@@ -1,0 +1,62 @@
+---
+title: "FONCTIOMIC_PICRUSt2_out"
+auteur: "Dinh-Phuc Hoang"
+date: "2025-02-27"
+---
+
+```{r}
+library(readr)
+library(ggpicrust2)
+library(tibble)
+library(tidyverse)
+library(ggprism)
+library(patchwork)
+```
+Load necessary data: abundance data and metadata
+```{r}
+meta <- read.csv2("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/03_dimimos_terrain.csv", sep = ",", header = TRUE)
+ko_abundance = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/KO_metagenome_out/pred_metagenome_unstrat.tsv.gz",
+    delim = "\t",
+    escape_double = FALSE,
+    trim_ws = TRUE)
+ec_abundance = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",
+    delim = "\t",
+    escape_double = FALSE,
+    trim_ws = TRUE)
+otu_abundance = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/03_dimimos_terrain.seq_abundance.16S.tsv",
+    delim = "\t",
+    escape_double = FALSE,
+    trim_ws = TRUE)
+metacyc_abundance = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/pathways_out/path_abun_unstrat.tsv.gz",
+    delim = "\t",
+    escape_double = FALSE,
+    trim_ws = TRUE)
+```
+Conversoin of KO abundance to KEGG abundance
+```{r}
+kegg_abundance <- ko2kegg_abundance(data = ko_abundance)
+```
+DAA
+```{r}
+sample1 = c(names(ko_abundance))
+sample1 = setdiff(sample1, c("function"))
+meta_cleaned = subset(meta, sample %in% sample1)
+
+ec_abundance1 = ec_abundance %>% column_to_rownames(var = "function")
+
+results_file_input <- ggpicrust2(data = ec_abundance,
+                                 metadata = meta_cleaned,
+                                 group = "sample",
+                                 pathway = "EC",
+                                 daa_method = "LinDA",
+                                 ko_to_kegg = FALSE,
+                                 order = "group",
+                                 p_values_bar = TRUE,
+                                 x_lab = "description")
+```
+
+```{r}
+data(metacyc_abundance)
+data(meta)
+pathway_pca(metacyc_abundance %>% column_to_rownames("pathway"), file = meta_cleaned, "sample")
+```
