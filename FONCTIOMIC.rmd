@@ -34,6 +34,3 @@ for (x in names) {
   assign(x, cbind(tb_ec[, c("EC_number", "EC_class")], get(x)))
 }
 ```
-```{r}
-crop_control <- crop_control %>% select(-EC_class)
-```
