@@ -16,34 +16,34 @@ library("tidyverse")
 ```
 Load necessary data: abundance data and metadata
 ```{r}
-meta = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/03_dimimos_terrain.csv",delim = ",",col_names = TRUE)
-p2_EC = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+meta = read_delim("C:/Users/dphoang/Documents/FONCTIOMIC/FONCTIOMIC/Data FONCTIOMIC/03_dimimos_terrain.csv",delim = ",",col_names = TRUE)
+p2_EC = read_delim("C:/Users/dphoang/Documents/FONCTIOMIC/FONCTIOMIC/Data FONCTIOMIC/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
     p2_EC = as.data.frame(p2_EC)
     rownames(p2_EC) = p2_EC[,1]
     p2_EC = as.matrix(p2_EC[,-1])
     p2_EC = round(p2_EC)
-p2_KO = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/KO_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+p2_KO = read_delim("C:/Users/dphoang/Documents/FONCTIOMIC/FONCTIOMIC/Data FONCTIOMIC/KO_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
     p2_KO = as.data.frame(p2_KO)
     rownames(p2_KO) = p2_KO[,1]
     p2_KO = as.matrix(p2_KO[,-1])
     p2_KO = round(p2_KO)
-p2_PW = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/pathways_out/path_abun_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+p2_PW = read_delim("C:/Users/dphoang/Documents/FONCTIOMIC/FONCTIOMIC/Data FONCTIOMIC/pathways_out/path_abun_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
     p2_PW = as.data.frame(p2_PW)
     rownames(p2_PW) = p2_PW[,1]
     p2_PW = as.matrix(p2_PW[,-1])
     p2_PW = round(p2_PW)
-otu_table = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/03_dimimos_terrain.seq_abundance.16S.tsv",delim = "\t",col_names = TRUE)
+otu_table = read_delim("C:/Users/dphoang/Documents/FONCTIOMIC/FONCTIOMIC/Data FONCTIOMIC/03_dimimos_terrain.seq_abundance.16S.tsv",delim = "\t",col_names = TRUE)
 otu_table = as.data.frame(otu_table)
 row.names(otu_table) = otu_table$sequence
 otu_table = as.matrix(otu_table[,-1])
-tax_table = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/Taxonomy_results_0.8_phylum.txt",delim = "\t",col_names = FALSE)
-phy_tree = read_tree("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/out.tre")
+#tax_table = read_delim("",delim = "\t",col_names = FALSE)
+phy_tree = read_tree("C:/Users/dphoang/Documents/FONCTIOMIC/FONCTIOMIC/Data FONCTIOMIC/out.tre")
 ```
 Load ref data: mapfile
 ```{r}
-mapfile_EC = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/ec_level4_info.tsv.gz",delim = "\t", col_names  = FALSE)
-mapfile_KO = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/ko_info.tsv.gz",delim = "\t", col_names = FALSE)
-mapfile_PW = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/metacyc_pathways_info.txt.gz",delim = "\t", col_names = FALSE)
+mapfile_EC = read_delim("C:/Users/dphoang/Documents/Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/ec_level4_info.tsv.gz",delim = "\t", col_names  = FALSE)
+mapfile_KO = read_delim("C:/Users/dphoang/Documents/Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/ko_info.tsv.gz",delim = "\t", col_names = FALSE)
+mapfile_PW = read_delim("C:/Users/dphoang/Documents/Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/metacyc_pathways_info.txt.gz",delim = "\t", col_names = FALSE)
 colnames(mapfile_EC) = c("function","description")
 colnames(mapfile_KO) = c("function","description")
 colnames(mapfile_PW) = c("pathway","description")
@@ -123,7 +123,21 @@ row.names(p2_EC_wide) <- p2_EC_wide$sample_id
 p2_EC_wide = p2_EC_wide[,-1]
 p2_EC_wide = as.matrix(p2_EC_wide)
 p2_EC_pca = vegan::rda(p2_EC_wide,scale=TRUE)
-EC_pca_dat = as.data.frame(p2_EC_pca$CA$u[,1:2])
-EC_pca_dat <- cbind(EC_pca_dat, iris$Species) 
-pathway_pca(abundance = p2_EC_0, metadata = meta_cleaned, "sample")
+summary(p2_EC_pca)
 ```
+PCA plot
+```{r}
+EC_pca_dat = as.data.frame(p2_EC_pca$CA$u[,1:2])
+EC_pca_dat <- cbind(EC_pca_dat, meta_cleaned$groupe2)
+colnames(EC_pca_dat) <- c("PC1","PC2","Groups")
+ggplot(EC_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
+  ggtitle("PCA of EC abundance") +
+  geom_point(alpha=1) +
+  xlab("PC1: 33%")+
+  ylab("PC2: 13%") +
+  stat_ellipse(geom="polygon",type ="norm", level=0.9, alpha=0.1,
+  aes(fill = Groups),
+  color =NA) +
+theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
