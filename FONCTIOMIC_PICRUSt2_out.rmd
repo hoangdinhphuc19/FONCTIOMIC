@@ -1,0 +1,59 @@
+---
+title: "FONCTIOMIC_PICRUSt2_out"
+auteur: "Dinh-Phuc Hoang"
+date: "2025-02-27"
+---
+
+```{r}
+library(readr)
+library(tibble)
+library(tidyverse)
+library(ggprism)
+library(patchwork)
+library("phyloseq")
+library("ALDEx2")
+library("tidyverse")
+```
+Load necessary data: abundance data and metadata
+```{r}
+meta = read_delim("D:/M2 MIB/Stage M2/Inference_fonctionnelle_FONCTIOMIC/03_dimimos_terrain.csv",delim = ",",col_names = TRUE)
+p2_EC = read_delim("D:/M2 MIB/Stage M2/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+    p2_EC = as.data.frame(p2_EC)
+    rownames(p2_EC) = p2_EC[,1]
+    p2_EC = as.matrix(p2_EC[,-1])
+    p2_EC = round(p2_EC)
+p2_KO = read_delim("D:/M2 MIB/Stage M2/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/KO_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+    p2_KO = as.data.frame(p2_KO)
+    rownames(p2_KO) = p2_KO[,1]
+    p2_KO = as.matrix(p2_KO[,-1])
+    p2_KO = round(p2_KO)
+p2_PW = read_delim("D:/M2 MIB/Stage M2/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/pathways_out/path_abun_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+    p2_PW = as.data.frame(p2_PW)
+    rownames(p2_PW) = p2_PW[,1]
+    p2_PW = as.matrix(p2_PW[,-1])
+    p2_PW = round(p2_PW)
+```
+Load ref data: mapfile
+```{r}
+mapfile_EC = read_delim("D:/M2 MIB/Stage M2/FONCTIOMIC/description_mapfiles/ec_level4_info.tsv.gz",delim = "\t", col_names  = FALSE)
+mapfile_KO = read_delim("D:/M2 MIB/Stage M2/FONCTIOMIC/description_mapfiles/ko_info.tsv.gz",delim = "\t", col_names = FALSE)
+mapfile_PW = read_delim("D:/M2 MIB/Stage M2/FONCTIOMIC/description_mapfiles/metacyc_pathways_info.txt.gz",delim = "\t", col_names = FALSE)
+colnames(mapfile_EC) = c("function","description")
+colnames(mapfile_KO) = c("function","description")
+colnames(mapfile_PW) = c("pathway","description")
+```
+Phyloseq object
+```{r}
+meta = as.data.frame(meta)
+rownames(meta) = meta$sample
+meta$sample = as.factor(meta$sample)
+meta$sample = factor(meta$sample, levels = c(sort(levels(meta$sample), decreasing = F)))
+```
+Subset results :
+```{r}
+meta1 = meta %>% filter (modality == "control")
+control = row.names(meta1)
+control = as.character(control)
+
+
+```
