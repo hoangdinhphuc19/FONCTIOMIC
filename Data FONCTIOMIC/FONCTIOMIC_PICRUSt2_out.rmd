@@ -48,26 +48,27 @@ colnames(mapfile_EC) = c("function","description")
 colnames(mapfile_KO) = c("function","description")
 colnames(mapfile_PW) = c("pathway","description")
 ```
-Phyloseq object
+1) Clean metadata (enlever les sample_id dèja enlevé dans les données)
+#Define : p2_EC1 = tableau de l'abondance des EC pour les échantillons de contrôle
 ```{r}
 meta = as.data.frame(meta)
 rownames(meta) = meta$sample
 meta$sample = as.factor(meta$sample)
 meta$sample = factor(meta$sample, levels = c(sort(levels(meta$sample), decreasing = F)))
+meta_cleaned = meta[colnames(p2_EC),]
+meta_cleaned$groupe2 = paste(meta_cleaned$bloc,meta_cleaned$modality,sep = "_")
+#meta_control <- dplyr::select(meta_cleaned,sample,modality,bloc)
+#meta_control = meta_control[(meta_control$modality == "control"),]
+#p2_EC1 = p2_EC[,colnames(p2_EC) %in% meta_control$sample]
+```
+Phyloseq object
+```{r}
 ps = phyloseq(sample_data(meta),
                 otu_table(as.matrix(otu_table), taxa_are_rows = FALSE),
                 phy_tree(phy_tree))
 ```
 Subset results
-1) Clean metadata (enlever les sample_id dèja enlevé dans les données)
-#Define : p2_EC1 = tableau de l'abondance des EC pour les échantillons de contrôle
-```{r}
-meta_cleaned = meta[colnames(p2_EC),]
-meta_cleaned$groupe2 = paste(meta_cleaned$bloc,meta_cleaned$modality,sep = "_")
-meta_control <- dplyr::select(meta_cleaned,sample,modality,bloc)
-meta_control = meta_control[(meta_control$modality == "control"),]
-p2_EC1 = p2_EC[,colnames(p2_EC) %in% meta_control$sample]
-```
+
 Statistical analysis with ALDEx2 between grasslands vs croplands control groups
 ```{r}
 set.seed(12345)
@@ -141,3 +142,6 @@ ggplot(EC_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
 theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```
 
+```{r}
+
+```
