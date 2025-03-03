@@ -123,10 +123,10 @@ p2_EC_wide = as.data.frame(p2_EC_wide)
 row.names(p2_EC_wide) <- p2_EC_wide$sample_id
 p2_EC_wide = p2_EC_wide[,-1]
 p2_EC_wide = as.matrix(p2_EC_wide)
-p2_EC_pca = vegan::rda(p2_EC_wide,scale=TRUE)
+p2_EC_pca = vegan::rda(row.names(p2_EC_wide)~.,p2_EC_wide,scale=TRUE)
 summary(p2_EC_pca)
 ```
-PCA plot
+PCA plot (EC)
 ```{r}
 EC_pca_dat = as.data.frame(p2_EC_pca$CA$u[,1:2])
 EC_pca_dat <- cbind(EC_pca_dat, meta_cleaned$groupe2)
@@ -141,7 +141,32 @@ ggplot(EC_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
   color =NA) +
 theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```
-
+PCA for KO
 ```{r}
-
+p2_KO_long <- as.data.frame(p2_KO) %>%
+  rownames_to_column(var = "KO") %>%
+  pivot_longer(cols = -KO, names_to = "sample_id", values_to = "value")
+p2_KO_wide <- p2_KO_long %>%
+  pivot_wider(names_from = KO, values_from = value)
+p2_KO_wide = as.data.frame(p2_KO_wide)
+row.names(p2_KO_wide) <- p2_KO_wide$sample_id
+p2_KO_wide = p2_KO_wide[,-1]
+p2_KO_wide = as.matrix(p2_KO_wide)
+p2_KO_pca = vegan::rda(p2_KO_wide,scale=TRUE)
+summary(p2_KO_pca)
+```
+PCA plot (KO)
+```{r}
+KO_pca_dat = as.data.frame(p2_KO_pca$CA$u[,1:2])
+KO_pca_dat <- cbind(KO_pca_dat, meta_cleaned$groupe2)
+colnames(KO_pca_dat) <- c("PC1","PC2","Groups")
+ggplot(KO_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
+  ggtitle("PCA of KO abundance") +
+  geom_point(alpha=1) +
+  xlab("PC1: 31%")+
+  ylab("PC2: 12%") +
+  stat_ellipse(geom="polygon",type ="norm", level=0.9, alpha=0.1,
+  aes(fill = Groups),
+  color =NA) +
+theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```
