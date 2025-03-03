@@ -16,28 +16,34 @@ library("tidyverse")
 ```
 Load necessary data: abundance data and metadata
 ```{r}
-meta = read_delim("",delim = ",",col_names = TRUE)
-p2_EC = read_delim("D:/M2 MIB/Stage M2/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+meta = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/03_dimimos_terrain.csv",delim = ",",col_names = TRUE)
+p2_EC = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
     p2_EC = as.data.frame(p2_EC)
     rownames(p2_EC) = p2_EC[,1]
     p2_EC = as.matrix(p2_EC[,-1])
     p2_EC = round(p2_EC)
-p2_KO = read_delim("D:/M2 MIB/Stage M2/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/KO_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+p2_KO = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/KO_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
     p2_KO = as.data.frame(p2_KO)
     rownames(p2_KO) = p2_KO[,1]
     p2_KO = as.matrix(p2_KO[,-1])
     p2_KO = round(p2_KO)
-p2_PW = read_delim("D:/M2 MIB/Stage M2/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/pathways_out/path_abun_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+p2_PW = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/pathways_out/path_abun_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
     p2_PW = as.data.frame(p2_PW)
     rownames(p2_PW) = p2_PW[,1]
     p2_PW = as.matrix(p2_PW[,-1])
     p2_PW = round(p2_PW)
+otu_table = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/03_dimimos_terrain.seq_abundance.16S.tsv",delim = "\t",col_names = TRUE)
+otu_table = as.data.frame(otu_table)
+row.names(otu_table) = otu_table$sequence
+otu_table = as.matrix(otu_table[,-1])
+tax_table = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/Taxonomy_results_0.8_phylum.txt",delim = "\t",col_names = FALSE)
+phy_tree = read_tree("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/16S/picrust2_out/out.tre")
 ```
 Load ref data: mapfile
 ```{r}
-mapfile_EC = read_delim("D:/M2 MIB/Stage M2/FONCTIOMIC/description_mapfiles/ec_level4_info.tsv.gz",delim = "\t", col_names  = FALSE)
-mapfile_KO = read_delim("D:/M2 MIB/Stage M2/FONCTIOMIC/description_mapfiles/ko_info.tsv.gz",delim = "\t", col_names = FALSE)
-mapfile_PW = read_delim("D:/M2 MIB/Stage M2/FONCTIOMIC/description_mapfiles/metacyc_pathways_info.txt.gz",delim = "\t", col_names = FALSE)
+mapfile_EC = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/ec_level4_info.tsv.gz",delim = "\t", col_names  = FALSE)
+mapfile_KO = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/ko_info.tsv.gz",delim = "\t", col_names = FALSE)
+mapfile_PW = read_delim("../Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/metacyc_pathways_info.txt.gz",delim = "\t", col_names = FALSE)
 colnames(mapfile_EC) = c("function","description")
 colnames(mapfile_KO) = c("function","description")
 colnames(mapfile_PW) = c("pathway","description")
@@ -48,41 +54,76 @@ meta = as.data.frame(meta)
 rownames(meta) = meta$sample
 meta$sample = as.factor(meta$sample)
 meta$sample = factor(meta$sample, levels = c(sort(levels(meta$sample), decreasing = F)))
+ps = phyloseq(sample_data(meta),
+                otu_table(as.matrix(otu_table), taxa_are_rows = FALSE),
+                phy_tree(phy_tree))
 ```
-Subset results :
+Subset results
+1) Clean metadata (enlever les sample_id dèja enlevé dans les données)
+#Define : p2_EC1 = tableau de l'abondance des EC pour les échantillons de contrôle
 ```{r}
-meta1 = meta %>% filter (modality == "control")
-control = row.names(meta1)
-control = as.character(control)
+meta_cleaned = meta[colnames(p2_EC),]
+meta_cleaned$groupe2 = paste(meta_cleaned$bloc,meta_cleaned$modality,sep = "_")
+meta_control <- dplyr::select(meta_cleaned,sample,modality,bloc)
+meta_control = meta_control[(meta_control$modality == "control"),]
+p2_EC1 = p2_EC[,colnames(p2_EC) %in% meta_control$sample]
 ```
-
+Statistical analysis with ALDEx2 between grasslands vs croplands control groups
 ```{r}
 set.seed(12345)
 system.time({
-        aldex2_EC1 = aldex(p2_EC, control, mc.samples = 500, test = "t", 
+        aldex2_EC1 = aldex(p2_EC1,meta_control$bloc, mc.samples = 500, test = "t", 
                effect = TRUE, denom = "iqlr", verbose = TRUE)
 })
 ```
+Check estimated size effect
 ```{r}
-sample1 = c(names(ko_abundance))
-sample1 = setdiff(sample1, c("function"))
-meta_cleaned = subset(meta, sample %in% sample1)
-
-ec_abundance1 = ec_abundance %>% column_to_rownames(var = "function")
-
-results_file_input <- ggpicrust2(data = ec_abundance,
-                                 metadata = meta_cleaned,
-                                 group = "sample",
-                                 pathway = "EC",
-                                 daa_method = "LinDA",
-                                 ko_to_kegg = FALSE,
-                                 order = "group",
-                                 p_values_bar = TRUE,
-                                 x_lab = "description")
+par(mfrow = c(1,2))
+hist(aldex2_EC1$effect, breaks = 20, xlab = "effect size", col = "yellow", main = "Effect size distribution")
+aldex.plot(aldex2_EC1, type = "MA", test = "wilcox", all.cex = 0.4, rare.cex = 0.4, 
+       called.cex = 0.6, cutoff = 0.05, xlab = "Log-ratio abundance", ylab = "Difference")
+title(main = "(EC) MA Plot")
+```
+Results of DA analysis
+```{r}
+df_EC1 = aldex2_EC1 %>% tibble::rownames_to_column(var = "EC") %>% 
+    inner_join(mapfile_EC, by = c("EC" = "function")) %>% arrange(EC)
+```
+```{r}
+qqnorm(p2_EC)
+qqline(p2_EC, col = "red")
 ```
 
 ```{r}
-data(metacyc_abundance)
-data(meta)
-pathway_pca(metacyc_abundance %>% column_to_rownames("pathway"), file = meta_cleaned, "sample")
+df_EC1 = aldex2_EC1 %>% tibble::rownames_to_column(var = "EC") %>% 
+    inner_join(mapfile_EC, by = c("EC" = "function")) %>% arrange(EC)
+```
+Statistical analysis with LinDA between 4 groups
+```{r}
+set.seed(12345)
+system.time({
+        aldex2_EC1 = aldex(p2_EC1,meta_control$bloc, mc.samples = 500, test = "t", 
+               effect = TRUE, denom = "iqlr", verbose = TRUE)
+})
+```
+
+```{r}
+EC1_with_p_0.05 <- df_EC1 %>% 
+  filter(wi.eBH < 0.05)
+```
+PCA for EC
+```{r}
+p2_EC_long <- as.data.frame(p2_EC) %>%
+  rownames_to_column(var = "EC_number") %>%
+  pivot_longer(cols = -EC_number, names_to = "sample_id", values_to = "value")
+p2_EC_wide <- p2_EC_long %>%
+  pivot_wider(names_from = EC_number, values_from = value)
+p2_EC_wide = as.data.frame(p2_EC_wide)
+row.names(p2_EC_wide) <- p2_EC_wide$sample_id
+p2_EC_wide = p2_EC_wide[,-1]
+p2_EC_wide = as.matrix(p2_EC_wide)
+p2_EC_pca = vegan::rda(p2_EC_wide,scale=TRUE)
+EC_pca_dat = as.data.frame(p2_EC_pca$CA$u[,1:2])
+EC_pca_dat <- cbind(EC_pca_dat, iris$Species) 
+pathway_pca(abundance = p2_EC_0, metadata = meta_cleaned, "sample")
 ```
