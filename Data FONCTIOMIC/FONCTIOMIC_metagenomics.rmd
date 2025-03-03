@@ -14,10 +14,10 @@ library(factoextra)
 ```
 
 ```{r}
-tb_ec = read_tsv("../Data FONCTIOMIC/counts_by_EC_number.norm.tsv")
-tb_gene = read_tsv("../Data FONCTIOMIC/TOY_ALL.counts.norm_cleaned.tsv")
-tb_cog = read_tsv("../Data FONCTIOMIC/TOY_PROKKA_02252022_all3000bp.tsv")
-meta = read_tsv("../Data FONCTIOMIC/complete_metadata_table.tsv")
+tb_ec = read_tsv("Data FONCTIOMIC/counts_by_EC_number.norm.tsv")
+tb_gene = read_tsv("Data FONCTIOMIC/TOY_ALL.counts.norm_cleaned.tsv")
+tb_cog = read_tsv("Data FONCTIOMIC/TOY_PROKKA_02252022_all3000bp.tsv")
+meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
 ```
 
 ```{r}
