@@ -41,9 +41,9 @@ phy_tree = read_tree("Data FONCTIOMIC/out.tre")
 ```
 Load ref data: mapfile
 ```{r}
-mapfile_EC = read_delim("Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/ec_level4_info.tsv.gz",delim = "\t", col_names  = FALSE)
-mapfile_KO = read_delim("Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/ko_info.tsv.gz",delim = "\t", col_names = FALSE)
-mapfile_PW = read_delim("Data FONCTIOMIC/Inference_fonctionnelle_FONCTIOMIC/dataset_ref/metacyc_pathways_info.txt.gz",delim = "\t", col_names = FALSE)
+mapfile_EC = read_delim("description_mapfiles/ec_level4_info.tsv.gz",delim = "\t", col_names  = FALSE)
+mapfile_KO = read_delim("description_mapfiles/ko_info.tsv.gz",delim = "\t", col_names = FALSE)
+mapfile_PW = read_delim("description_mapfiles/metacyc_pathways_info.txt.gz",delim = "\t", col_names = FALSE)
 colnames(mapfile_EC) = c("function","description")
 colnames(mapfile_KO) = c("function","description")
 colnames(mapfile_PW) = c("pathway","description")
@@ -123,7 +123,7 @@ p2_EC_wide = as.data.frame(p2_EC_wide)
 row.names(p2_EC_wide) <- p2_EC_wide$sample_id
 p2_EC_wide = p2_EC_wide[,-1]
 p2_EC_wide = as.matrix(p2_EC_wide)
-p2_EC_pca = vegan::rda(row.names(p2_EC_wide)~.,p2_EC_wide,scale=TRUE)
+p2_EC_pca = vegan::rda(p2_EC_wide,scale=TRUE)
 summary(p2_EC_pca)
 ```
 PCA plot (EC)
