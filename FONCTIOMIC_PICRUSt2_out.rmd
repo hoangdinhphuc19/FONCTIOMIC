@@ -11,8 +11,8 @@ library(tidyverse)
 library(ggprism)
 library(patchwork)
 library("phyloseq")
-library("ALDEx2")
-library("tidyverse")
+library(mia)
+library(ANCOMBC)
 ```
 Load necessary data: abundance data and metadata
 ```{r}
@@ -57,9 +57,6 @@ meta$sample = as.factor(meta$sample)
 meta$sample = factor(meta$sample, levels = c(sort(levels(meta$sample), decreasing = F)))
 meta_cleaned = meta[colnames(p2_EC),]
 meta_cleaned$groupe2 = paste(meta_cleaned$bloc,meta_cleaned$modality,sep = "_")
-#meta_control <- dplyr::select(meta_cleaned,sample,modality,bloc)
-#meta_control = meta_control[(meta_control$modality == "control"),]
-#p2_EC1 = p2_EC[,colnames(p2_EC) %in% meta_control$sample]
 ```
 Phyloseq object
 ```{r}
@@ -67,8 +64,6 @@ ps = phyloseq(sample_data(meta),
                 otu_table(as.matrix(otu_table), taxa_are_rows = FALSE),
                 phy_tree(phy_tree))
 ```
-Subset results
-
 Statistical analysis with ALDEx2 between grasslands vs croplands control groups
 ```{r}
 set.seed(12345)
@@ -169,4 +164,18 @@ ggplot(KO_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
   aes(fill = Groups),
   color =NA) +
 theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+subset data for control group
+```{r}
+meta_control <- dplyr::select(meta_cleaned,sample,modality,bloc)
+meta_control = meta_control[(meta_control$modality == "control"),]
+p2_EC1 = p2_EC[,colnames(p2_EC) %in% meta_control$sample]
+```
+
+```{r}
+meta_cleaned = microbiome::meta(meta_cleaned)
+head(meta_cleaned)
+meta_cleaned$groupe2 = recode(meta_cleaned$groupe2, CC = "crops_control",PC = "grasslands_control", CR = "crops_residues", PR = "grasslands_residues")
+res_ancombc = ancombc(data = p2_EC, meta = meta_cleaned, formula = meta_cleaned$groupe2, p_adj_method = "holm")
+
 ```
