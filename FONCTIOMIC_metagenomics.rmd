@@ -19,6 +19,48 @@ tb_gene = read_tsv("Data FONCTIOMIC/TOY_ALL.counts.norm_cleaned.tsv")
 tb_cog = read_tsv("Data FONCTIOMIC/TOY_PROKKA_02252022_all3000bp.tsv")
 meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
 ```
+PCA for EC abundance
+```{r}
+tb_ec = as.data.frame(tb_ec)
+row.names(tb_ec) = paste0("EC:", tb_ec$EC_number)
+tb_ec_cleaned = tb_ec %>% filter(!str_detect(rownames(tb_ec), "-$"))
+tb_ec_cleaned = tb_ec_cleaned[,-c(1)]
+tb_ec_cleaned=rownames_to_column(tb_ec_cleaned, var = "EC_number")
+tb_ec_cleaned = as.matrix(tb_ec_cleaned)
+tb_ec_cleaned = t(tb_ec_cleaned)
+ec_pca = vegan::rda(tb_ec_cleaned)
+summary(ec_pca)
+```
+PCA plot for EC abundance
+```{r}
+ec_pca_plot = as.data.frame(ec_pca$CA$u[,1:2])
+ec_pca_plot = cbind(ec_pca_plot, meta$Category)
+colnames(ec_pca_plot) <- c("PC1","PC2","Groups")
+ggplot(ec_pca_plot, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
+  ggtitle("PCA of EC abundance") +
+  geom_point(alpha=1) +
+  xlab("PC1: 9%")+
+  ylab("PC2: 1%") +
+  stat_ellipse(geom="polygon",type ="norm", level=0.9, alpha=0.1,
+  aes(fill = Groups),
+  color =NA) +
+theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+overlap EC between MSG and PICRUsT2 on FONCTIOMIC
+```{r}
+tb_ec = as.data.frame(tb_ec)
+row.names(tb_ec) = paste0("EC:", tb_ec$EC_number)
+tb_ec_cleaned = tb_ec %>% filter(!str_detect(rownames(tb_ec), "-$"))
+tb_ec_cleaned = tb_ec_cleaned[,-c(1,50)]
+tb_ec_cleaned = as.matrix(tb_ec_cleaned)
+tb_ec_cleaned = round(tb_ec_cleaned,0)
+overlapping_EC = intersect(rownames(p2_EC), rownames(tb_ec_cleaned))
+overlapping_sample = intersect(colnames(p2_EC), colnames(tb_ec_cleaned))
+EC_P2 = p2_EC[overlapping_EC, overlapping_sample]
+write.table(EC_P2, "Data FONCTIOMIC/EC_P2.txt",sep="\t")
+EC_MGS = tb_ec_cleaned[overlapping_EC, overlapping_sample]
+write.table(EC_MGS, "Data FONCTIOMIC/EC_MGS.txt",sep="\t")
+```
 
 ```{r}
 crop_control=tb_ec %>% select(c(starts_with("C") & contains("-C")))

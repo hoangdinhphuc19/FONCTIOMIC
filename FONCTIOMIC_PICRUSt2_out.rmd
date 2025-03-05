@@ -18,10 +18,10 @@ Load necessary data: abundance data and metadata
 ```{r}
 meta = read_delim("Data FONCTIOMIC/03_dimimos_terrain.csv",delim = ",",col_names = TRUE)
 p2_EC = read_delim("Data FONCTIOMIC/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
-    p2_EC = as.data.frame(p2_EC)
-    rownames(p2_EC) = p2_EC[,1]
-    p2_EC = as.matrix(p2_EC[,-1])
-    p2_EC = round(p2_EC)
+  p2_EC = as.data.frame(p2_EC)
+  rownames(p2_EC) = p2_EC[,1]
+  p2_EC = as.matrix(p2_EC[,-1])
+  p2_EC = round(p2_EC)
 p2_KO = read_delim("Data FONCTIOMIC/KO_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
     p2_KO = as.data.frame(p2_KO)
     rownames(p2_KO) = p2_KO[,1]
@@ -109,15 +109,9 @@ EC1_with_p_0.05 <- df_EC1 %>%
 ```
 PCA for EC
 ```{r}
-p2_EC_long <- as.data.frame(p2_EC) %>%
-  rownames_to_column(var = "EC_number") %>%
-  pivot_longer(cols = -EC_number, names_to = "sample_id", values_to = "value")
-p2_EC_wide <- p2_EC_long %>%
-  pivot_wider(names_from = EC_number, values_from = value)
-p2_EC_wide = as.data.frame(p2_EC_wide)
-row.names(p2_EC_wide) <- p2_EC_wide$sample_id
-p2_EC_wide = p2_EC_wide[,-1]
-p2_EC_wide = as.matrix(p2_EC_wide)
+p2_EC_wide = as.matrix(p2_EC)
+p2_EC_wide = t(p2_EC_wide)
+write.table(p2_EC_wide, "Data FONCTIOMIC/p2_EC_wide.txt", sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
 p2_EC_pca = vegan::rda(p2_EC_wide,scale=TRUE)
 summary(p2_EC_pca)
 ```

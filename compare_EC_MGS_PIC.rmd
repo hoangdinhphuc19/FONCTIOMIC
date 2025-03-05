@@ -1,0 +1,49 @@
+---
+title: "compare_EC_MGS_PIC"
+auteur: "Dinh-Phuc Hoang"
+date: "2025-03-05"
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(phyloseq)
+```
+
+```{r}
+EC_P2 = read.delim("Data FONCTIOMIC/EC_P2.txt", sep ="\t")
+EC_MGS = read.delim("Data FONCTIOMIC/EC_MGS.txt", sep ="\t")
+EC_P2 = as.matrix(EC_P2)
+EC_MGS = as.matrix(EC_MGS)
+```
+
+```{r}
+corr = cor.test(EC_MGS, EC_P2, method = "spearman")
+cor.1 = cor(t(EC_MGS), t(EC_P2), method = "spearman")
+diag_cor = diag(cor.1)
+diag_cor = as.data.frame(diag_cor)
+names(diag_cor) = "Spearman_correlation"
+diag_cor = rownames_to_column(diag_cor, var = "EC_number")
+diag_cor.1 = left_join(diag_cor, tb_ec_cleaned, by = "EC_number")
+diag_cor.1 = diag_cor.1[,-c(3:50)]
+```
+
+```{r}
+ggplot(diag_cor.1, aes(x = Spearman_correlation, y = EC_class,group = EC_class)) +
+  geom_boxplot(fill="gray", alpha=0.2)+
+  ggtitle("Spearman correlation between EC abundance from PICRUSt2 and MGS") +
+  xlab("Spearman correlation") +
+  ylab("EC number")
+```
+
+```{r}
+for (i in 1:7){
+  assign(paste0("diag_cor_EC",i), diag_cor %>% filter(str_detect(EC_number,paste0("EC:",i))))
+}
+```
+
+```{r}
+for (i in 1:7){
+  assign(paste0("cor_EC_",i), cor.test(get(paste0("diag_cor_EC",i))$Spearman_correlation, method = "spearman"))
+}
+```
