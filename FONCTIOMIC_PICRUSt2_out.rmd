@@ -96,9 +96,12 @@ df_EC1 = aldex2_EC1 %>% tibble::rownames_to_column(var = "EC") %>%
 ```
 Statistical analysis with LinDA between 4 groups
 ```{r}
+mm = model.matrix(~ groupe2, data = meta_cleaned)
+ x = aldex.clr (p2_EC, mm, mc.samples = 500, denom = "all")
+glm.test = aldex.glm(x, mm, mc.samples = 500,  test = "glm", effect = TRUE, denom = "all", verbose = TRUE)
 set.seed(12345)
 system.time({
-        aldex2_EC1 = aldex(p2_EC1,meta_control$bloc, mc.samples = 500, test = "t", 
+        aldex2_EC1 = aldex(p2_EC, mm, mc.samples = 500, test = "glm", 
                effect = TRUE, denom = "iqlr", verbose = TRUE)
 })
 ```

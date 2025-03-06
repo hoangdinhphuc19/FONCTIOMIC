@@ -8,6 +8,7 @@ date: "2025-03-05"
 library(tidyverse)
 library(dplyr)
 library(phyloseq)
+library(VennDiagram)
 ```
 
 ```{r}
@@ -18,7 +19,7 @@ EC_MGS = as.matrix(EC_MGS)
 ```
 
 ```{r}
-corr = cor.test(EC_MGS, EC_P2, method = "spearman")
+corr = cor.test(EC_MGS, EC_P2, method = "spearman", exact = FALSE)
 cor.1 = cor(t(EC_MGS), t(EC_P2), method = "spearman")
 diag_cor = diag(cor.1)
 diag_cor = as.data.frame(diag_cor)
@@ -33,17 +34,25 @@ ggplot(diag_cor.1, aes(x = Spearman_correlation, y = EC_class,group = EC_class))
   geom_boxplot(fill="gray", alpha=0.2)+
   ggtitle("Spearman correlation between EC abundance from PICRUSt2 and MGS") +
   xlab("Spearman correlation") +
-  ylab("EC number")
+  ylab("EC class")
 ```
 
 ```{r}
-for (i in 1:7){
-  assign(paste0("diag_cor_EC",i), diag_cor %>% filter(str_detect(EC_number,paste0("EC:",i))))
-}
+venn.diagram(
+        x = list(rownames(tb_ec_cleaned), rownames(p2_EC)),
+        category.names = c("MGS" , "PICRUSt2"),
+        filename = '#14_venn_diagramm.png',
+        output=TRUE,
+        imagetype="png" ,
+        lwd = 2,
+        lty = 'blank',
+        fill = c("cornflowerblue", "pink"),
+        cat.fontface = "bold",
+        cat.default.pos = "outer",
+        cat.fontfamily = "sans",
+)
 ```
 
 ```{r}
-for (i in 1:7){
-  assign(paste0("cor_EC_",i), cor.test(get(paste0("diag_cor_EC",i))$Spearman_correlation, method = "spearman"))
-}
+
 ```
