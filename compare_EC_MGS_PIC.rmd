@@ -16,8 +16,9 @@ EC_P2 = read.delim("Data FONCTIOMIC/EC_P2.txt", sep ="\t")
 EC_MGS = read.delim("Data FONCTIOMIC/EC_MGS.txt", sep ="\t")
 EC_P2 = as.matrix(EC_P2)
 EC_MGS = as.matrix(EC_MGS)
+EC_number_class = read.delim("description_mapfiles/EC_number_class.txt", sep ="\t")
 ```
-
+Correlation of Spearman on EC abundance between PICRUSt2 and MGS (Robust)
 ```{r}
 corr = cor.test(EC_MGS, EC_P2, method = "spearman", exact = FALSE)
 cor.1 = cor(t(EC_MGS), t(EC_P2), method = "spearman")
@@ -25,10 +26,9 @@ diag_cor = diag(cor.1)
 diag_cor = as.data.frame(diag_cor)
 names(diag_cor) = "Spearman_correlation"
 diag_cor = rownames_to_column(diag_cor, var = "EC_number")
-diag_cor.1 = left_join(diag_cor, tb_ec_cleaned, by = "EC_number")
-diag_cor.1 = diag_cor.1[,-c(3:50)]
+diag_cor.1 = merge(diag_cor, EC_number_class, by = "EC_number", join = "left")
 ```
-
+Boxplot for Spearman correlation coeffectient between EC abundance from PICRUSt2 and MGS
 ```{r}
 ggplot(diag_cor.1, aes(x = Spearman_correlation, y = EC_class,group = EC_class)) +
   geom_boxplot(fill="gray", alpha=0.2)+
@@ -36,7 +36,7 @@ ggplot(diag_cor.1, aes(x = Spearman_correlation, y = EC_class,group = EC_class))
   xlab("Spearman correlation") +
   ylab("EC class")
 ```
-
+Venn Diagramm for EC detected between PICRUSt2 and MGS
 ```{r}
 venn.diagram(
         x = list(rownames(tb_ec_cleaned), rownames(p2_EC)),
@@ -52,7 +52,38 @@ venn.diagram(
         cat.fontfamily = "sans",
 )
 ```
+Import ALDEx2 for EC abundance (PICRUSt2 + MGS)
+```{r}
+EC_P2_P_value = read.delim("ALDEx2/p2_EC_aldex.txt", sep ="\t")
+EC_MGS_P_value = read.delim("ALDEx2/MGS_EC_aldex.txt", sep ="\t")
+EC_number_class = read.delim("description_mapfiles/EC_number_class.txt", sep ="\t")
+```
+Correlation of Spearman on P value between PICRUSt2 and MGS (Robust)
+```{r}
+c = intersect(rownames(EC_P2_P_value), rownames(EC_MGS_P_value))
+EC_P2_P_value = EC_P2_P_value[c,]
+EC_MGS_P_value = EC_MGS_P_value[c,]
+EC_P2_P_value = as.matrix(EC_P2_P_value)
+EC_MGS_P_value = as.matrix(EC_MGS_P_value)
+cor.2 = cor(t(EC_MGS_P_value), t(EC_P2_P_value), method = "spearman")
+corr.2 = cor.test(EC_MGS_P_value, EC_P2_P_value, method = "spearman", exact = FALSE)
+diag_cor.2 = diag(cor.2)
+diag_cor.2 = as.data.frame(diag_cor.2)
+diag_cor.2$EC_number = rownames(cor.2)
+class_cor.2 = merge(diag_cor.2, EC_number_class, by = "EC_number")
+```
+Plot for Spearman correlation of P value between EC differential abundance from PICRUSt2 and MGS
+```{r}
+class_cor.2 = class_cor.2[order(class_cor.2$EC_number, decreasing = TRUE),]
+ggplot(class_cor.2, aes(x = class_cor.2$diag_cor.2, y = EC_class, group = EC_class)) +
+  geom_boxplot(fill="gray", alpha=0.2)+
+  ggtitle("Spearman correlation of P value between EC differential abundance from PICRUSt2 and MGS") +
+  xlab("Spearman correlation") +
+  ylab("EC class")
+```
 
 ```{r}
-
+cor.2 = cor(t(EC_MGS_P_value), t(EC_P2_P_value), method = "spearman")
+hist(unlist(cor.2), breaks = 20, col = "gray", xlab = "Spearman correlation")
+hist(unlist(cor.1), breaks = 20, col = "gray", xlab = "Spearman correlation")
 ```

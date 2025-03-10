@@ -18,14 +18,15 @@ tb_ec = read_tsv("Data FONCTIOMIC/counts_by_EC_number.norm.tsv")
 tb_gene = read_tsv("Data FONCTIOMIC/TOY_ALL.counts.norm_cleaned.tsv")
 tb_cog = read_tsv("Data FONCTIOMIC/TOY_PROKKA_02252022_all3000bp.tsv")
 meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
+meta = as.data.frame(meta)
+row.names(meta) = meta$sample_id
 ```
 PCA for EC abundance
 ```{r}
 tb_ec = as.data.frame(tb_ec)
 row.names(tb_ec) = paste0("EC:", tb_ec$EC_number)
 tb_ec_cleaned = tb_ec %>% filter(!str_detect(rownames(tb_ec), "-$"))
-tb_ec_cleaned = tb_ec_cleaned[,-c(1)]
-tb_ec_cleaned=rownames_to_column(tb_ec_cleaned, var = "EC_number")
+tb_ec_cleaned = tb_ec_cleaned[,-c(1,50)]
 tb_ec_cleaned = as.matrix(tb_ec_cleaned)
 tb_ec_cleaned = t(tb_ec_cleaned)
 ec_pca = vegan::rda(tb_ec_cleaned)
@@ -145,5 +146,16 @@ pca1 = cbind(pca1, EC_class)
 ggplot(pca1, aes(PC1, PC2, col = EC_class, fill = EC_class)) +
   stat_ellipse(geom = "polygon", col = "black", alpha = 0.5) +
   geom_point(shape = 21, col = "black")
+```
+Statistical analysis with ALDEx2 between 4 groups
+```{r}
+mm = model.matrix(meta$sample_id ~ 0+meta$Category, data = meta)
+tb_ec_cleaned = as.matrix(tb_ec_cleaned)
+tb_ec_cleaned = round(tb_ec_cleaned,0)
+x = aldex.clr (tb_ec_cleaned, mm, mc.samples = 128, denom = "all")
+glm.test = aldex.glm(x, mm)
+glm.effect <- aldex.glm.effect(x)
+MGS_EC_aldex = glm.test[,13:20]
+write.table(MGS_EC_aldex, "ALDEx2/MGS_EC_aldex.txt", sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
 ```
 

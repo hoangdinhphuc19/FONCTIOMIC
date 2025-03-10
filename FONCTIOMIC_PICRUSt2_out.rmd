@@ -11,7 +11,7 @@ library(tidyverse)
 library(ggprism)
 library(patchwork)
 library("phyloseq")
-library(mia)
+library(ALDEx2)
 library(ANCOMBC)
 ```
 Load necessary data: abundance data and metadata
@@ -94,16 +94,14 @@ qqline(p2_EC, col = "red")
 df_EC1 = aldex2_EC1 %>% tibble::rownames_to_column(var = "EC") %>% 
     inner_join(mapfile_EC, by = c("EC" = "function")) %>% arrange(EC)
 ```
-Statistical analysis with LinDA between 4 groups
+Statistical analysis with ALDEx2 between 4 groups
 ```{r}
-mm = model.matrix(~ groupe2, data = meta_cleaned)
- x = aldex.clr (p2_EC, mm, mc.samples = 500, denom = "all")
-glm.test = aldex.glm(x, mm, mc.samples = 500,  test = "glm", effect = TRUE, denom = "all", verbose = TRUE)
-set.seed(12345)
-system.time({
-        aldex2_EC1 = aldex(p2_EC, mm, mc.samples = 500, test = "glm", 
-               effect = TRUE, denom = "iqlr", verbose = TRUE)
-})
+mm = model.matrix(~ 0+meta_cleaned$groupe2, data = meta_cleaned)
+ x = aldex.clr (p2_EC, mm, mc.samples = 128, denom = "all")
+glm.test = aldex.glm(x, mm)
+glm.effect <- aldex.glm.effect(x)
+p2_EC_aldex = glm.test[,13:20]
+write.table(p2_EC_aldex, "ALDEx2/p2_EC_aldex.txt", sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
 ```
 
 ```{r}
