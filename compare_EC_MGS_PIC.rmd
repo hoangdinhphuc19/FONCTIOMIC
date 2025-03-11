@@ -61,8 +61,8 @@ EC_number_class = read.delim("description_mapfiles/EC_number_class.txt", sep ="\
 Correlation of Spearman on P value between PICRUSt2 and MGS (Robust)
 ```{r}
 c = intersect(rownames(EC_P2_P_value), rownames(EC_MGS_P_value))
-EC_P2_P_value = EC_P2_P_value[c,]
-EC_MGS_P_value = EC_MGS_P_value[c,]
+EC_P2_P_value = EC_P2_P_value[c,1:4]
+EC_MGS_P_value = EC_MGS_P_value[c,1:4]
 EC_P2_P_value = as.matrix(EC_P2_P_value)
 EC_MGS_P_value = as.matrix(EC_MGS_P_value)
 cor.2 = cor(t(EC_MGS_P_value), t(EC_P2_P_value), method = "spearman")
@@ -74,7 +74,6 @@ class_cor.2 = merge(diag_cor.2, EC_number_class, by = "EC_number")
 ```
 Plot for Spearman correlation of P value between EC differential abundance from PICRUSt2 and MGS
 ```{r}
-class_cor.2 = class_cor.2[order(class_cor.2$EC_number, decreasing = TRUE),]
 ggplot(class_cor.2, aes(x = class_cor.2$diag_cor.2, y = EC_class, group = EC_class)) +
   geom_boxplot(fill="gray", alpha=0.2)+
   ggtitle("Spearman correlation of P value between EC differential abundance from PICRUSt2 and MGS") +
@@ -83,7 +82,5 @@ ggplot(class_cor.2, aes(x = class_cor.2$diag_cor.2, y = EC_class, group = EC_cla
 ```
 
 ```{r}
-cor.2 = cor(t(EC_MGS_P_value), t(EC_P2_P_value), method = "spearman")
-hist(unlist(cor.2), breaks = 20, col = "gray", xlab = "Spearman correlation")
-hist(unlist(cor.1), breaks = 20, col = "gray", xlab = "Spearman correlation")
+
 ```

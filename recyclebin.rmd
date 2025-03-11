@@ -1,0 +1,158 @@
+```{r}
+crop_control=tb_ec %>% select(c(starts_with("C") & contains("-C")))
+crop_amended=tb_ec %>% select(c(starts_with("C") & contains("-R")))
+grass_control=tb_ec %>% select(c(starts_with("P") & contains("-C")))
+grass_amended=tb_ec %>% select(c(starts_with("P") & contains("-R")))
+```
+
+```{r}
+names <- list("crop_control", "crop_amended", "grass_control", "grass_amended")
+for (x in names) {
+  assign(x, cbind(tb_ec[, c("EC_number", "EC_class")], get(x)))
+}
+```
+
+```{r}
+meta_subset = meta %>% select(c("Kinetic", "Dynamic", "Treatment", "sample_id"))
+```
+
+```{r}
+crop_control_long <- crop_control %>%
+  pivot_longer(cols = -c(EC_number, EC_class), names_to = "sample_id", values_to = "value") %>%
+  left_join(meta_subset, by = "sample_id")
+```
+
+```{r}
+crop_amended_long <- crop_amended %>%
+  pivot_longer(cols = -c(EC_number, EC_class), names_to = "sample_id", values_to = "value") %>%
+  left_join(meta_subset, by = "sample_id")
+```
+
+```{r}
+grass_control_long <- grass_control %>%
+  pivot_longer(cols = -c(EC_number, EC_class), names_to = "sample_id", values_to = "value") %>%
+  left_join(meta_subset, by = "sample_id")
+```
+
+```{r}
+grass_amended_long <- grass_amended %>%
+  pivot_longer(cols = -c(EC_number, EC_class), names_to = "sample_id", values_to = "value") %>%
+  left_join(meta_subset, by = "sample_id")
+```
+
+```{r}
+meta_subset_wide <- meta_subset %>%
+  pivot_longer(cols = -sample_id, names_to = "variable", values_to = "value") %>%
+  pivot_wider(names_from = sample_id, values_from = value)
+```
+#Test: Normalization of the data "crop_control" by Log transformation
+```{r}
+crop_control_long$value[crop_control_long$value == 0] <- 0.01
+crop_control_long$value <- log1p(crop_control_long$value)
+qqnorm(crop_control_long$value, main = "QQ plot of crop_control_long")
+qqline(crop_control_long$value, col = "red")
+```
+#Test: Normalization of the data "grass_control" by Log transformation
+```{r}
+grass_control_long$value[grass_control_long$value == 0] <- 0.01
+grass_control_long$value <- log1p(grass_control_long$value)
+qqnorm(grass_control_long$value, main = "QQ plot of grass_control_long")
+qqline(grass_control_long$value, col = "red")
+```
+Agregation of the data
+```{r}
+abundance_moys_per_EC_group_C_C = crop_control_long %>%
+  group_by(EC_number,EC_class,Dynamic) %>%
+  summarize(mean_abundance = mean(value, na.rm = TRUE))
+```
+
+```{r}
+hist(unlist(abundance_moys_per_EC_group_C_C$mean_abundance),breaks=1000)
+```
+
+```{r}
+pca1 <- prcomp(crop_control[, -(1:2)], scale = TRUE)
+```
+
+```{r}
+pca1 = data.frame(pca1$x)
+EC_class = crop_control$EC_class
+pca1 = cbind(pca1, EC_class)
+ggplot(pca1, aes(PC1, PC2, col = EC_class, fill = EC_class)) +
+  stat_ellipse(geom = "polygon", col = "black", alpha = 0.5) +
+  geom_point(shape = 21, col = "black")
+```
+
+subset data for control group
+```{r}
+meta_control <- dplyr::select(meta_cleaned,sample,modality,bloc)
+meta_control = meta_control[(meta_control$modality == "control"),]
+p2_EC1 = p2_EC[,colnames(p2_EC) %in% meta_control$sample]
+```
+
+```{r}
+meta_cleaned = microbiome::meta(meta_cleaned)
+head(meta_cleaned)
+meta_cleaned$groupe2 = recode(meta_cleaned$groupe2, CC = "crops_control",PC = "grasslands_control", CR = "crops_residues", PR = "grasslands_residues")
+res_ancombc = ancombc(data = p2_EC, meta = meta_cleaned, formula = meta_cleaned$groupe2, p_adj_method = "holm")
+
+```
+Statistical analysis with ALDEx2 between grasslands vs croplands control groups
+```{r}
+set.seed(12345)
+system.time({
+        aldex2_EC1 = aldex(p2_EC1,meta_control$bloc, mc.samples = 500, test = "t", 
+               effect = TRUE, denom = "iqlr", verbose = TRUE)
+})
+```
+Check estimated size effect
+```{r}
+par(mfrow = c(1,2))
+hist(aldex2_EC1$effect, breaks = 20, xlab = "effect size", col = "yellow", main = "Effect size distribution")
+aldex.plot(aldex2_EC1, type = "MA", test = "wilcox", all.cex = 0.4, rare.cex = 0.4, 
+       called.cex = 0.6, cutoff = 0.05, xlab = "Log-ratio abundance", ylab = "Difference")
+title(main = "(EC) MA Plot")
+```
+Results of DA analysis
+```{r}
+df_EC1 = aldex2_EC1 %>% tibble::rownames_to_column(var = "EC") %>% 
+    inner_join(mapfile_EC, by = c("EC" = "function")) %>% arrange(EC)
+```
+```{r}
+qqnorm(p2_EC)
+qqline(p2_EC, col = "red")
+```
+
+```{r}
+df_EC1 = aldex2_EC1 %>% tibble::rownames_to_column(var = "EC") %>% 
+    inner_join(mapfile_EC, by = c("EC" = "function")) %>% arrange(EC)
+```
+PCA for KO
+```{r}
+p2_KO_long <- as.data.frame(p2_KO) %>%
+  rownames_to_column(var = "KO") %>%
+  pivot_longer(cols = -KO, names_to = "sample_id", values_to = "value")
+p2_KO_wide <- p2_KO_long %>%
+  pivot_wider(names_from = KO, values_from = value)
+p2_KO_wide = as.data.frame(p2_KO_wide)
+row.names(p2_KO_wide) <- p2_KO_wide$sample_id
+p2_KO_wide = p2_KO_wide[,-1]
+p2_KO_wide = as.matrix(p2_KO_wide)
+p2_KO_pca = vegan::rda(p2_KO_wide,scale=TRUE)
+summary(p2_KO_pca)
+```
+PCA plot (KO)
+```{r}
+KO_pca_dat = as.data.frame(p2_KO_pca$CA$u[,1:2])
+KO_pca_dat <- cbind(KO_pca_dat, meta_cleaned$groupe2)
+colnames(KO_pca_dat) <- c("PC1","PC2","Groups")
+ggplot(KO_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
+  ggtitle("PCA of KO abundance") +
+  geom_point(alpha=1) +
+  xlab("PC1: 31%")+
+  ylab("PC2: 12%") +
+  stat_ellipse(geom="polygon",type ="norm", level=0.9, alpha=0.1,
+  aes(fill = Groups),
+  color =NA) +
+theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```

@@ -6,13 +6,11 @@ date: "2025-02-27"
 
 ```{r}
 library(readr)
-library(tibble)
+library(dplyr)
 library(tidyverse)
-library(ggprism)
-library(patchwork)
 library("phyloseq")
 library(ALDEx2)
-library(ANCOMBC)
+library(DESeq2)
 ```
 Load necessary data: abundance data and metadata
 ```{r}
@@ -57,6 +55,7 @@ meta$sample = as.factor(meta$sample)
 meta$sample = factor(meta$sample, levels = c(sort(levels(meta$sample), decreasing = F)))
 meta_cleaned = meta[colnames(p2_EC),]
 meta_cleaned$groupe2 = paste(meta_cleaned$bloc,meta_cleaned$modality,sep = "_")
+meta_cleaned = meta_cleaned %>% filter(campagne %in% c("0","1","4","6"))
 ```
 Phyloseq object
 ```{r}
@@ -64,51 +63,18 @@ ps = phyloseq(sample_data(meta),
                 otu_table(as.matrix(otu_table), taxa_are_rows = FALSE),
                 phy_tree(phy_tree))
 ```
-Statistical analysis with ALDEx2 between grasslands vs croplands control groups
-```{r}
-set.seed(12345)
-system.time({
-        aldex2_EC1 = aldex(p2_EC1,meta_control$bloc, mc.samples = 500, test = "t", 
-               effect = TRUE, denom = "iqlr", verbose = TRUE)
-})
-```
-Check estimated size effect
-```{r}
-par(mfrow = c(1,2))
-hist(aldex2_EC1$effect, breaks = 20, xlab = "effect size", col = "yellow", main = "Effect size distribution")
-aldex.plot(aldex2_EC1, type = "MA", test = "wilcox", all.cex = 0.4, rare.cex = 0.4, 
-       called.cex = 0.6, cutoff = 0.05, xlab = "Log-ratio abundance", ylab = "Difference")
-title(main = "(EC) MA Plot")
-```
-Results of DA analysis
-```{r}
-df_EC1 = aldex2_EC1 %>% tibble::rownames_to_column(var = "EC") %>% 
-    inner_join(mapfile_EC, by = c("EC" = "function")) %>% arrange(EC)
-```
-```{r}
-qqnorm(p2_EC)
-qqline(p2_EC, col = "red")
-```
-
-```{r}
-df_EC1 = aldex2_EC1 %>% tibble::rownames_to_column(var = "EC") %>% 
-    inner_join(mapfile_EC, by = c("EC" = "function")) %>% arrange(EC)
-```
 Statistical analysis with ALDEx2 between 4 groups
 ```{r}
-mm = model.matrix(~ 0+meta_cleaned$groupe2, data = meta_cleaned)
+meta_cleaned$groupe2 = as.factor(meta_cleaned$groupe2)
+meta_cleaned$groupe2 = relevel(meta_cleaned$groupe2, ref = "crops_control")
+mm = model.matrix(~ meta_cleaned$groupe2, data = meta_cleaned)
  x = aldex.clr (p2_EC, mm, mc.samples = 128, denom = "all")
 glm.test = aldex.glm(x, mm)
 glm.effect <- aldex.glm.effect(x)
 p2_EC_aldex = glm.test[,13:20]
 write.table(p2_EC_aldex, "ALDEx2/p2_EC_aldex.txt", sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
 ```
-
-```{r}
-EC1_with_p_0.05 <- df_EC1 %>% 
-  filter(wi.eBH < 0.05)
-```
-PCA for EC
+PCA for EC (brut)
 ```{r}
 p2_EC_wide = as.matrix(p2_EC)
 p2_EC_wide = t(p2_EC_wide)
@@ -131,46 +97,30 @@ ggplot(EC_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
   color =NA) +
 theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```
-PCA for KO
+**bold**#Statistical analysis with DESSeq2 between 4 groups
+Slice the data into groups by time
+
 ```{r}
-p2_KO_long <- as.data.frame(p2_KO) %>%
-  rownames_to_column(var = "KO") %>%
-  pivot_longer(cols = -KO, names_to = "sample_id", values_to = "value")
-p2_KO_wide <- p2_KO_long %>%
-  pivot_wider(names_from = KO, values_from = value)
-p2_KO_wide = as.data.frame(p2_KO_wide)
-row.names(p2_KO_wide) <- p2_KO_wide$sample_id
-p2_KO_wide = p2_KO_wide[,-1]
-p2_KO_wide = as.matrix(p2_KO_wide)
-p2_KO_pca = vegan::rda(p2_KO_wide,scale=TRUE)
-summary(p2_KO_pca)
-```
-PCA plot (KO)
-```{r}
-KO_pca_dat = as.data.frame(p2_KO_pca$CA$u[,1:2])
-KO_pca_dat <- cbind(KO_pca_dat, meta_cleaned$groupe2)
-colnames(KO_pca_dat) <- c("PC1","PC2","Groups")
-ggplot(KO_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
-  ggtitle("PCA of KO abundance") +
-  geom_point(alpha=1) +
-  xlab("PC1: 31%")+
-  ylab("PC2: 12%") +
-  stat_ellipse(geom="polygon",type ="norm", level=0.9, alpha=0.1,
-  aes(fill = Groups),
-  color =NA) +
-theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
-```
-subset data for control group
-```{r}
-meta_control <- dplyr::select(meta_cleaned,sample,modality,bloc)
-meta_control = meta_control[(meta_control$modality == "control"),]
-p2_EC1 = p2_EC[,colnames(p2_EC) %in% meta_control$sample]
+meta_cleaned$campagne = as.factor(meta_cleaned$campagne)
+meta_cleaned$campagne = relevel(meta_cleaned$campagne, ref = "0")
+p2_EC_cleaned = p2_EC[,rownames(meta_cleaned)]
+dds_P2 = DESeqDataSetFromMatrix(countData =p2_EC_cleaned,
+                                  colData = meta_cleaned,
+                                  design = ~ campagne + groupe2, tidy = FALSE)
+DAA_EC_P2 = DESeq(dds_P2, parallel = TRUE)
+dds_P2 = vst(dds_P2,blind = FALSE)
+res_EC = results(DAA_EC_P2, parallel = TRUE)
+head(res_EC)
+summary(res_EC)
 ```
 
 ```{r}
-meta_cleaned = microbiome::meta(meta_cleaned)
-head(meta_cleaned)
-meta_cleaned$groupe2 = recode(meta_cleaned$groupe2, CC = "crops_control",PC = "grasslands_control", CR = "crops_residues", PR = "grasslands_residues")
-res_ancombc = ancombc(data = p2_EC, meta = meta_cleaned, formula = meta_cleaned$groupe2, p_adj_method = "holm")
-
+pcaData = plotPCA(dds_P2, intgroup = c("campagne", "groupe2"), returnData = TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(x = PC1, y = PC2, color = groupe2, shape = campagne)) +
+  geom_point(size =3) +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of PICRUSt2") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```

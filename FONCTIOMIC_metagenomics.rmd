@@ -9,8 +9,10 @@ date: "2025-02-25"
 library(tidyverse)
 library(dplyr)
 library(phyloseq)
-library(FactoMineR)
-library(factoextra)
+library(ALDEx2)
+library(DESeq2)
+library(BiocParallel)
+register(SnowParam(4))
 ```
 
 ```{r}
@@ -21,15 +23,19 @@ meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
 meta = as.data.frame(meta)
 row.names(meta) = meta$sample_id
 ```
-PCA for EC abundance
+Tidy up EC table
 ```{r}
 tb_ec = as.data.frame(tb_ec)
 row.names(tb_ec) = paste0("EC:", tb_ec$EC_number)
 tb_ec_cleaned = tb_ec %>% filter(!str_detect(rownames(tb_ec), "-$"))
 tb_ec_cleaned = tb_ec_cleaned[,-c(1,50)]
 tb_ec_cleaned = as.matrix(tb_ec_cleaned)
-tb_ec_cleaned = t(tb_ec_cleaned)
-ec_pca = vegan::rda(tb_ec_cleaned)
+```
+PCA for EC abundance
+
+```{r}
+tb_ec_cleaned_pca = t(tb_ec_cleaned)
+ec_pca = vegan::rda(tb_ec_cleaned_pca)
 summary(ec_pca)
 ```
 PCA plot for EC abundance
@@ -49,12 +55,6 @@ theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```
 overlap EC between MSG and PICRUsT2 on FONCTIOMIC
 ```{r}
-tb_ec = as.data.frame(tb_ec)
-row.names(tb_ec) = paste0("EC:", tb_ec$EC_number)
-tb_ec_cleaned = tb_ec %>% filter(!str_detect(rownames(tb_ec), "-$"))
-tb_ec_cleaned = tb_ec_cleaned[,-c(1,50)]
-tb_ec_cleaned = as.matrix(tb_ec_cleaned)
-tb_ec_cleaned = round(tb_ec_cleaned,0)
 overlapping_EC = intersect(rownames(p2_EC), rownames(tb_ec_cleaned))
 overlapping_sample = intersect(colnames(p2_EC), colnames(tb_ec_cleaned))
 EC_P2 = p2_EC[overlapping_EC, overlapping_sample]
@@ -63,99 +63,48 @@ EC_MGS = tb_ec_cleaned[overlapping_EC, overlapping_sample]
 write.table(EC_MGS, "Data FONCTIOMIC/EC_MGS.txt",sep="\t")
 ```
 
-```{r}
-crop_control=tb_ec %>% select(c(starts_with("C") & contains("-C")))
-crop_amended=tb_ec %>% select(c(starts_with("C") & contains("-R")))
-grass_control=tb_ec %>% select(c(starts_with("P") & contains("-C")))
-grass_amended=tb_ec %>% select(c(starts_with("P") & contains("-R")))
-```
-
-```{r}
-names <- list("crop_control", "crop_amended", "grass_control", "grass_amended")
-for (x in names) {
-  assign(x, cbind(tb_ec[, c("EC_number", "EC_class")], get(x)))
-}
-```
-
-```{r}
-meta_subset = meta %>% select(c("Kinetic", "Dynamic", "Treatment", "sample_id"))
-```
-
-```{r}
-crop_control_long <- crop_control %>%
-  pivot_longer(cols = -c(EC_number, EC_class), names_to = "sample_id", values_to = "value") %>%
-  left_join(meta_subset, by = "sample_id")
-```
-
-```{r}
-crop_amended_long <- crop_amended %>%
-  pivot_longer(cols = -c(EC_number, EC_class), names_to = "sample_id", values_to = "value") %>%
-  left_join(meta_subset, by = "sample_id")
-```
-
-```{r}
-grass_control_long <- grass_control %>%
-  pivot_longer(cols = -c(EC_number, EC_class), names_to = "sample_id", values_to = "value") %>%
-  left_join(meta_subset, by = "sample_id")
-```
-
-```{r}
-grass_amended_long <- grass_amended %>%
-  pivot_longer(cols = -c(EC_number, EC_class), names_to = "sample_id", values_to = "value") %>%
-  left_join(meta_subset, by = "sample_id")
-```
-
-```{r}
-meta_subset_wide <- meta_subset %>%
-  pivot_longer(cols = -sample_id, names_to = "variable", values_to = "value") %>%
-  pivot_wider(names_from = sample_id, values_from = value)
-```
-#Test: Normalization of the data "crop_control" by Log transformation
-```{r}
-crop_control_long$value[crop_control_long$value == 0] <- 0.01
-crop_control_long$value <- log1p(crop_control_long$value)
-qqnorm(crop_control_long$value, main = "QQ plot of crop_control_long")
-qqline(crop_control_long$value, col = "red")
-```
-#Test: Normalization of the data "grass_control" by Log transformation
-```{r}
-grass_control_long$value[grass_control_long$value == 0] <- 0.01
-grass_control_long$value <- log1p(grass_control_long$value)
-qqnorm(grass_control_long$value, main = "QQ plot of grass_control_long")
-qqline(grass_control_long$value, col = "red")
-```
-Agregation of the data
-```{r}
-abundance_moys_per_EC_group_C_C = crop_control_long %>%
-  group_by(EC_number,EC_class,Dynamic) %>%
-  summarize(mean_abundance = mean(value, na.rm = TRUE))
-```
-
-```{r}
-hist(unlist(abundance_moys_per_EC_group_C_C$mean_abundance),breaks=1000)
-```
-
-```{r}
-pca1 <- prcomp(crop_control[, -(1:2)], scale = TRUE)
-```
-
-```{r}
-pca1 = data.frame(pca1$x)
-EC_class = crop_control$EC_class
-pca1 = cbind(pca1, EC_class)
-ggplot(pca1, aes(PC1, PC2, col = EC_class, fill = EC_class)) +
-  stat_ellipse(geom = "polygon", col = "black", alpha = 0.5) +
-  geom_point(shape = 21, col = "black")
-```
 Statistical analysis with ALDEx2 between 4 groups
 ```{r}
-mm = model.matrix(meta$sample_id ~ 0+meta$Category, data = meta)
+meta$Category <- as.factor(meta$Category)
+meta$Category <- relevel(meta$Category, ref = "Control Cropland")
+mm = model.matrix(~ meta$Category, data = meta)
 tb_ec_cleaned = as.matrix(tb_ec_cleaned)
 tb_ec_cleaned = round(tb_ec_cleaned,0)
-x = aldex.clr (tb_ec_cleaned, mm, mc.samples = 128, denom = "all")
+x = aldex.clr (tb_ec_cleaned, mm, mc.samples = 128, denom = "all",useMC=TRUE)
 glm.test = aldex.glm(x, mm)
-glm.effect <- aldex.glm.effect(x)
+glm.effect <- aldex.glm.effect(x,useMC = TRUE)
 MGS_EC_aldex = glm.test[,13:20]
 write.table(MGS_EC_aldex, "ALDEx2/MGS_EC_aldex.txt", sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
+```
+**bold**#Statistical analysis with DESSeq2 between 4 groups
+Slice the data into groups by time
+```{r}
+tb_ec_cleaned = round(tb_ec_cleaned,0)
+meta$Category = as.factor(meta$Category)
+meta$time = as.factor(meta$time)
+meta$time = relevel(meta$time, ref = "0")
+dds_MGS = DESeqDataSetFromMatrix(countData =tb_ec_cleaned,
+                                  colData = meta,
+                                  design = ~ time + Category, tidy = FALSE)
+DAA_EC_MGS = DESeq(dds_MGS, parallel = TRUE)
+dds_MGS = vst(dds_MGS,blind = FALSE)
+res_EC = results(DAA_EC_MGS, parallel = TRUE)
+head(res_EC)
+summary(res_EC)
+resultsNames(DAA_EC_MGS)
+```
+
+```{r}
+pcaData = plotPCA(dds_MGS, intgroup = c("Category", "time"), returnData = TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category, shape = time)) +
+  geom_point(size =3) +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of MGS") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+```{r}
 ```
 
