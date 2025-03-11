@@ -11,6 +11,8 @@ library(tidyverse)
 library("phyloseq")
 library(ALDEx2)
 library(DESeq2)
+library(BiocParallel)
+register(SnowParam(4))
 ```
 Load necessary data: abundance data and metadata
 ```{r}
@@ -56,6 +58,12 @@ meta$sample = factor(meta$sample, levels = c(sort(levels(meta$sample), decreasin
 meta_cleaned = meta[colnames(p2_EC),]
 meta_cleaned$groupe2 = paste(meta_cleaned$bloc,meta_cleaned$modality,sep = "_")
 meta_cleaned = meta_cleaned %>% filter(campagne %in% c("0","1","4","6"))
+meta_cleaned$campagne = as.factor(meta_cleaned$campagne)
+meta_cleaned$campagne = relevel(meta_cleaned$campagne, ref = "0")
+meta_cleaned = meta_cleaned %>% mutate(time = fct_recode(campagne, 
+"0" = "0", "3" = "1", "51" = "4", "125" = "6")) %>% mutate(groups = fct_recode(groupe2, 
+"Control Cropland" = "crops_control", "Amended Cropland" = "crops_residues", 
+"Control Grassland" = "grasslands_control", "Amended Grassland" = "grasslands_residues"))
 ```
 Phyloseq object
 ```{r}
@@ -65,9 +73,9 @@ ps = phyloseq(sample_data(meta),
 ```
 Statistical analysis with ALDEx2 between 4 groups
 ```{r}
-meta_cleaned$groupe2 = as.factor(meta_cleaned$groupe2)
-meta_cleaned$groupe2 = relevel(meta_cleaned$groupe2, ref = "crops_control")
-mm = model.matrix(~ meta_cleaned$groupe2, data = meta_cleaned)
+meta_cleaned$groupe2 = as.factor(meta_cleaned$groups)
+meta_cleaned$groupe2 = relevel(meta_cleaned$groups, ref = "Control Cropland")
+mm = model.matrix(~ meta_cleaned$groupe2 + meta_cleaned$time, data = meta_cleaned)
  x = aldex.clr (p2_EC, mm, mc.samples = 128, denom = "all")
 glm.test = aldex.glm(x, mm)
 glm.effect <- aldex.glm.effect(x)
@@ -78,14 +86,13 @@ PCA for EC (brut)
 ```{r}
 p2_EC_wide = as.matrix(p2_EC)
 p2_EC_wide = t(p2_EC_wide)
-write.table(p2_EC_wide, "Data FONCTIOMIC/p2_EC_wide.txt", sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
 p2_EC_pca = vegan::rda(p2_EC_wide,scale=TRUE)
 summary(p2_EC_pca)
 ```
 PCA plot (EC)
 ```{r}
 EC_pca_dat = as.data.frame(p2_EC_pca$CA$u[,1:2])
-EC_pca_dat <- cbind(EC_pca_dat, meta_cleaned$groupe2)
+EC_pca_dat <- cbind(EC_pca_dat, meta_cleaned$groups)
 colnames(EC_pca_dat) <- c("PC1","PC2","Groups")
 ggplot(EC_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
   ggtitle("PCA of EC abundance") +
@@ -101,12 +108,10 @@ theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 Slice the data into groups by time
 
 ```{r}
-meta_cleaned$campagne = as.factor(meta_cleaned$campagne)
-meta_cleaned$campagne = relevel(meta_cleaned$campagne, ref = "0")
 p2_EC_cleaned = p2_EC[,rownames(meta_cleaned)]
 dds_P2 = DESeqDataSetFromMatrix(countData =p2_EC_cleaned,
                                   colData = meta_cleaned,
-                                  design = ~ campagne + groupe2, tidy = FALSE)
+                                  design = ~ time + groups, tidy = FALSE)
 DAA_EC_P2 = DESeq(dds_P2, parallel = TRUE)
 dds_P2 = vst(dds_P2,blind = FALSE)
 res_EC = results(DAA_EC_P2, parallel = TRUE)
@@ -115,12 +120,18 @@ summary(res_EC)
 ```
 
 ```{r}
-pcaData = plotPCA(dds_P2, intgroup = c("campagne", "groupe2"), returnData = TRUE)
+pcaData = plotPCA(dds_P2, intgroup = c("time", "groups"), returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
-ggplot(pcaData, aes(x = PC1, y = PC2, color = groupe2, shape = campagne)) +
+ggplot(pcaData, aes(x = PC1, y = PC2, color = groups, shape = time)) +
   geom_point(size =3) +
   xlab(paste0("PC1: ", percentVar[1], "% variance")) +
   ylab(paste0("PC2: ", percentVar[2], "% variance")) +
  ggtitle("PCA of EC abundance in output of PICRUSt2") +
+ scale_color_manual(values = c("#FF6F91",
+                                "#C34A36",
+                                "#008F7A",
+                                "#2C73D2"))+
+  scale_shape_manual(values = c(16,15,17,18))+
+  guides(color = guide_legend(title = "Groups"),shape = guide_legend(title = "Time")) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```

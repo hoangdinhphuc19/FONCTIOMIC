@@ -67,7 +67,7 @@ Statistical analysis with ALDEx2 between 4 groups
 ```{r}
 meta$Category <- as.factor(meta$Category)
 meta$Category <- relevel(meta$Category, ref = "Control Cropland")
-mm = model.matrix(~ meta$Category, data = meta)
+mm = model.matrix(~ meta$Category + meta$time, data = meta)
 tb_ec_cleaned = as.matrix(tb_ec_cleaned)
 tb_ec_cleaned = round(tb_ec_cleaned,0)
 x = aldex.clr (tb_ec_cleaned, mm, mc.samples = 128, denom = "all",useMC=TRUE)
@@ -81,6 +81,7 @@ Slice the data into groups by time
 ```{r}
 tb_ec_cleaned = round(tb_ec_cleaned,0)
 meta$Category = as.factor(meta$Category)
+meta$Category = relevel(meta$Category, ref = "Control Cropland")
 meta$time = as.factor(meta$time)
 meta$time = relevel(meta$time, ref = "0")
 dds_MGS = DESeqDataSetFromMatrix(countData =tb_ec_cleaned,
@@ -91,7 +92,12 @@ dds_MGS = vst(dds_MGS,blind = FALSE)
 res_EC = results(DAA_EC_MGS, parallel = TRUE)
 head(res_EC)
 summary(res_EC)
-resultsNames(DAA_EC_MGS)
+resSig_EC = subset(res_EC, padj < 0.05 & pvalue < 0.05)
+head(resSig_EC[ order(resSig_EC$log2FoldChange, decreasing = TRUE), ])
+dds_MGS_vst = assay(dds_MGS)
+dds_MGS_vst = as.data.frame(dds_MGS_vst)
+dds_MGS_vst$EC_number = rownames(dds_MGS_vst)
+dds_MGS_vst = subset(dds_MGS_vst, EC_number %in% rownames(resSig_EC))
 ```
 
 ```{r}
@@ -102,9 +108,17 @@ ggplot(pcaData, aes(x = PC1, y = PC2, color = Category, shape = time)) +
   xlab(paste0("PC1: ", percentVar[1], "% variance")) +
   ylab(paste0("PC2: ", percentVar[2], "% variance")) +
  ggtitle("PCA of EC abundance in output of MGS") +
+ scale_color_manual(values = c("#FF6F91",
+                                "#C34A36",
+                                "#2C73D2",
+                                "#161a19"))+
+  scale_shape_manual(values = c(16,15,17,18))+
+  scale_fill_discrete(breaks = c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland"))+
+  guides(color = guide_legend(title = "Groups"),shape = guide_legend(title = "Time")) +  
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```
 
 ```{r}
+
 ```
 
