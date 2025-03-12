@@ -11,17 +11,20 @@ library(dplyr)
 library(phyloseq)
 library(ALDEx2)
 library(DESeq2)
+library(pheatmap)
 library(BiocParallel)
 register(SnowParam(4))
 ```
 
 ```{r}
+tb_ec_raw = read_tsv("Data FONCTIOMIC/counts_by_EC_number.tsv")
 tb_ec = read_tsv("Data FONCTIOMIC/counts_by_EC_number.norm.tsv")
 tb_gene = read_tsv("Data FONCTIOMIC/TOY_ALL.counts.norm_cleaned.tsv")
 tb_cog = read_tsv("Data FONCTIOMIC/TOY_PROKKA_02252022_all3000bp.tsv")
 meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
 meta = as.data.frame(meta)
 row.names(meta) = meta$sample_id
+t = read.table("description_mapfiles/EC_number_class.txt", header = TRUE, sep = "\t")
 ```
 Tidy up EC table
 ```{r}
@@ -62,7 +65,6 @@ write.table(EC_P2, "Data FONCTIOMIC/EC_P2.txt",sep="\t")
 EC_MGS = tb_ec_cleaned[overlapping_EC, overlapping_sample]
 write.table(EC_MGS, "Data FONCTIOMIC/EC_MGS.txt",sep="\t")
 ```
-
 Statistical analysis with ALDEx2 between 4 groups
 ```{r}
 meta$Category <- as.factor(meta$Category)
@@ -76,7 +78,7 @@ glm.effect <- aldex.glm.effect(x,useMC = TRUE)
 MGS_EC_aldex = glm.test[,13:20]
 write.table(MGS_EC_aldex, "ALDEx2/MGS_EC_aldex.txt", sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
 ```
-**bold**#Statistical analysis with DESSeq2 between 4 groups
+**bold**#Statistical analysis with DESeq2 between 4 groups
 Slice the data into groups by time
 ```{r}
 tb_ec_cleaned = round(tb_ec_cleaned,0)
@@ -89,9 +91,15 @@ dds_MGS = DESeqDataSetFromMatrix(countData =tb_ec_cleaned,
                                   design = ~ time + Category, tidy = FALSE)
 DAA_EC_MGS = DESeq(dds_MGS, parallel = TRUE)
 dds_MGS = vst(dds_MGS,blind = FALSE)
-res_EC = results(DAA_EC_MGS, parallel = TRUE)
+```
+Extracting results
+```{r}
+res_EC = results(DAA_EC_MGS, parallel = TRUE, contrast = c("Category",
+"Control Cropland",
+"Amended Grassland"))
 head(res_EC)
 summary(res_EC)
+resultsNames(DAA_EC_MGS)
 resSig_EC = subset(res_EC, padj < 0.05 & pvalue < 0.05)
 head(resSig_EC[ order(resSig_EC$log2FoldChange, decreasing = TRUE), ])
 dds_MGS_vst = assay(dds_MGS)
@@ -117,8 +125,34 @@ ggplot(pcaData, aes(x = PC1, y = PC2, color = Category, shape = time)) +
   guides(color = guide_legend(title = "Groups"),shape = guide_legend(title = "Time")) +  
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```
+Sample distances
+```{r}
+dds_MGS_vst = as.matrix(dds_MGS_vst[,-c(49)])
+dds_MGS_vst = dds_MGS_vst[order(rownames(dds_MGS_vst)),
+order(colnames(dds_MGS_vst))]
+mat = dds_MGS_vst
+mat = mat - rowMeans(mat)
+dists_row = vegan::vegdist((dds_MGS_vst), method = "bray")
+dists_col = vegan::vegdist(t(dds_MGS_vst), method = "bray")
+```
+Heatmap of the expression of ECs across the groups (by time and land types)
+```{r}
+anno_col = as.data.frame(meta[,c("land_use","wheat_straw_amendment","time")])
+colnames(anno_col) = c("Land types","Treatments","Time")
+anno_col$Time = as.factor(anno_col$Time)
+anno_row = t[,2]
+anno_row = as.data.frame(anno_row)
+colnames(anno_row) = "EC Class"
+rownames(anno_row) = t$EC_number
+pheatmap(mat, clustering_distance_rows = dists_row, 
+              clustering_distance_cols = dists_col,
+              show_rownames = FALSE, 
+              cutree_rows = 5, #9, #5
+              cutree_cols = 3,
+              annotation_col = anno_col, 
+              annotation_row = anno_row)
+```
 
 ```{r}
 
 ```
-

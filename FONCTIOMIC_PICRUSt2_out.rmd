@@ -113,12 +113,12 @@ dds_P2 = DESeqDataSetFromMatrix(countData =p2_EC_cleaned,
                                   colData = meta_cleaned,
                                   design = ~ time + groups, tidy = FALSE)
 DAA_EC_P2 = DESeq(dds_P2, parallel = TRUE)
-dds_P2 = vst(dds_P2,blind = FALSE)
+dds_P2_vst = vst(dds_P2,blind = FALSE)
 res_EC = results(DAA_EC_P2, parallel = TRUE)
 head(res_EC)
 summary(res_EC)
 ```
-
+PCA plotting
 ```{r}
 pcaData = plotPCA(dds_P2, intgroup = c("time", "groups"), returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
@@ -134,4 +134,17 @@ ggplot(pcaData, aes(x = PC1, y = PC2, color = groups, shape = time)) +
   scale_shape_manual(values = c(16,15,17,18))+
   guides(color = guide_legend(title = "Groups"),shape = guide_legend(title = "Time")) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+```{r}
+dds_p2_vst = as.matrix(dds_MGS_vst[,-c(49)])
+dds_MGS_vst = dds_MGS_vst[order(rownames(dds_MGS_vst)),
+order(colnames(dds_MGS_vst))]
+mat = dds_MGS_vst
+mat = mat - rowMeans(mat)
+dists_row = vegan::vegdist((dds_MGS_vst), method = "bray")
+dists_col = vegan::vegdist(t(dds_MGS_vst), method = "bray")
+```
+
+```{r}
 ```

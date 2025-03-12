@@ -156,3 +156,20 @@ ggplot(KO_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
   color =NA) +
 theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```
+```{r}
+break()
+#eff_x = data.frame(glm.effect)
+#eff_x = dplyr::select(eff_x,meta.CategoryControl.Grassland.effect,
+#meta.CategoryAmended.Cropland.effect,
+#meta.CategoryAmended.Grassland.effect)
+#colnames(eff_x) = c("CC vs. GC","CC vs. CR","CC vs. GR")
+#Faire heatmap des size effect des ECs entre les conditions
+#pheatmap(eff_x,cluster_rows = FALSE,
+         cluster_cols = TRUE,
+         show_rownames = FALSE,
+         show_colnames = TRUE,
+         cutree_cols = 3,
+          cutree_rows = 6,
+         annotation_row = anno_row)
+return()
+```
