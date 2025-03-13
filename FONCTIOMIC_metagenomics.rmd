@@ -152,7 +152,34 @@ pheatmap(mat, clustering_distance_rows = dists_row,
               annotation_col = anno_col, 
               annotation_row = anno_row)
 ```
-
+Define of variables for subset matrix of EC
 ```{r}
-
+control_0 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Control" & meta$time == "0",]))
+amended_0 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Amended" & meta$time == "0",]))
+control_3 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Control" & meta$time == "3",]))
+amended_3 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Amended" & meta$time == "3",]))
+control_51 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Control" & meta$time == "51",]))
+amended_51 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Amended" & meta$time == "51",]))
+control_125 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Control" & meta$time == "125",]))
+amended_125 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Amended" & meta$time == "125",]))
 ```
+Subset matrix of EC en fonction of time and traitement
+```{r}
+mat_control_0 = tb_ec_cleaned[,control_0]
+mat_amended_0 = tb_ec_cleaned[,amended_0]
+mat_control_3 = tb_ec_cleaned[,control_3]
+mat_amended_3 = tb_ec_cleaned[,amended_3]
+mat_control_51 = tb_ec_cleaned[,control_51]
+mat_amended_51 = tb_ec_cleaned[,amended_51]
+mat_control_125 = tb_ec_cleaned[,control_125]
+mat_amended_125 = tb_ec_cleaned[,amended_125]
+```
+Calcul de différence entre les matrices
+```{r}
+dif_0 = mat_control_0 - mat_amended_0
+dif_3 = mat_control_3 - mat_amended_3
+dif_51 = mat_control_51 - mat_amended_51
+dif_125 = mat_control_125 - mat_amended_125
+```
+
+

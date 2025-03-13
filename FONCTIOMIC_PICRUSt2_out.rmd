@@ -21,7 +21,6 @@ p2_EC = read_delim("Data FONCTIOMIC/EC_metagenome_out/pred_metagenome_unstrat.ts
   p2_EC = as.data.frame(p2_EC)
   rownames(p2_EC) = p2_EC[,1]
   p2_EC = as.matrix(p2_EC[,-1])
-  p2_EC = round(p2_EC)
 p2_KO = read_delim("Data FONCTIOMIC/KO_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
     p2_KO = as.data.frame(p2_KO)
     rownames(p2_KO) = p2_KO[,1]
@@ -73,10 +72,11 @@ ps = phyloseq(sample_data(meta),
 ```
 Statistical analysis with ALDEx2 between 4 groups
 ```{r}
-meta_cleaned$groupe2 = as.factor(meta_cleaned$groups)
-meta_cleaned$groupe2 = relevel(meta_cleaned$groups, ref = "Control Cropland")
-mm = model.matrix(~ meta_cleaned$groupe2 + meta_cleaned$time, data = meta_cleaned)
- x = aldex.clr (p2_EC, mm, mc.samples = 128, denom = "all")
+meta_cleaned$modality = as.factor(meta_cleaned$modality)
+meta_cleaned$modality = relevel(meta_cleaned$modality, ref = "control")
+mm = model.matrix(~ meta_cleaned$modality + meta_cleaned$time, data = meta_cleaned)
+p2_EC = round(p2_EC,0)
+ x = aldex.clr (p2_EC_cleaned, mm, mc.samples = 128, denom = "all")
 glm.test = aldex.glm(x, mm)
 glm.effect <- aldex.glm.effect(x)
 p2_EC_aldex = glm.test[,13:20]
@@ -114,9 +114,20 @@ dds_P2 = DESeqDataSetFromMatrix(countData =p2_EC_cleaned,
                                   design = ~ time + groups, tidy = FALSE)
 DAA_EC_P2 = DESeq(dds_P2, parallel = TRUE)
 dds_P2_vst = vst(dds_P2,blind = FALSE)
-res_EC = results(DAA_EC_P2, parallel = TRUE)
+```
+Results of DESeq2
+```{r}
+res_EC = results(DAA_EC_P2, parallel = TRUE, contrast = c("groups",
+"Control Cropland",
+"Amended Grassland"))
 head(res_EC)
 summary(res_EC)
+resSig_EC = subset(res_EC, padj < 0.05 & pvalue < 0.05)
+head(resSig_EC[ order(resSig_EC$log2FoldChange, decreasing = TRUE), ])
+dds_P2_vst = assay(dds_P2)
+dds_P2_vst = as.data.frame(dds_P2_vst)
+dds_P2_vst$EC_number = rownames(dds_P2_vst)
+dds_P2_vst = subset(dds_P2_vst, EC_number %in% rownames(resSig_EC))
 ```
 PCA plotting
 ```{r}
@@ -137,14 +148,56 @@ ggplot(pcaData, aes(x = PC1, y = PC2, color = groups, shape = time)) +
 ```
 
 ```{r}
-dds_p2_vst = as.matrix(dds_MGS_vst[,-c(49)])
-dds_MGS_vst = dds_MGS_vst[order(rownames(dds_MGS_vst)),
-order(colnames(dds_MGS_vst))]
-mat = dds_MGS_vst
+dds_P2_vst = dds_P2_vst[order(rownames(dds_P2_vst)),
+order(colnames(dds_P2_vst))]
+mat = dds_P2_vst
 mat = mat - rowMeans(mat)
-dists_row = vegan::vegdist((dds_MGS_vst), method = "bray")
-dists_col = vegan::vegdist(t(dds_MGS_vst), method = "bray")
+dists_row = vegan::vegdist((dds_P2_vst), method = "bray")
+dists_col = vegan::vegdist(t(dds_P2_vst), method = "bray")
 ```
-
+Heatmap of the expression of ECs across the groups (by time and land types)
 ```{r}
+anno_col = as.data.frame(meta_cleaned[,c("modality","time")])
+colnames(anno_col) = c("Treatments","Time")
+anno_col$Time = as.factor(anno_col$Time)
+anno_row = t[,2]
+anno_row = as.data.frame(anno_row)
+colnames(anno_row) = "EC Class"
+rownames(anno_row) = t$EC_number
+pheatmap(mat, clustering_distance_rows = dists_row, 
+              clustering_distance_cols = dists_col,
+              show_rownames = FALSE, 
+              cutree_rows = 5, #9, #5
+              cutree_cols = 3,
+              annotation_col = anno_col, 
+              annotation_row = anno_row)
+```
+Define of variables for subset matrix of EC
+```{r}
+P2_control_0 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "control" & meta_cleaned$time == "0",]))
+P2_amended_0 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "residues" & meta_cleaned$time == "0",]))
+P2_control_3 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "control" & meta_cleaned$time == "3",]))
+P2_amended_3 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "residues" & meta_cleaned$time == "3",]))
+P2_control_51 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "control" & meta_cleaned$time == "51",]))
+P2_amended_51 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "residues" & meta_cleaned$time == "51",]))
+P2_control_125 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "control" & meta_cleaned$time == "125",]))
+P2_amended_125 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "residues" & meta_cleaned$time == "125",]))
+```
+Subset matrix of EC en fonction of time and traitement
+```{r}
+P2_mat_control_0 = p2_EC[,P2_control_0]
+P2_mat_amended_0 = p2_EC[,P2_amended_0]
+P2_mat_control_3 = p2_EC[,P2_control_3]
+P2_mat_amended_3 = p2_EC[,P2_amended_3]
+P2_mat_control_51 = p2_EC[,P2_control_51]
+P2_mat_amended_51 = p2_EC[,P2_amended_51]
+P2_mat_control_125 = p2_EC[,P2_control_125]
+P2_mat_amended_125 = p2_EC[,P2_amended_125]
+```
+Calcul de différence entre les matrices
+```{r}
+P2_dif_0 = P2_mat_control_0 - P2_mat_amended_0
+P2_dif_3 = P2_mat_control_3 - P2_mat_amended_3
+P2_dif_51 = P2_mat_control_51 - P2_mat_amended_51
+P2_dif_125 = P2_mat_control_125 - P2_mat_amended_125
 ```

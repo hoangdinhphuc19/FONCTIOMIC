@@ -9,6 +9,8 @@ library(tidyverse)
 library(dplyr)
 library(phyloseq)
 library(VennDiagram)
+library(reshape2)
+library(ggplot2)
 ```
 
 ```{r}
@@ -17,6 +19,10 @@ EC_MGS = read.delim("Data FONCTIOMIC/EC_MGS.txt", sep ="\t")
 EC_P2 = as.matrix(EC_P2)
 EC_MGS = as.matrix(EC_MGS)
 EC_number_class = read.delim("description_mapfiles/EC_number_class.txt", sep ="\t")
+rownames(EC_number_class) = EC_number_class$EC_number
+EC_class = as.data.frame(EC_number_class[,-1])
+colnames(EC_class) = "EC_class"
+rownames(EC_class) = EC_number_class$EC_number
 ```
 Correlation of Spearman on EC abundance between PICRUSt2 and MGS (Robust)
 ```{r}
@@ -80,7 +86,53 @@ ggplot(class_cor.2, aes(x = class_cor.2$diag_cor.2, y = EC_class, group = EC_cla
   xlab("Spearman correlation") +
   ylab("EC class")
 ```
+Correlation des différences (Control contre Residues) entre PICRUSt2 et MGS
+```{r}
+#Au temps 0
+plot(dif_0[overlapping_EC,], P2_dif_0[overlapping_EC,],
+     xlab = "Control vs Residues from MGS",
+     ylab = "Control vs Residues from PICRUSt2",
+     main = "Correlation of differences EC abundance between Control vs Residues from PICRUSt2 and MGS at T0")
+#testé avec qqnorm pour voir si les données sont normalement distribuées (la réponse est non) => corrélation de Spearman
+cor_0 = cor(t(dif_0[overlapping_EC,]),t(P2_dif_0[overlapping_EC,]), method = "spearman")
+corr_0 = cor.test(t(dif_0[overlapping_EC,]),t(P2_dif_0[overlapping_EC,]), method = "spearman")
+diag_cor_0 = diag(cor_0)
+diag_cor_0 = as.data.frame(diag_cor_0)
+diag_cor_0$EC_number = rownames(diag_cor_0)
+diag_cor_0 = merge(diag_cor_0, t, by = "EC_number")
+ggplot(diag_cor_0, aes(x = diag_cor_0, y = EC_class, group = EC_class)) +
+  geom_boxplot(fill="gray", alpha=0.2)+
+  ggtitle("Spearman correlation of differences EC abundance between Control vs Residues from PICRUSt2 and MGS at T0") +
+  xlab("Spearman correlation") +
+  ylab("EC class")
+#Au temps 51
+plot(dif_51[overlapping_EC,], P2_dif_51[overlapping_EC,],
+     xlab = "Control vs Residues from MGS",
+     ylab = "Control vs Residues from PICRUSt2",
+     main = "Correlation of differences EC abundance between Control vs Residues from PICRUSt2 and MGS at T51")
+cor_51 = cor(t(dif_51[overlapping_EC,]),t(P2_dif_51[overlapping_EC,]), method = "spearman")
+corr_51 = cor.test(t(dif_51[overlapping_EC,]),t(P2_dif_51[overlapping_EC,]), method = "spearman")
+diag_cor_51 = diag(cor_51)
+diag_cor_51 = as.data.frame(diag_cor_51)
+diag_cor_51$EC_number = rownames(diag_cor_51)
+diag_cor_51 = merge(diag_cor_51, t, by = "EC_number")
+ggplot(diag_cor_51, aes(x = diag_cor_51, y = EC_class, group = EC_class)) +
+  geom_boxplot(fill="gray", alpha=0.2)+
+  ggtitle("Spearman correlation of differences EC abundance between Control vs Residues from PICRUSt2 and MGS at T51") +
+  xlab("Spearman correlation") +
+  ylab("EC class")
+```
 
 ```{r}
-
+top_EC_P2=read.delim("top_EC_P2.txt", sep ="\t")
+top_EC_P2 = as.data.frame(top_EC_P2[,1])
+colnames(top_EC_P2) = "log2Fold change"
+top_EC_MGS=read.delim("top_EC_MGS.txt", sep ="\t")
+pheatmap(top_EC_P2,
+show_rownames = FALSE,
+show_colnames = FALSE,
+annotate_row = EC_class,
+cluster_rows = TRUE,
+cluster_cols = FALSE,
+main = "Top ECs having a significants change from PICRUSt2")
 ```
