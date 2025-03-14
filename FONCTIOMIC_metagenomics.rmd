@@ -79,23 +79,24 @@ MGS_EC_aldex = glm.test[,13:20]
 write.table(MGS_EC_aldex, "ALDEx2/MGS_EC_aldex.txt", sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
 ```
 **bold**#Statistical analysis with DESeq2 between 4 groups
-Slice the data into groups by time
+Slice the data by time #time = 0
 ```{r}
 tb_ec_cleaned = round(tb_ec_cleaned,0)
 meta$Category = as.factor(meta$Category)
 meta$Category = relevel(meta$Category, ref = "Control Cropland")
 meta$time = as.factor(meta$time)
-meta$time = relevel(meta$time, ref = "0")
-dds_MGS = DESeqDataSetFromMatrix(countData =tb_ec_cleaned,
-                                  colData = meta,
-                                  design = ~ time + Category, tidy = FALSE)
+meta_0 = meta[meta$time == "0",]
+tb_ec_0 = tb_ec_cleaned[,rownames(meta_0)]
+dds_MGS = DESeqDataSetFromMatrix(countData =tb_ec_0,
+                                  colData = meta_0,
+                                  design = ~ Category, tidy = FALSE)
 DAA_EC_MGS = DESeq(dds_MGS, parallel = TRUE)
 dds_MGS = vst(dds_MGS,blind = FALSE)
 ```
 Extracting results
 ```{r}
 res_EC = results(DAA_EC_MGS, parallel = TRUE, contrast = c("Category",
-"Control Cropland",
+"Control Grassland",
 "Amended Grassland"))
 head(res_EC)
 summary(res_EC)
@@ -154,29 +155,25 @@ pheatmap(mat, clustering_distance_rows = dists_row,
 ```
 Define of variables for subset matrix of EC
 ```{r}
-control_0 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Control" & meta$time == "0",]))
-amended_0 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Amended" & meta$time == "0",]))
-control_3 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Control" & meta$time == "3",]))
-amended_3 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Amended" & meta$time == "3",]))
-control_51 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Control" & meta$time == "51",]))
-amended_51 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Amended" & meta$time == "51",]))
-control_125 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Control" & meta$time == "125",]))
-amended_125 = str_sort(rownames(meta[meta$wheat_straw_amendment == "Amended" & meta$time == "125",]))
+list = list()
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")){
+  for (time in c("0","3","51","125")){
+  assign(paste0(gsub(" ","_",groups),"_",time), str_sort(rownames(meta[meta$Category == groups & meta$time == time,])))
+  }
+}
 ```
 Subset matrix of EC en fonction of time and traitement
 ```{r}
-mat_control_0 = tb_ec_cleaned[,control_0]
-mat_amended_0 = tb_ec_cleaned[,amended_0]
-mat_control_3 = tb_ec_cleaned[,control_3]
-mat_amended_3 = tb_ec_cleaned[,amended_3]
-mat_control_51 = tb_ec_cleaned[,control_51]
-mat_amended_51 = tb_ec_cleaned[,amended_51]
-mat_control_125 = tb_ec_cleaned[,control_125]
-mat_amended_125 = tb_ec_cleaned[,amended_125]
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), tb_ec_cleaned[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
 ```
 Calcul de différence entre les matrices
 ```{r}
-dif_0 = mat_control_0 - mat_amended_0
+dif_C_0 = mat_Control_Cropland_0 - mat_Amended_Cropland_0
+dif_G_0 = mat_Control Grassland_0 - mat_Amended Grassland_0
 dif_3 = mat_control_3 - mat_amended_3
 dif_51 = mat_control_51 - mat_amended_51
 dif_125 = mat_control_125 - mat_amended_125

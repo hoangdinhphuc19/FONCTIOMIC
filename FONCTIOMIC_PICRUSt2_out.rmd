@@ -75,6 +75,7 @@ Statistical analysis with ALDEx2 between 4 groups
 meta_cleaned$modality = as.factor(meta_cleaned$modality)
 meta_cleaned$modality = relevel(meta_cleaned$modality, ref = "control")
 mm = model.matrix(~ meta_cleaned$modality + meta_cleaned$time, data = meta_cleaned)
+p2_EC_cleaned = p2_EC[,rownames(meta_cleaned)]
 p2_EC = round(p2_EC,0)
  x = aldex.clr (p2_EC_cleaned, mm, mc.samples = 128, denom = "all")
 glm.test = aldex.glm(x, mm)
@@ -105,13 +106,15 @@ ggplot(EC_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
 theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```
 **bold**#Statistical analysis with DESSeq2 between 4 groups
-Slice the data into groups by time
+Slice the data by time #time = 0
 
 ```{r}
-p2_EC_cleaned = p2_EC[,rownames(meta_cleaned)]
-dds_P2 = DESeqDataSetFromMatrix(countData =p2_EC_cleaned,
-                                  colData = meta_cleaned,
-                                  design = ~ time + groups, tidy = FALSE)
+meta_0 = meta_cleaned[meta_cleaned$time == "0",]
+p2_EC_0 = p2_EC[,rownames(meta_0)]
+p2_EC_0 = round(p2_EC_0,0)
+dds_P2 = DESeqDataSetFromMatrix(countData =p2_EC_0,
+                                  colData = meta_0,
+                                  design = ~ groups, tidy = FALSE)
 DAA_EC_P2 = DESeq(dds_P2, parallel = TRUE)
 dds_P2_vst = vst(dds_P2,blind = FALSE)
 ```
@@ -119,7 +122,7 @@ Results of DESeq2
 ```{r}
 res_EC = results(DAA_EC_P2, parallel = TRUE, contrast = c("groups",
 "Control Cropland",
-"Amended Grassland"))
+"Control Grassland"))
 head(res_EC)
 summary(res_EC)
 resSig_EC = subset(res_EC, padj < 0.05 & pvalue < 0.05)
@@ -174,11 +177,11 @@ pheatmap(mat, clustering_distance_rows = dists_row,
 ```
 Define of variables for subset matrix of EC
 ```{r}
-P2_control_0 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "control" & meta_cleaned$time == "0",]))
+P2_CC_0 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "control" & meta_cleaned$time == "0",]))
 P2_amended_0 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "residues" & meta_cleaned$time == "0",]))
 P2_control_3 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "control" & meta_cleaned$time == "3",]))
 P2_amended_3 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "residues" & meta_cleaned$time == "3",]))
-P2_control_51 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "control" & meta_cleaned$time == "51",]))
+P2_control_51 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "control" & meta_cleaned$time == "51",])) 
 P2_amended_51 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "residues" & meta_cleaned$time == "51",]))
 P2_control_125 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "control" & meta_cleaned$time == "125",]))
 P2_amended_125 = str_sort(rownames(meta_cleaned[meta_cleaned$modality == "residues" & meta_cleaned$time == "125",]))

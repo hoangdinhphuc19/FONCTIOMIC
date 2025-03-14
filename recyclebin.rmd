@@ -173,3 +173,12 @@ break()
          annotation_row = anno_row)
 return()
 ```
+```{r}
+dat_EC_class = dat_EC_class %>% mutate(EC_class = ifelse(str_starts(dat_EC_class, "EC:1"), "Oxidoreductases", 
+                                       ifelse(str_starts(dat_EC_class, "EC:2"), "Transferases",
+                                              ifelse(str_starts(dat_EC_class, "EC:3"), "Hydrolases",
+                                                     ifelse(str_starts(dat_EC_class, "EC:4"), "Lyases",
+                                                            ifelse(str_starts(dat_EC_class, "EC:5"), "Isomerases",
+                                                                   ifelse(str_starts(dat_EC_class, "EC:6"), "Ligases", "Translocases")))))))
+
+```

@@ -125,14 +125,20 @@ ggplot(diag_cor_51, aes(x = diag_cor_51, y = EC_class, group = EC_class)) +
 
 ```{r}
 top_EC_P2=read.delim("top_EC_P2.txt", sep ="\t")
-top_EC_P2 = as.data.frame(top_EC_P2[,1])
-colnames(top_EC_P2) = "log2Fold change"
 top_EC_MGS=read.delim("top_EC_MGS.txt", sep ="\t")
-pheatmap(top_EC_P2,
-show_rownames = FALSE,
-show_colnames = FALSE,
-annotate_row = EC_class,
-cluster_rows = TRUE,
-cluster_cols = FALSE,
-main = "Top ECs having a significants change from PICRUSt2")
+top_EC_MGS=left_join(rownames_to_column(top_EC_MGS), EC_number_class, by = c("rowname" = "EC_number"))
+view(top_EC_MGS)
+top_EC_P2=left_join(rownames_to_column(top_EC_P2), EC_number_class, by = c("rowname" = "EC_number"))
+view(top_EC_P2)
+```
+
+```{r}
+top_EC_T0_CCvsGC_MGS=read.delim("top_EC_T0_CCvsGC_MGS.txt", sep ="\t")
+top_EC_T0_CCvsGC_P2=read.delim("top_EC_T0_CCvsGC_P2.txt", sep ="\t")
+top_EC_T0_CCvsGC_MGS=top_EC_T0_CCvsGC_MGS[,c(2,5)]
+top_EC_T0_CCvsGC_P2=top_EC_T0_CCvsGC_P2[,c(2,5)]
+top_EC_T0_CCvsGC_MGS=left_join(rownames_to_column(top_EC_T0_CCvsGC_MGS), EC_number_class, by = c("rowname" = "EC_number"))
+view(top_EC_T0_CCvsGC_MGS)
+top_EC_T0_CCvsGC_P2=left_join(rownames_to_column(top_EC_T0_CCvsGC_P2), EC_number_class, by = c("rowname" = "EC_number"))
+view(top_EC_T0_CCvsGC_P2)
 ```
