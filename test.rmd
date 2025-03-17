@@ -1,0 +1,49 @@
+---
+title: "Data transformation"
+auteur: "Dinh-Phuc Hoang"
+date: "2025-02-25"
+---
+
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(DESeq2)
+library(BiocParallel)
+register(SnowParam(4))
+```
+Data loading
+```{r}
+missing_values = c("C6-R-T1","P1-C-T6","P5-C-T6")
+meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
+meta = as.data.frame(meta)
+row.names(meta) = meta$sample_id
+meta <- meta[!meta$sample_id %in% missing_values,]
+MGS_EC = read_rds("tb_ec_cleaned.rds")
+MGS_EC = as.matrix(MGS_EC)
+p2_EC = read_delim("Data FONCTIOMIC/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+  p2_EC = as.data.frame(p2_EC)
+  rownames(p2_EC) = p2_EC[,1]
+  p2_EC = as.matrix(p2_EC[,-1])
+overlapping_EC = intersect(rownames(p2_EC), rownames(MGS_EC))
+MGS_EC = MGS_EC[overlapping_EC,colnames(MGS_EC) %in% rownames(meta)]
+p2_EC = p2_EC[overlapping_EC,colnames(p2_EC) %in% rownames(meta)]
+p2_EC = p2_EC[,str_sort(colnames(p2_EC),decreasing = F)]
+```
+Data transformation : DESeq2 TMM normalization
+```{r}
+MGS_EC = round(MGS_EC,0)
+dds_MGS <- DESeqDataSetFromMatrix(countData = MGS_EC, colData = meta, design = ~  Category + time) 
+dds_MGS <- estimateSizeFactors(dds_MGS)
+sizeFactors(dds_MGS)
+MGS_EC_norm = counts(dds_MGS, normalized=TRUE)
+p2_EC = round(p2_EC,0)
+dds_p2 <- DESeqDataSetFromMatrix(countData = p2_EC, colData = meta, design = ~  Category + time)
+dds_p2 <- estimateSizeFactors(dds_p2)
+sizeFactors(dds_p2)
+p2_EC_norm = counts(dds_p2, normalized=TRUE)
+```
+```{r}
+MGS_EC_clr = clr(MGS_EC_norm)
+p2_EC_clr = clr(p2_EC_norm)
+```
