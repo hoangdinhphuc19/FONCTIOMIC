@@ -110,19 +110,17 @@ Slice the data by time #time = 0
 
 ```{r}
 meta_0 = meta_cleaned[meta_cleaned$time == "0",]
-p2_EC_0 = p2_EC[,rownames(meta_0)]
-p2_EC_0 = round(p2_EC_0,0)
-dds_P2 = DESeqDataSetFromMatrix(countData =p2_EC_0,
-                                  colData = meta_0,
-                                  design = ~ groups, tidy = FALSE)
+p2_EC = p2_EC[,rownames(meta_cleaned)]
+p2_EC = round(p2_EC,0)
+dds_P2 = DESeqDataSetFromMatrix(countData =p2_EC,
+                                  colData = meta_cleaned,
+                                  design = ~ groups + time, tidy = FALSE)
 DAA_EC_P2 = DESeq(dds_P2, parallel = TRUE)
 dds_P2_vst = vst(dds_P2,blind = FALSE)
 ```
 Results of DESeq2
 ```{r}
-res_EC = results(DAA_EC_P2, parallel = TRUE, contrast = c("groups",
-"Control Cropland",
-"Control Grassland"))
+res_EC = results(DAA_EC_P2, parallel = TRUE)
 head(res_EC)
 summary(res_EC)
 resSig_EC = subset(res_EC, padj < 0.05 & pvalue < 0.05)

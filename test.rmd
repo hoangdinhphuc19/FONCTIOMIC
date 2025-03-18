@@ -9,6 +9,7 @@ date: "2025-02-25"
 library(tidyverse)
 library(dplyr)
 library(DESeq2)
+library(Hotelling)
 library(BiocParallel)
 register(SnowParam(4))
 ```
@@ -29,6 +30,8 @@ overlapping_EC = intersect(rownames(p2_EC), rownames(MGS_EC))
 MGS_EC = MGS_EC[overlapping_EC,colnames(MGS_EC) %in% rownames(meta)]
 p2_EC = p2_EC[overlapping_EC,colnames(p2_EC) %in% rownames(meta)]
 p2_EC = p2_EC[,str_sort(colnames(p2_EC),decreasing = F)]
+EC_number_class = read.table("description_mapfiles/EC_number_class.txt")
+rm(missing_values, overlapping_EC)
 ```
 Data transformation : DESeq2 TMM normalization
 ```{r}
@@ -44,6 +47,70 @@ sizeFactors(dds_p2)
 p2_EC_norm = counts(dds_p2, normalized=TRUE)
 ```
 ```{r}
+MGS_EC_norm = MGS_EC
+p2_EC_norm = p2_EC
 MGS_EC_clr = clr(MGS_EC_norm)
 p2_EC_clr = clr(p2_EC_norm)
+rm(list = c("MGS_EC_norm","p2_EC_norm"))
+MGS_EC_clr = MGS_EC_clr[rowSums(is.na(MGS_EC_clr)) == 0,]
+p2_EC_clr = p2_EC_clr[rowSums(is.na(p2_EC_clr)) == 0,]
+c =intersect(rownames(MGS_EC_clr),rownames(p2_EC_clr))
+MGS_EC_clr = MGS_EC_clr[c,]
+p2_EC_clr = p2_EC_clr[c,]
+rm(c)
+```
+
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")){
+  for (time in c("0","3","51","125")){
+  assign(paste0(gsub(" ","_",groups),"_",time), str_sort(rownames(meta[meta$Category == groups & meta$time == time,])))
+  }
+}
+rm(groups,time)
+```
+
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), MGS_EC_norm[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("P2_mat_", gsub(" ", "_", groups), "_", time), p2_EC_norm[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+
+```{r}
+#Cropland
+dif_C_0 = mat_Control_Cropland_0 - mat_Amended_Cropland_0
+#dif_C_3 = mat_Control_Cropland_3 - mat_Amended_Cropland_3
+dif_C_51 = mat_Control_Cropland_51 - mat_Amended_Cropland_51
+dif_C_125 = mat_Control_Cropland_125 - mat_Amended_Cropland_125
+#Grassland
+dif_G_0 = mat_Control_Grassland_0 - mat_Amended_Grassland_0
+dif_G_3 = mat_Control_Grassland_3 - mat_Amended_Grassland_3
+dif_G_51 = mat_Control_Grassland_51 - mat_Amended_Grassland_51
+#dif_G_125 = mat_Control_Grassland_125 - mat_Amended_Grassland_125
+```
+
+```{r}
+#Cropland
+P2_dif_C_0 = P2_mat_Control_Cropland_0 - P2_mat_Amended_Cropland_0
+#P2_dif_C_3 = P2_mat_Control_Cropland_3 - P2_mat_Amended_Cropland_3 #Error: missing value C6-R-T1
+P2_dif_C_51 = P2_mat_Control_Cropland_51 - P2_mat_Amended_Cropland_51
+P2_dif_C_125 = P2_mat_Control_Cropland_125 - P2_mat_Amended_Cropland_125
+#Grassland
+P2_dif_G_0 = P2_mat_Control_Grassland_0 - P2_mat_Amended_Grassland_0
+P2_dif_G_3 = P2_mat_Control_Grassland_3 - P2_mat_Amended_Grassland_3
+P2_dif_G_51 = P2_mat_Control_Grassland_51 - P2_mat_Amended_Grassland_51
+#P2_dif_G_125 = P2_mat_Control_Grassland_125 - P2_mat_Amended_Grassland_125 #Error: missing value P1_C_T6 & P5-C-T6
+```
+
+```{r}
+
 ```
