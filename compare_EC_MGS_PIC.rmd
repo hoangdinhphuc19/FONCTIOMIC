@@ -146,8 +146,8 @@ view(top_EC_T0_CCvsGC_P2)
 Correlation of Spearman on the difference of EC abundance between Control vs Residues (Cropland) from PICRUSt2 and MGS 
 ```{r}
 #At time 0
-cor_C_0 = cor(t(dif_C_0[overlapping_EC,]),t(P2_dif_C_0[overlapping_EC,]), method = "spearman")
-corr_C_0 = cor.test(t(dif_C_0[overlapping_EC,]),t(P2_dif_C_0[overlapping_EC,]), method = "spearman")
+cor_C_0 = cor(t(dif_C_0),t(P2_dif_C_0), method = "spearman")
+corr_C_0 = cor.test(t(dif_C_0),t(P2_dif_C_0), method = "spearman")
 diag_cor_C_0 = diag(cor_C_0)
 diag_cor_C_0 = as.data.frame(diag_cor_C_0)
 diag_cor_C_0$EC_number = rownames(diag_cor_C_0)
@@ -158,8 +158,8 @@ plot_C_0 = ggplot(diag_cor_C_0, aes(x = diag_cor_C_0, y = EC_class, group = EC_c
   xlab("Spearman correlation") +
   ylab("EC class")
 #At time 51
-cor_C_51 = cor(t(dif_C_51[overlapping_EC,]),t(P2_dif_C_51[overlapping_EC,]), method = "spearman")
-corr_C_51 = cor.test(t(dif_C_51[overlapping_EC,]),t(P2_dif_C_51[overlapping_EC,]), method = "spearman")
+cor_C_51 = cor(t(dif_C_51),t(P2_dif_C_51), method = "spearman")
+corr_C_51 = cor.test(t(dif_C_51),t(P2_dif_C_51), method = "spearman")
 diag_cor_C_51 = diag(cor_C_51)
 diag_cor_C_51 = as.data.frame(diag_cor_C_51)
 diag_cor_C_51$EC_number = rownames(diag_cor_C_51)
@@ -170,8 +170,8 @@ plot_C_51 = ggplot(diag_cor_C_51, aes(x = diag_cor_C_51, y = EC_class, group = E
   xlab("Spearman correlation") +
   ylab("EC class")
 #At time 125
-cor_C_125 = cor(t(dif_C_125[overlapping_EC,]),t(P2_dif_C_125[overlapping_EC,]), method = "spearman")
-corr_C_125 = cor.test(t(dif_C_125[overlapping_EC,]),t(P2_dif_C_125[overlapping_EC,]), method = "spearman")
+cor_C_125 = cor(t(dif_C_125),t(P2_dif_C_125), method = "spearman")
+corr_C_125 = cor.test(t(dif_C_125),t(P2_dif_C_125), method = "spearman")
 diag_cor_C_125 = diag(cor_C_125)
 diag_cor_C_125 = as.data.frame(diag_cor_C_125)
 diag_cor_C_125$EC_number = rownames(diag_cor_C_125)

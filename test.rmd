@@ -46,6 +46,7 @@ dds_p2 <- estimateSizeFactors(dds_p2)
 sizeFactors(dds_p2)
 p2_EC_norm = counts(dds_p2, normalized=TRUE)
 ```
+CLR transformation
 ```{r}
 MGS_EC_norm = MGS_EC
 p2_EC_norm = p2_EC
@@ -72,7 +73,7 @@ rm(groups,time)
 ```{r}
 for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
   for (time in c("0","3","51","125")) {
-    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), MGS_EC_norm[, get(paste0(gsub(" ", "_", groups), "_", time))])
+    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), MGS_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
   }
 }
 ```
@@ -80,7 +81,7 @@ for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amen
 ```{r}
 for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
   for (time in c("0","3","51","125")) {
-    assign(paste0("P2_mat_", gsub(" ", "_", groups), "_", time), p2_EC_norm[, get(paste0(gsub(" ", "_", groups), "_", time))])
+    assign(paste0("P2_mat_", gsub(" ", "_", groups), "_", time), p2_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
   }
 }
 ```
