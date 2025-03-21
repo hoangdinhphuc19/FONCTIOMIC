@@ -112,5 +112,8 @@ P2_dif_G_51 = P2_mat_Control_Grassland_51 - P2_mat_Amended_Grassland_51
 ```
 
 ```{r}
-
+DA_EC_MGS_Crops <- read_rds("Output/DA_EC_MGS_Crops.rds")
+DA_EC_MGS_Crops <- DA_EC_MGS_Crops[order(DA_EC_MGS_Crops$log2FoldChange,decreasing = T),]
+DA_EC_P2_Crops <- read_rds("Output/DA_EC_P2_Crops.rds")
+DA_EC_P2_Grass <- read_rds("Output/DA_EC_P2_Grass.rds") 
 ```
