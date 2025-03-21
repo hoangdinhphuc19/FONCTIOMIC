@@ -295,5 +295,4 @@ rownames(res4_df) = NULL
 res4_df = filter(res4_df, padj < 0.1 & pvalue < 0.05)
 res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
 res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
-
 ```

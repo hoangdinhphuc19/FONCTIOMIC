@@ -1,0 +1,197 @@
+---
+title: "FONCTIOMIC_MGS"
+auteur: "Dinh-Phuc Hoang"
+date: "2025-03-21"
+---
+
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(phyloseq)
+library(DESeq2)
+library(pheatmap)
+library(BiocParallel)
+library(Hotelling)
+register(SnowParam(4))
+```
+Data loading
+```{r}
+tb_ec = read_tsv("Data FONCTIOMIC/counts_by_EC_number.norm.tsv")
+meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
+meta = as.data.frame(meta)
+row.names(meta) = meta$sample_id
+EC_number_class = read.table("description_mapfiles/EC_number_class.txt", header = TRUE, sep = "\t")
+rownames(EC_number_class) = EC_number_class$EC_number
+```
+**Data description**
+* tb_ec: abundance of EC number in the output of MGS
+* meta: metadata of samples
+* EC_number_class: description of EC number
+* tb_ec_cleaned: abundance of EC number in the output of MGS after cleaning
+Part I : _Analysis of EC abundance in the output of MGS_
+Tidy up the table abundance of EC
+```{r}
+tb_ec = as.data.frame(tb_ec)
+row.names(tb_ec) = paste0("EC:", tb_ec$EC_number)
+tb_ec_cleaned = tb_ec %>% filter(!str_detect(rownames(tb_ec), "-$"))
+tb_ec_cleaned = tb_ec_cleaned[,-c(1,50)]
+tb_ec_cleaned = as.matrix(tb_ec_cleaned)
+```
+PCA analysis
+```{r}
+meta$Category = as.factor(meta$Category)
+meta$Category = relevel(meta$Category, ref = "Control Cropland")
+meta$time = as.factor(meta$time)
+meta$time = relevel(meta$time, ref = "0")
+meta$wheat_straw_amendment = as.factor(meta$wheat_straw_amendment)
+meta$wheat_straw_amendment = relevel(meta$wheat_straw_amendment, ref = "Control")
+tb_ec_cleaned = round(tb_ec_cleaned,0)
+dds_MGS = DESeqDataSetFromMatrix(countData = tb_ec_cleaned,
+                                  colData = meta,
+                                  design = ~ Category + time, tidy = FALSE)
+vst_MGS = vst(dds_MGS,blind = FALSE) # variance stabilizing transformation
+#PCA plot
+pcaData = plotPCA(vst_MGS, intgroup = c("Category", "time"), returnData = TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category, shape = time)) +
+  geom_point(size =3) +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of MGS") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_shape_manual(values = c("0" = 16,"3"= 15,"51" = 17,"125" = 18)) +
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups"),shape = guide_legend(title = "Time")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+ggsave("Output/PCA_EC_MGS.png", width = 8, height = 10, dpi = 300)
+```
+Define of variables for subset matrix of EC
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")){
+  for (time in c("0","3","51","125")){
+  assign(paste0(gsub(" ","_",groups),"_",time), str_sort(rownames(meta[meta$Category == groups & meta$time == time,])))
+  }
+}
+crop_0 = c(Control_Cropland_0,Amended_Cropland_0)
+crop_3 = c(Control_Cropland_3,Amended_Cropland_3)
+crop_51 = c(Control_Cropland_51,Amended_Cropland_51)
+crop_125 = c(Control_Cropland_125,Amended_Cropland_125)
+grass_0 = c(Control_Grassland_0,Amended_Grassland_0)
+grass_3 = c(Control_Grassland_3,Amended_Grassland_3)
+grass_51 = c(Control_Grassland_51,Amended_Grassland_51)
+grass_125 = c(Control_Grassland_125,Amended_Grassland_125)
+```
+Subset matrix of EC en fonction of time and traitement
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), tb_ec_cleaned[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+DAG analysis for Cropland
+```{r}
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        EC_number = character())
+tb_ec_cleaned = as.data.frame(tb_ec_cleaned)
+for ( dataset in c("crop_0", "crop_3", "crop_51", "crop_125")){
+  counts_matrix <- as.matrix(tb_ec_cleaned[,get(dataset)],rownames = TRUE)
+  sample_data <- meta[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ wheat_straw_amendment, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$EC_number = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
+res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
+res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
+write_rds(res4_df, "Output/DA_EC_MGS_Crops.rds")
+```
+DAG analysis for Grassland
+```{r}
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        EC_number = character())
+for ( dataset in c("grass_0", "grass_3", "grass_51", "grass_125")){
+  counts_matrix <- as.matrix(tb_ec_cleaned[,get(dataset)],rownames = TRUE)
+  sample_data <- meta[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ wheat_straw_amendment, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$EC_number = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
+res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
+res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
+write_rds(res4_df, "Output/DA_EC_MGS_Grass.rds")
+```
+Heatmap of EC
+Data transformation
+```{r}
+tb_ec_clr = clr(tb_ec_cleaned)
+tb_ec_clr = na.omit(tb_ec_clr)
+```
+Distance between the variables (intergroups, Control vs Amended)
+```{r}
+dist_a_vs_c = vegan::vegdist(t(tb_ec_clr), method = "euclidean")
+tree_a_vs_c = hclust(dist_a_vs_c, method = "complete")
+cutree_a_vs_c = cutree(tree_a_vs_c, k = 3 )
+table(cutree_a_vs_c)
+```
+Distance between the observation (EC)
+```{r}
+dist_ec = vegan::vegdist(tb_ec_clr, method = "euclidean")
+tree_ec = hclust(dist_ec, method = "complete")
+#cut into arbitrary clusters
+cutree_ec = cutree(tree_ec, k = 7 )
+table(cutree_ec)
+```
+Heatmap ##voir avec Domitille
+```{r}
+anno_col = as.data.frame(meta[,c("Category","time")])
+colnames(anno_col) = c("Groups","Time")
+rownames(anno_col) = rownames(meta)
+anno_col$Groups = as.factor(anno_col$Groups)
+anno_col$Time = as.factor(anno_col$Time)
+anno_row = EC_number_class
+anno_row = select(anno_row, -EC_number)
+vect_colours = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd", 
+                "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2")
+pheatmap(tb_ec_clr,
+            cluster_rows = tree_ec, cluster_cols = tree_a_vs_c,
+              show_rownames = FALSE, 
+              cutree_rows = 7, #9, #5
+              cutree_cols = 3,
+              annotation_colors = list(Groups = vect_colours),
+              annotation_col = anno_col, 
+              annotation_row = anno_row)
+```

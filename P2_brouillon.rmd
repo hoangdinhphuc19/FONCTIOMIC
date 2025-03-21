@@ -1,0 +1,279 @@
+---
+title: "FONCTIOMIC_PICRUSt2_out"
+auteur: "Dinh-Phuc Hoang"
+date: "2025-02-27"
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(ALDEx2)
+library(DESeq2)
+library(BiocParallel)
+register(SnowParam(4))
+```
+Load necessary data: abundance data and metadata
+```{r}
+meta = read_delim("Data FONCTIOMIC/03_dimimos_terrain.csv",delim = ",",col_names = TRUE)
+p2_EC = read_delim("Data FONCTIOMIC/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+  p2_EC = as.data.frame(p2_EC)
+  rownames(p2_EC) = p2_EC[,1]
+  p2_EC = as.matrix(p2_EC[,-1])
+p2_KO = read_delim("Data FONCTIOMIC/KO_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+    p2_KO = as.data.frame(p2_KO)
+    rownames(p2_KO) = p2_KO[,1]
+    p2_KO = as.matrix(p2_KO[,-1])
+    p2_KO = round(p2_KO)
+p2_PW = read_delim("Data FONCTIOMIC/pathways_out/path_abun_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+    p2_PW = as.data.frame(p2_PW)
+    rownames(p2_PW) = p2_PW[,1]
+    p2_PW = as.matrix(p2_PW[,-1])
+    p2_PW = round(p2_PW)
+otu_table = read_delim("Data FONCTIOMIC/03_dimimos_terrain.seq_abundance.16S.tsv",delim = "\t",col_names = TRUE)
+otu_table = as.data.frame(otu_table)
+row.names(otu_table) = otu_table$sequence
+otu_table = as.matrix(otu_table[,-1])
+#tax_table = read_delim("",delim = "\t",col_names = FALSE)
+phy_tree = read_tree("Data FONCTIOMIC/out.tre")
+EC_number_class = read.table("description_mapfiles/EC_number_class.txt", header = TRUE, sep = "\t")
+```
+Load ref data: mapfile
+```{r}
+mapfile_EC = read_delim("description_mapfiles/ec_level4_info.tsv.gz",delim = "\t", col_names  = FALSE)
+mapfile_KO = read_delim("description_mapfiles/ko_info.tsv.gz",delim = "\t", col_names = FALSE)
+mapfile_PW = read_delim("description_mapfiles/metacyc_pathways_info.txt.gz",delim = "\t", col_names = FALSE)
+colnames(mapfile_EC) = c("function","description")
+colnames(mapfile_KO) = c("function","description")
+colnames(mapfile_PW) = c("pathway","description")
+```
+1) Clean metadata (enlever les sample_id dèja enlevé dans les données)
+#Define : p2_EC1 = tableau de l'abondance des EC pour les échantillons de contrôle
+```{r}
+meta = as.data.frame(meta)
+rownames(meta) = meta$sample
+meta$sample = as.factor(meta$sample)
+meta$sample = factor(meta$sample, levels = c(sort(levels(meta$sample), decreasing = F)))
+meta_cleaned = meta[colnames(p2_EC),]
+meta_cleaned$groupe2 = paste(meta_cleaned$bloc,meta_cleaned$modality,sep = "_")
+meta_cleaned = meta_cleaned %>% filter(campagne %in% c("0","1","4","6"))
+meta_cleaned$campagne = as.factor(meta_cleaned$campagne)
+meta_cleaned$campagne = relevel(meta_cleaned$campagne, ref = "0")
+meta_cleaned = meta_cleaned %>% mutate(time = fct_recode(campagne, 
+"0" = "0", "3" = "1", "51" = "4", "125" = "6")) %>% mutate(groups = fct_recode(groupe2, 
+"Control Cropland" = "crops_control", "Amended Cropland" = "crops_residues", 
+"Control Grassland" = "grasslands_control", "Amended Grassland" = "grasslands_residues"))
+```
+Phyloseq object
+```{r}
+ps = phyloseq(sample_data(meta),
+                otu_table(as.matrix(otu_table), taxa_are_rows = FALSE),
+                phy_tree(phy_tree))
+```
+Statistical analysis with ALDEx2 between 4 groups
+```{r}
+meta_cleaned$modality = as.factor(meta_cleaned$modality)
+meta_cleaned$modality = relevel(meta_cleaned$modality, ref = "control")
+mm = model.matrix(~ meta_cleaned$modality + meta_cleaned$time, data = meta_cleaned)
+p2_EC_cleaned = p2_EC[,rownames(meta_cleaned)]
+p2_EC = round(p2_EC,0)
+ x = aldex.clr (p2_EC_cleaned, mm, mc.samples = 128, denom = "all")
+glm.test = aldex.glm(x, mm)
+glm.effect <- aldex.glm.effect(x)
+p2_EC_aldex = glm.test[,13:20]
+write.table(p2_EC_aldex, "ALDEx2/p2_EC_aldex.txt", sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
+```
+PCA for EC (brut)
+```{r}
+p2_EC_wide = as.matrix(p2_EC)
+p2_EC_wide = t(p2_EC_wide)
+p2_EC_pca = vegan::rda(p2_EC_wide,scale=TRUE)
+summary(p2_EC_pca)
+```
+PCA plot (EC)
+```{r}
+EC_pca_dat = as.data.frame(p2_EC_pca$CA$u[,1:2])
+EC_pca_dat <- cbind(EC_pca_dat, meta_cleaned$groups)
+colnames(EC_pca_dat) <- c("PC1","PC2","Groups")
+ggplot(EC_pca_dat, aes(x = PC1, y = PC2, color = Groups, shape = Groups)) +
+  ggtitle("PCA of EC abundance") +
+  geom_point(alpha=1) +
+  xlab("PC1: 33%")+
+  ylab("PC2: 13%") +
+  stat_ellipse(geom="polygon",type ="norm", level=0.9, alpha=0.1,
+  aes(fill = Groups),
+  color =NA) +
+theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+**bold**#Statistical analysis with DESSeq2 between 4 groups
+Slice the data by time #time = 0
+
+```{r}
+meta_0 = meta_cleaned[meta_cleaned$time == "0",]
+p2_EC = p2_EC[,rownames(meta_cleaned)]
+p2_EC = round(p2_EC,0)
+dds_P2 = DESeqDataSetFromMatrix(countData =p2_EC,
+                                  colData = meta_cleaned,
+                                  design = ~ groups + time, tidy = FALSE)
+DAA_EC_P2 = DESeq(dds_P2, parallel = TRUE)
+dds_P2_vst = vst(dds_P2,blind = FALSE)
+```
+Results of DESeq2
+```{r}
+res_EC = results(DAA_EC_P2, parallel = TRUE)
+head(res_EC)
+summary(res_EC)
+resSig_EC = subset(res_EC, padj < 0.05 & pvalue < 0.05)
+head(resSig_EC[ order(resSig_EC$log2FoldChange, decreasing = TRUE), ])
+dds_P2_vst = assay(dds_P2)
+dds_P2_vst = as.data.frame(dds_P2_vst)
+dds_P2_vst$EC_number = rownames(dds_P2_vst)
+dds_P2_vst = subset(dds_P2_vst, EC_number %in% rownames(resSig_EC))
+```
+PCA plotting
+```{r}
+pcaData = plotPCA(dds_P2_vst, intgroup = c("groups", "time"), returnData = TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(x = PC1, y = PC2, color = groups, shape = time)) +
+  geom_point(size =3) +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of PICRUSt2") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_shape_manual(values = c("0" = 16,"3"= 15,"51" = 17,"125" = 18)) +
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups"),shape = guide_legend(title = "Time")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+ggsave("Output/PCA_EC_P2.png", width = 8, height = 10, dpi = 300)
+```
+
+```{r}
+dds_P2_vst = dds_P2_vst[order(rownames(dds_P2_vst)),
+order(colnames(dds_P2_vst))]
+mat = dds_P2_vst
+mat = mat - rowMeans(mat)
+dists_row = vegan::vegdist((dds_P2_vst), method = "bray")
+dists_col = vegan::vegdist(t(dds_P2_vst), method = "bray")
+```
+Heatmap of the expression of ECs across the groups (by time and land types)
+```{r}
+anno_col = as.data.frame(meta_cleaned[,c("modality","time")])
+colnames(anno_col) = c("Treatments","Time")
+anno_col$Time = as.factor(anno_col$Time)
+anno_row = t[,2]
+anno_row = as.data.frame(anno_row)
+colnames(anno_row) = "EC Class"
+rownames(anno_row) = t$EC_number
+pheatmap(mat, clustering_distance_rows = dists_row, 
+              clustering_distance_cols = dists_col,
+              show_rownames = FALSE, 
+              cutree_rows = 5, #9, #5
+              cutree_cols = 3,
+              annotation_col = anno_col, 
+              annotation_row = anno_row)
+ggsave("Output/heatmap_EC_PICRUSt2.png", width = 10, height = 10, units = "in")
+```
+Define of variables for subset matrix of EC
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")){
+  for (time in c("0","3","51","125")){
+  assign(paste0(gsub(" ","_",groups),"_",time), str_sort(rownames(meta_cleaned[meta_cleaned$groups == groups & meta_cleaned$time == time,])))
+  }
+}
+P2_crop_0 = c(Control_Cropland_0,Amended_Cropland_0)
+P2_crop_3 = c(Control_Cropland_3,Amended_Cropland_3)
+P2_crop_51 = c(Control_Cropland_51,Amended_Cropland_51)
+P2_crop_125 = c(Control_Cropland_125,Amended_Cropland_125)
+P2_grass_0 = c(Control_Grassland_0,Amended_Grassland_0)
+P2_grass_3 = c(Control_Grassland_3,Amended_Grassland_3)
+P2_grass_51 = c(Control_Grassland_51,Amended_Grassland_51)
+P2_grass_125 = c(Control_Grassland_125,Amended_Grassland_125)
+```
+
+Subset matrix of EC en fonction of time and traitement
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), p2_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+Calcul de différence entre les matrices
+```{r}
+#Cropland
+P2_dif_C_0 = mat_Control_Cropland_0 - mat_Amended_Cropland_0
+#P2_dif_C_3 = mat_Control_Cropland_3 - mat_Amended_Cropland_3 #Error: missing value C6-R-T1
+P2_dif_C_51 = mat_Control_Cropland_51 - mat_Amended_Cropland_51
+P2_dif_C_125 = mat_Control_Cropland_125 - mat_Amended_Cropland_125
+#Grassland
+P2_dif_G_0 = mat_Control_Grassland_0 - mat_Amended_Grassland_0
+P2_dif_G_3 = mat_Control_Grassland_3 - mat_Amended_Grassland_3
+P2_dif_G_51 = mat_Control_Grassland_51 - mat_Amended_Grassland_51
+#P2_dif_G_125 = mat_Control_Grassland_125 - mat_Amended_Grassland_125 #Error: missing value P1_C_T6 & P5-C-T6
+```
+
+```{r}
+p2_EC = p2_EC[,rownames(meta_cleaned)]
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        EC_number = character())
+p2_EC = as.data.frame(p2_EC)
+p2_EC=round(p2_EC,0)
+for ( dataset in c("P2_crop_0", "P2_crop_51", "P2_crop_125")){
+  counts_matrix <- as.matrix(p2_EC[,get(dataset)],rownames = TRUE)
+  sample_data <- meta_cleaned[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ modality, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$EC_number = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.1 & pvalue < 0.05)
+res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
+res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
+write_rds(res4_df, "Output/DA_EC_P2_Crops.rds")
+```
+
+```{r}
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        EC_number = character())
+for ( dataset in c("P2_grass_0", "P2_grass_3", "P2_grass_51")){
+  counts_matrix <- as.matrix(p2_EC[,get(dataset)],rownames = TRUE)
+  sample_data <- meta_cleaned[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ modality, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$EC_number = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.1 & pvalue < 0.05)
+res4_df = res4_df[order(res4_df$conditions, decreasing = TRUE),]
+res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
+write_rds(res4_df, "Output/DA_EC_P2_Grass.rds")
+```
