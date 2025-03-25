@@ -65,20 +65,20 @@ dds_P2 = DESeqDataSetFromMatrix(countData = p2_EC_cleaned,
 vst_P2 = vst(dds_P2,blind = FALSE) # variance stabilizing transformation
 pcaData = plotPCA(vst_P2, intgroup = c("groups", "time"), returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
-ggplot(pcaData, aes(x = PC1, y = PC2, color = groups, shape = time)) +
-  geom_point(size =3) +
+ggplot(pcaData, aes(x = PC1, y = PC2, color = groups)) +
+  geom_point(size =7) +
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 4, alpha = 0.6)+
   xlab(paste0("PC1: ", percentVar[1], "% variance")) +
   ylab(paste0("PC2: ", percentVar[2], "% variance")) +
  ggtitle("PCA of EC abundance in output of PICRUSt2") +
     scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
                                   "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
                         guide=FALSE) + 
-    scale_shape_manual(values = c("0" = 16,"3"= 15,"51" = 17,"125" = 18)) +
     scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
                                   "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
                       labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
                                   "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
-  guides(color = guide_legend(title = "Groups"),shape = guide_legend(title = "Time")) +  
+  guides(color = guide_legend(title = "Groups")) +  
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCA_EC_P2.png", width = 8, height = 10, dpi = 300)
 ```
