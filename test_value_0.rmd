@@ -140,7 +140,7 @@ MGS_EC_imp = MGS_EC
 MGS_EC_imp[MGS_EC_imp == 0] <- 0.01
 MGS_EC_imp = clr(MGS_EC_imp)
 p2_EC_imp = p2_EC
-p2_EC[p2_EC == 0] <- 0.01
+p2_EC_imp[p2_EC_imp == 0] <- 0.01
 p2_EC_imp = clr(p2_EC_imp)
 ```
 
