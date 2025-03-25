@@ -24,12 +24,14 @@ p2_KO = read_delim("Data FONCTIOMIC/KO_metagenome_out/pred_metagenome_unstrat.ts
     p2_KO = as.data.frame(p2_KO)
     rownames(p2_KO) = p2_KO[,1]
     p2_KO = as.matrix(p2_KO[,-1])
-    p2_KO = round(p2_KO)
 p2_PW = read_delim("Data FONCTIOMIC/pathways_out/path_abun_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
     p2_PW = as.data.frame(p2_PW)
     rownames(p2_PW) = p2_PW[,1]
     p2_PW = as.matrix(p2_PW[,-1])
-    p2_PW = round(p2_PW)
+p2_COG = read_delim("Data FONCTIOMIC/COG_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+    p2_COG = as.data.frame(p2_COG)
+    rownames(p2_COG) = p2_COG[,1]
+    p2_COG = as.matrix(p2_COG[,-1])
 otu_table = read_delim("Data FONCTIOMIC/03_dimimos_terrain.seq_abundance.16S.tsv",delim = "\t",col_names = TRUE)
 otu_table = as.data.frame(otu_table)
 row.names(otu_table) = otu_table$sequence

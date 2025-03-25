@@ -38,8 +38,17 @@ MGS_EC = MGS_EC[overlapping_EC,]
 EC_number_class = read.table("description_mapfiles/EC_number_class.txt")
 rm(missing_values, overlapping_EC)
 ```
+Definition des variables
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")){
+  for (time in c("0","3","51","125")){
+  assign(paste0(gsub(" ","_",groups),"_",time), str_sort(rownames(meta[meta$Category == groups & meta$time == time,])))
+  }
+}
+rm(groups,time)
+```
 ##Data transformation
-Data transformation : DESeq2 TMM normalization
+1) Data transformation : DESeq2 TMM normalization
 ```{r}
 MGS_EC = round(MGS_EC,0)
 dds_MGS <- DESeqDataSetFromMatrix(countData = MGS_EC, colData = meta, design = ~  Category + time) 
@@ -52,7 +61,37 @@ dds_p2 <- estimateSizeFactors(dds_p2)
 sizeFactors(dds_p2)
 p2_EC_norm = counts(dds_p2, normalized=TRUE)
 ```
-CLR transformation
+
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), MGS_EC_norm[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("P2_mat_", gsub(" ", "_", groups), "_", time), p2_EC_norm[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+
+```{r}
+for (groups in c("Control_Cropland","Amended_Cropland","Control_Grassland","Amended_Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("cor_", groups, "_", time), 
+            cor(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+    assign(paste0("d_cor_", groups, "_", time), 
+            diag(get(paste0("cor_", groups, "_", time))))
+        assign(paste0("corr_", groups, "_", time), 
+            cor.test(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+
+  }
+}
+```
+2) CLR transformation
 ```{r}
 MGS_EC_clr = clr(MGS_EC)
 p2_EC_clr = clr(p2_EC)
@@ -64,7 +103,38 @@ MGS_EC_clr = MGS_EC_clr[c,]
 p2_EC_clr = p2_EC_clr[c,]
 rm(c)
 ```
-Imputation des valeurs nulles + transformation log1p
+
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), MGS_EC_clr[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("P2_mat_", gsub(" ", "_", groups), "_", time), p2_EC_clr[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+
+```{r}
+for (groups in c("Control_Cropland","Amended_Cropland","Control_Grassland","Amended_Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("cor_", groups, "_", time), 
+            cor(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+    assign(paste0("d_cor_", groups, "_", time), 
+            diag(get(paste0("cor_", groups, "_", time))))
+        assign(paste0("corr_", groups, "_", time), 
+            cor.test(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+
+  }
+}
+```
+
+3) Imputation des valeurs nulles + transformation CLR
 ```{r}
 MGS_EC_imp = MGS_EC
 MGS_EC_imp[MGS_EC_imp == 0] <- 0.01
@@ -94,11 +164,52 @@ for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amen
 for (groups in c("Control_Cropland","Amended_Cropland","Control_Grassland","Amended_Grassland")) {
   for (time in c("0","3","51","125")) {
     assign(paste0("cor_", groups, "_", time), 
-            cor(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "pearson"))
+            cor(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
     assign(paste0("d_cor_", groups, "_", time), 
             diag(get(paste0("cor_", groups, "_", time))))
         assign(paste0("corr_", groups, "_", time), 
-            cor.test(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "pearson"))
+            cor.test(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+
+  }
+}
+```
+Regroupement des abondances ECs en fonction des conditions
+```{r}
+control_0 = c(Control_Cropland_0,Control_Grassland_0)
+control_3 = c(Control_Cropland_3,Control_Grassland_3)
+control_51 = c(Control_Cropland_51,Control_Grassland_51)
+control_125 = c(Control_Cropland_125,Control_Grassland_125)
+amended_0 = c(Amended_Cropland_0,Amended_Grassland_0)
+amended_3 = c(Amended_Cropland_3,Amended_Grassland_3)
+amended_51 = c(Amended_Cropland_51,Amended_Grassland_51)
+amended_125 = c(Amended_Cropland_125,Amended_Grassland_125)
+```
+
+```{r}
+for (groups in c("control","amended")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", groups, "_", time), MGS_EC[, get(paste0(groups, "_", time))])
+  }
+}
+```
+
+```{r}
+for (groups in c("control","amended")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("P2_mat_", groups, "_", time), p2_EC[, get(paste0(groups, "_", time))])
+  }
+}
+```
+
+```{r}
+for (groups in c("control","amended")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("cor_", groups, "_", time), 
+            cor(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+    assign(paste0("d_cor_", groups, "_", time), 
+            diag(get(paste0("cor_", groups, "_", time))))
+        assign(paste0("corr_", groups, "_", time), 
+            cor.test(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
 
   }
 }

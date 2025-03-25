@@ -23,6 +23,7 @@ meta = as.data.frame(meta)
 row.names(meta) = meta$sample_id
 EC_number_class = read.table("description_mapfiles/EC_number_class.txt", header = TRUE, sep = "\t")
 rownames(EC_number_class) = EC_number_class$EC_number
+tb_cog = read_tsv("Data FONCTIOMIC/TOY_PROKKA_02252022_all3000bp.tsv")
 ```
 **Data description**
 * tb_ec: abundance of EC number in the output of MGS
@@ -56,7 +57,7 @@ pcaData = plotPCA(vst_MGS, intgroup = c("Category", "time"), returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
   geom_point(size =7) +
-  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 4, alpha = 0.6)+
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
   xlab(paste0("PC1: ", percentVar[1], "% variance")) +
   ylab(paste0("PC2: ", percentVar[2], "% variance")) +
  ggtitle("PCA of EC abundance in output of MGS") +
