@@ -11,6 +11,13 @@ Le projet est organisé comme suit :
 - 🧬 COG, EC abondance relative par la métagénomique shotgun
 - 🔬 KO, EC abondance relative inférrés par PICRUSt2 à partir des données de la métabarcoding 16S rARN 
 
+## 🎯 Structure des données
+- FONCTIOMIC_MGS : Analyses différentiels sur les résultats de MGS (PCA Plot, Test DAG, Heatmap)
+- FONCTIOMIC_P2 : Analyses différentiels sur les résultats de PICRUSt2 (PCA Plot, Test DAG, Heatmap)
+- test_value_0 : essais des modèles mathématiques -> corrélation des données sortants des 2 méthodes (Important pour Seb + Léo)
+- campare_EC_MGS_PIC : essais des analyses comparatives (Dinh)
+
+
 ## 📊 Résultats attendus
 
 Les résultats de cette analyse comparative permettront de :
