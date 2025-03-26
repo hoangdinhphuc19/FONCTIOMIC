@@ -214,3 +214,16 @@ for (groups in c("control","amended")) {
   }
 }
 ```
+Test de normalité
+```{r}
+qqnorm(MGS_EC)
+qqnorm(p2_EC)
+qqnorm(MGS_EC_norm)
+qqnorm(p2_EC_norm)
+qqnorm(MGS_EC_imp)
+qqnorm(p2_EC_imp)
+```
+
+```{r}
+plot(mat_Control_Cropland_0, P2_mat_Control_Cropland_0)
+```
