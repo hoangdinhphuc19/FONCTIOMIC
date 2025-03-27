@@ -10,6 +10,8 @@ library(tidyverse)
 library(dplyr)
 library(DESeq2)
 library(Hotelling)
+library(ggplot2)
+library(GGally)
 library(BiocParallel)
 register(SnowParam(4))
 ```
@@ -216,14 +218,98 @@ for (groups in c("control","amended")) {
 ```
 Test de normalité
 ```{r}
-qqnorm(MGS_EC)
-qqnorm(p2_EC)
-qqnorm(MGS_EC_norm)
-qqnorm(p2_EC_norm)
-qqnorm(MGS_EC_imp)
-qqnorm(p2_EC_imp)
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), MGS_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
 ```
 
 ```{r}
-plot(mat_Control_Cropland_0, P2_mat_Control_Cropland_0)
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("P2_mat_", gsub(" ", "_", groups), "_", time), p2_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+
+```{r}
+ggpairs(mat_control_0,upper=list(continuous=wrap(ggally_cor,method = "spearman")))
+ggpairs(P2_mat_control_0,upper=list(continuous=wrap(ggally_cor,method = "spearman")))
+```
+
+```{r}
+CC0_MGSvsP2 = cbind(mat_Control_Cropland_0,P2_mat_Control_Cropland_0)
+colnames(CC0_MGSvsP2) = c(paste0("MGS_",colnames(mat_Control_Cropland_0)),paste0("P2_",colnames(P2_mat_Control_Cropland_0)))
+ggpairs(CC0_MGSvsP2,upper=list(continuous=wrap(ggally_cor,method = "spearman")))
+```
+
+```{r}
+AG51_MGSvsP2 = cbind(mat_Amended_Grassland_51,P2_mat_Amended_Grassland_51)
+colnames(AG51_MGSvsP2) = c(paste0("MGS_",colnames(mat_Amended_Grassland_51)),paste0("P2_",colnames(P2_mat_Amended_Grassland_51)))
+ggpairs(AG51_MGSvsP2,upper=list(continuous=wrap(ggally_cor,method = "spearman")))
+```
+
+```{r}
+control0_MGSvsP2 = cbind(mat_control_0,P2_mat_control_0)
+colnames(control0_MGSvsP2) = c(paste0("MGS_",colnames(mat_control_0)),paste0("P2_",colnames(P2_mat_control_0)))
+ggpairs(control0_MGSvsP2,upper=list(continuous=wrap(ggally_cor,method = "spearman")))
+```
+
+```{r}
+scatter_data <- data.frame(x = as.vector(MGS_EC), y = as.vector(p2_EC))
+scatter_data$EC_number = rep(rownames(MGS_EC), ncol(MGS_EC))
+scatter_data = left_join(scatter_data, EC_number_class, by = "EC_number")
+scatter_data$EC_class = as.factor(scatter_data$EC_class)
+ec_colors <- c("Hydrolases" = "#E41A1C",  # Red
+  "Isomerases" = "#377EB8",  # Blue
+  "Ligases" = "#4DAF4A",  # Green
+  "Lyases" = "#984EA3",  # Purple
+  "Oxidoreductases" = "#FF7F00",  # Orange
+  "Transferases" = "#A65628")  # Yellow)
+ggplot(scatter_data, aes(x = x, y = y, color = EC_class)) +
+  geom_point(size = 2, alpha = 0.8) +  # Adjust point size and transparency
+  labs(x = "MGS EC Abundance", y = "P2 EC Abundance", title = "MGS vs P2 Comparison by EC Class") +
+  scale_color_manual(values = ec_colors) +  # Apply the custom color palette
+  theme_minimal() +
+  theme(
+plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title = element_text(size = 14),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10))
+```
+
+```{r}
+for (groups in c("Control_Cropland","Amended_Grassland")) {
+  for (time in c("0","3","51","125")) {
+     mat_MGS <- get(paste0("mat_", groups, "_", time))
+    mat_P2 <- get(paste0("P2_mat_", groups, "_", time))
+    scatter_data_temp <- data.frame(
+      x = as.vector(mat_MGS),
+      y = as.vector(mat_P2),
+      EC_number = rep(rownames(mat_MGS), ncol(mat_MGS))
+    )
+    scatter_data_temp <- left_join(scatter_data_temp, EC_number_class, by = "EC_number")
+    scatter_data_temp$EC_class <- as.factor(scatter_data_temp$EC_class)
+    ec_colors <- c("Hydrolases" = "#E41A1C",  # Red
+      "Isomerases" = "#377EB8",  # Blue
+      "Ligases" = "#4DAF4A",  # Green
+      "Lyases" = "#984EA3",  # Purple
+      "Oxidoreductases" = "#FF7F00",  # Orange
+      "Transferases" = "#A65628")  # Yellow)
+
+     tmp <- ggplot(scatter_data_temp, aes(x = x, y = y, color = EC_class)) +
+        geom_point(size = 2, alpha = 0.8) +  # Adjust point size and transparency
+        labs(x = "MGS", y = "P2", title = paste("MGS vs P2 Comparison-", groups, time)) +
+        scale_color_manual(values = ec_colors) +  # Apply the custom color palette
+        theme_minimal() +
+        theme(
+        plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        axis.title = element_text(size = 14),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10))
+      
+      assign(paste0("splot_", groups, "_", time), tmp)
+  }}
+
 ```

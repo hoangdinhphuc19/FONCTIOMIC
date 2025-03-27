@@ -23,6 +23,10 @@ p2_EC = read_delim("Data FONCTIOMIC/EC_metagenome_out/pred_metagenome_unstrat.ts
   rownames(p2_EC) = p2_EC[,1]
   p2_EC = p2_EC[,-1]
 EC_number_class = read.table("description_mapfiles/EC_number_class.txt", header = TRUE, sep = "\t")
+p2_COG = read_delim("Data FONCTIOMIC/COG_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+p2_COG = as.data.frame(p2_COG)
+  rownames(p2_COG) = p2_COG[,1]
+  p2_COG = p2_COG[,-1]
 rownames(EC_number_class) = EC_number_class$EC_number
 ```
 **Data description**
@@ -197,4 +201,4 @@ pheatmap(p2_EC_vst,
               annotation_col = anno_col, 
               annotation_row = anno_row)
 ```
-
+Part II : _Analysis of COG abundance in the output of P2_

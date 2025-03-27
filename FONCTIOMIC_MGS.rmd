@@ -23,7 +23,7 @@ meta = as.data.frame(meta)
 row.names(meta) = meta$sample_id
 EC_number_class = read.table("description_mapfiles/EC_number_class.txt", header = TRUE, sep = "\t")
 rownames(EC_number_class) = EC_number_class$EC_number
-tb_cog = read_tsv("Data FONCTIOMIC/TOY_PROKKA_02252022_all3000bp.tsv")
+tb_cog = read_tsv("Data FONCTIOMIC/counts_by_COG.raw.tsv")
 ```
 **Data description**
 * tb_ec: abundance of EC number in the output of MGS
@@ -195,3 +195,11 @@ pheatmap(count_MGS,
               annotation_col = anno_col, 
               annotation_row = anno_row)
 ```
+Part II : _Analysis of COG abundance in the output of MGS_
+Tidy up the table abundance of COG
+```{r}
+tb_cog = as.data.frame(tb_cog)
+  rownames(tb_cog) = tb_cog[,1]
+  tb_cog = tb_cog[,-1]
+```
+
