@@ -12,33 +12,31 @@ library(DESeq2)
 library(Hotelling)
 library(ggplot2)
 library(GGally)
+library(ggpubr)
 library(BiocParallel)
 register(SnowParam(4))
 ```
 Data loading
+!Etonant pas car il me fallait traiter dèja des données (join les noms de colonnes, attribuer les nouveaux noms de colonnes, etc.) => exporté des données sous forme .rds
 ```{r}
-missing_values = c("C6-R-T1","P1-C-T6","P5-C-T6")
 meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
 meta = as.data.frame(meta)
 row.names(meta) = meta$sample_id
-meta <- meta[!meta$sample_id %in% missing_values,]
 MGS_EC = read_rds("tb_ec_cleaned.rds")
 MGS_EC = as.matrix(MGS_EC)
-p2_EC = read_delim("Data FONCTIOMIC/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
-  p2_EC = as.data.frame(p2_EC)
-  rownames(p2_EC) = p2_EC[,1]
-  p2_EC = as.matrix(p2_EC[,-1])
+p2_EC = read_rds("Data FONCTIOMIC/picrust2out_ver2/p2_EC.rds")
+p2_EC = as.matrix(p2_EC)
 overlapping_EC = intersect(rownames(p2_EC), rownames(MGS_EC))
 MGS_EC = MGS_EC[overlapping_EC,colnames(MGS_EC) %in% rownames(meta)]
 p2_EC = p2_EC[overlapping_EC,colnames(p2_EC) %in% rownames(meta)]
 p2_EC = p2_EC[,str_sort(colnames(p2_EC),decreasing = F)]
-p2_EC = p2_EC[rowSums(p2_EC) != 0 ,]
-MGS_EC = MGS_EC[rowSums(MGS_EC) != 0 ,]
-overlapping_EC = intersect(rownames(p2_EC), rownames(MGS_EC))
-p2_EC = p2_EC[overlapping_EC,]
-MGS_EC = MGS_EC[overlapping_EC,]
 EC_number_class = read.table("description_mapfiles/EC_number_class.txt")
-rm(missing_values, overlapping_EC)
+rm( overlapping_EC)
+p2_EC_ancien = read_delim("Data FONCTIOMIC/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+  p2_EC_ancien = as.data.frame(p2_EC_ancien)
+  rownames(p2_EC_ancien) = p2_EC_ancien[,1]
+  p2_EC_ancien = as.matrix(p2_EC_ancien[,-1])
+
 ```
 Definition des variables
 ```{r}
@@ -49,6 +47,38 @@ for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amen
 }
 rm(groups,time)
 ```
+##No apply data transformation
+0) Raw data
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), MGS_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("P2_mat_", gsub(" ", "_", groups), "_", time), p2_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+
+```{r}
+for (groups in c("Control_Cropland","Amended_Cropland","Control_Grassland","Amended_Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("cor_", groups, "_", time), 
+            cor(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+    assign(paste0("d_cor_", groups, "_", time), 
+            diag(get(paste0("cor_", groups, "_", time))))
+        assign(paste0("corr_", groups, "_", time), 
+            cor.test(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+
+  }
+}
+```
+
 ##Data transformation
 1) Data transformation : DESeq2 TMM normalization
 ```{r}
@@ -257,30 +287,48 @@ ggpairs(control0_MGSvsP2,upper=list(continuous=wrap(ggally_cor,method = "spearma
 ```
 
 ```{r}
-scatter_data <- data.frame(x = as.vector(MGS_EC), y = as.vector(p2_EC))
+threshold = 2
+scatter_data <- data.frame(x = as.vector(MGS_EC_imp), y = as.vector(p2_EC_imp))
 scatter_data$EC_number = rep(rownames(MGS_EC), ncol(MGS_EC))
 scatter_data = left_join(scatter_data, EC_number_class, by = "EC_number")
 scatter_data$EC_class = as.factor(scatter_data$EC_class)
+scatter_data <- scatter_data %>%
+  mutate(
+    deviation = y - x,  # Calculate deviation from the identity line y = x
+    classification = case_when(
+      deviation > threshold ~ "Overestimated",  # Above the upper bound
+      deviation < -threshold ~ "Underestimated",  # Below the lower bound
+      TRUE ~ "Within Zone"  # Within the confidence zone
+    )
+  )
+percentages <- scatter_data %>%
+  group_by(classification) %>%
+  dplyr::summarise(count = n()) %>%
+  mutate(percentage = count / sum(count) * 100)
 ec_colors <- c("Hydrolases" = "#E41A1C",  # Red
   "Isomerases" = "#377EB8",  # Blue
   "Ligases" = "#4DAF4A",  # Green
   "Lyases" = "#984EA3",  # Purple
   "Oxidoreductases" = "#FF7F00",  # Orange
   "Transferases" = "#A65628")  # Yellow)
-ggplot(scatter_data, aes(x = x, y = y, color = EC_class)) +
+scatterplot_global <- ggplot(scatter_data, aes(x = x, y = y, color = EC_class)) +
   geom_point(size = 2, alpha = 0.8) +  # Adjust point size and transparency
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +  # Identity line
+  geom_abline(slope = 1, intercept = threshold, linetype = "dotted", color = "red") +  # Upper bound
+  geom_abline(slope = 1, intercept = -threshold, linetype = "dotted", color = "blue") +  # Lower bound
   labs(x = "MGS EC Abundance", y = "P2 EC Abundance", title = "MGS vs P2 Comparison by EC Class") +
   scale_color_manual(values = ec_colors) +  # Apply the custom color palette
-  theme_minimal() +
+  theme_bw()+
   theme(
 plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
     axis.title = element_text(size = 14),
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 10))
+ggsave(plot = scatterplot_global, filename = "Output/scatterplot_global.png", width = 15, height = 25, dpi = 300)
 ```
 
 ```{r}
-for (groups in c("Control_Cropland","Amended_Grassland")) {
+for (groups in c("Control_Cropland","Amended_Cropland","Control_Grassland","Amended_Grassland")) {
   for (time in c("0","3","51","125")) {
      mat_MGS <- get(paste0("mat_", groups, "_", time))
     mat_P2 <- get(paste0("P2_mat_", groups, "_", time))
@@ -302,7 +350,6 @@ for (groups in c("Control_Cropland","Amended_Grassland")) {
         geom_point(size = 2, alpha = 0.8) +  # Adjust point size and transparency
         labs(x = "MGS", y = "P2", title = paste("MGS vs P2 Comparison-", groups, time)) +
         scale_color_manual(values = ec_colors) +  # Apply the custom color palette
-        theme_minimal() +
         theme(
         plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
         axis.title = element_text(size = 14),
@@ -311,5 +358,15 @@ for (groups in c("Control_Cropland","Amended_Grassland")) {
       
       assign(paste0("splot_", groups, "_", time), tmp)
   }}
-
+plot_grid_Crop <- ggarrange(splot_Control_Cropland_0, splot_Control_Cropland_3, splot_Control_Cropland_51, splot_Control_Cropland_125,
+                            splot_Amended_Cropland_0, splot_Amended_Cropland_3, splot_Amended_Cropland_51, splot_Amended_Cropland_125,
+          ncol = 4, nrow = 2)
+plot_grid_Grass <- ggarrange(splot_Control_Grassland_0, splot_Control_Grassland_3, splot_Control_Grassland_51, splot_Control_Grassland_125,
+          splot_Amended_Cropland_0, splot_Amended_Cropland_3, splot_Amended_Cropland_51, splot_Amended_Cropland_125,
+          ncol = 4, nrow = 2)
+plot_grid_Crop <- annotate_figure(plot_grid_Crop, top = text_grob("Cropland", face = "bold", size = 14))
+plot_grid_Grass <- annotate_figure(plot_grid_Grass, top = text_grob("Grassland", face = "bold", size = 14))
+ggsave(plot = plot_grid_Crop, filename = "Output/scatterplot_EC_Crop.png", width = 40, height = 15, dpi = 300)
+ggsave(plot = plot_grid_Grass, filename = "Output/scatterplot_EC_Grass.png", width = 40, height = 15, dpi = 300)
 ```
+

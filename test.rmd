@@ -15,28 +15,21 @@ register(SnowParam(4))
 ```
 Data loading
 ```{r}
-missing_values = c("C6-R-T1","P1-C-T6","P5-C-T6")
 meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
 meta = as.data.frame(meta)
 row.names(meta) = meta$sample_id
-meta <- meta[!meta$sample_id %in% missing_values,]
 MGS_EC = read_rds("tb_ec_cleaned.rds")
 MGS_EC = as.matrix(MGS_EC)
-p2_EC = read_delim("Data FONCTIOMIC/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
-  p2_EC = as.data.frame(p2_EC)
-  rownames(p2_EC) = p2_EC[,1]
-  p2_EC = as.matrix(p2_EC[,-1])
+p2_EC = read_rds("Data FONCTIOMIC/picrust2out_ver2/p2_EC.rds")
+p2_EC = as.matrix(p2_EC)
 overlapping_EC = intersect(rownames(p2_EC), rownames(MGS_EC))
 MGS_EC = MGS_EC[overlapping_EC,colnames(MGS_EC) %in% rownames(meta)]
 p2_EC = p2_EC[overlapping_EC,colnames(p2_EC) %in% rownames(meta)]
 p2_EC = p2_EC[,str_sort(colnames(p2_EC),decreasing = F)]
-p2_EC = p2_EC[rowMeans(p2_EC == 0) < 0.9 ,]
-MGS_EC = MGS_EC[rowMeans(p2_EC == 0) < 0.9 ,]
-overlapping_EC = intersect(rownames(p2_EC), rownames(MGS_EC))
-p2_EC = p2_EC[overlapping_EC,]
-MGS_EC = MGS_EC[overlapping_EC,]
+#p2_EC = p2_EC[rowMeans(p2_EC == 0) < 0.9 ,]
+#MGS_EC = MGS_EC[rowMeans(p2_EC == 0) < 0.9 ,]
 EC_number_class = read.table("description_mapfiles/EC_number_class.txt")
-rm(missing_values, overlapping_EC)
+rm(overlapping_EC)
 ```
 Data transformation : DESeq2 TMM normalization
 ```{r}
@@ -125,15 +118,123 @@ DA_EC_P2_Grass <- read_rds("Output/DA_EC_P2_Grass.rds")
 ```
 
 ```{r}
-for (groups in c("Control_Cropland","Amended_Cropland","Control_Grassland","Amended_Grassland")) {
-  for (time in c("0","3","51","125")) {
-    assign(paste0("cor_", groups, "_", time), 
-            cor(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
-    assign(paste0("d_cor_", groups, "_", time), 
-            diag(get(paste0("cor_", groups, "_", time))))
-        assign(paste0("corr_", groups, "_", time), 
-            cor.test(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+DA_EC_Crop = unique(intersect(DA_EC_MGS_Crops$EC_number,DA_EC_P2_Crops$EC_number))
+EC_dif_MGS = MGS_EC %>% as.data.frame() %>%
+  rownames_to_column("EC_number") %>%
+  filter(EC_number %in% DA_EC_MGS_Crop)
+rownames(EC_dif_MGS) = EC_dif_MGS$EC_number
+EC_dif_MGS = EC_dif_MGS[,-1]
+EC_dif_MGS = t(EC_dif_MGS)
+EC_dif_MGS = EC_dif_MGS %>% as.data.frame() %>% rownames_to_column("sample_id") %>% left_join(meta[,c("sample_id","Category","time")], by = "sample_id") %>% 
+column_to_rownames("sample_id")
+EC_dif_MGS$Category = as.factor(EC_dif_MGS$Category)
+EC_dif_MGS$time = as.factor(EC_dif_MGS$time)
+EC_dif_MGS = EC_dif_MGS %>% filter(Category != "Control Grassland" & Category != "Amended Grassland") %>% arrange(Category,time)
+plot_ec1 = ggplot( EC_dif_MGS, aes(x = time, y=as.numeric(`EC:1.1.5.8`), fill = Category ) ) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  labs(title = "Relative abundance of EC:1.1.5.8") +
+  ylab("Relative abundance")+
+  xlab ("Time") +
+  theme_bw()
+plot_ec2 = ggplot( EC_dif_MGS, aes(x = time, y=as.numeric(`EC:1.1.9.1`), fill = Category ) ) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  labs(title = "Relative abundance of EC:1.1.9.1") +
+  ylab("Relative abundance")+
+  xlab ("Time") +
+  theme_bw()
+plot_ec3 = ggplot( EC_dif_MGS, aes(x = time, y=as.numeric(`EC:1.14.12.17`), fill = Category ) ) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  labs(title = "Relative abundance of EC:1.14.12.17") +
+  ylab("Relative abundance")+
+  xlab ("Time") +
+  theme_bw()
+plot_ec4 = ggplot( EC_dif_MGS, aes(x = time, y=as.numeric(`EC:1.4.1.2`), fill = Category ) ) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  labs(title = "Relative abundance of EC:1.4.1.2") +
+  ylab("Relative abundance")+
+  xlab ("Time") +
+  theme_bw()
+plot_grid_EC_MGS_Crop <- ggarrange(plot_ec1, plot_ec2, plot_ec3, plot_ec4, ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
+plot_grid_EC_MGS_Crop <- annotate_figure(plot_grid_EC_MGS_Crop, top = text_grob("The abundance of ECs noted by test DAG between control and amended sample from Cropland (MGS)", face = "bold", size = 14))
+ggsave("Output/plot_grid_EC_MGS_Crop.png", plot = plot_grid_EC_MGS_Crop, width = 12, height = 8, dpi = 300)
+```
 
-  }
-}
+```{r}
+EC_dif_P2 = p2_EC %>% as.data.frame() %>%
+  rownames_to_column("EC_number") %>%
+  filter(EC_number %in% DA_EC_Crop)
+rownames(EC_dif_P2) = EC_dif_P2$EC_number
+EC_dif_P2 = EC_dif_P2[,-1]
+EC_dif_P2 = t(EC_dif_P2)
+EC_dif_P2 = EC_dif_P2 %>% as.data.frame() %>% rownames_to_column("sample_id") %>% left_join(meta[,c("sample_id","Category","time")], by = "sample_id") %>% 
+column_to_rownames("sample_id")
+EC_dif_P2$Category = as.factor(EC_dif_P2$Category)
+EC_dif_P2$time = as.factor(EC_dif_P2$time)
+EC_dif_P2 = EC_dif_P2 %>% filter(Category != "Control Grassland" & Category != "Amended Grassland") %>% arrange(Category,time)
+plot_ec1 = ggplot( EC_dif_P2, aes(x = time, y=as.numeric(`EC:1.1.5.8`), fill = Category ) ) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  labs(title = "Relative abundance of EC:1.1.5.8") +
+  ylab("Relative abundance")+
+  xlab ("Time") +
+  theme_bw()
+plot_ec2 = ggplot( EC_dif_P2, aes(x = time, y=as.numeric(`EC:1.1.9.1`), fill = Category ) ) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  labs(title = "Relative abundance of EC:1.1.9.1") +
+  ylab("Relative abundance")+
+  xlab ("Time") +
+  theme_bw()
+plot_ec3 = ggplot( EC_dif_P2, aes(x = time, y=as.numeric(`EC:1.14.12.17`), fill = Category ) ) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  labs(title = "Relative abundance of EC:1.14.12.17") +
+  ylab("Relative abundance")+
+  xlab ("Time") +
+  theme_bw()
+plot_ec4 = ggplot( EC_dif_P2, aes(x = time, y=as.numeric(`EC:1.4.1.2`), fill = Category ) ) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  labs(title = "Relative abundance of EC:1.4.1.2") +
+  ylab("Relative abundance")+
+  xlab ("Time") +
+  theme_bw()
+plot_grid_EC_P2_Crop <- ggarrange(plot_ec1, plot_ec2, plot_ec3, plot_ec4, ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
+plot_grid_EC_P2_Crop <- annotate_figure(plot_grid_EC_P2_Crop, top = text_grob("The abundance of ECs noted by test DAG between control and amended sample from Cropland (PICRUSt2)", face = "bold", size = 14))
+ggsave("Output/plot_grid_EC_P2_Crop.png", plot = plot_grid_EC_P2_Crop, width = 12, height = 8, dpi = 300)
+```
+
+```{r}
+DA_COG_MGS_Crop = read_rds("Output/DA_COG_MGS_Crops.rds")
+DA_COG_MGS_Grass = read_rds("Output/DA_COG_MGS_Grass.rds")
+DA_COG_P2_Crop = read_rds("Output/DA_COG_P2_Crops.rds")
+DA_COG_P2_Grass = read_rds("Output/DA_COG_P2_Grass.rds")
 ```

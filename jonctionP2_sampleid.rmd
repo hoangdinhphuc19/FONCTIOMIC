@@ -1,0 +1,40 @@
+---
+title: "Joinction P2 Sample ID"
+auteur: "Dinh-Phuc Hoang"
+date: "2025-03-31"
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(DESeq2)
+library(BiocParallel)
+register(SnowParam(4))
+```
+Loading the data
+```{r}
+meta = read_delim("Data FONCTIOMIC/03_dimimos_terrain.csv",delim = ",",col_names = TRUE)
+p2_EC = read_delim("Data FONCTIOMIC/picrust2out_ver2/EC_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+  p2_EC = as.data.frame(p2_EC)
+  rownames(p2_EC) = p2_EC[,1]
+  p2_EC = p2_EC[,-1]
+p2_COG = read_delim("Data FONCTIOMIC/picrust2out_ver2/COG_metagenome_out/pred_metagenome_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+p2_COG = as.data.frame(p2_COG)
+  rownames(p2_COG) = p2_COG[,1]
+  p2_COG = p2_COG[,-1]
+```
+Extracting the column names of the data
+```{r}
+sample_before = as.data.frame(colnames(p2_EC))
+names(sample_before)[1] = "id"
+sample_before$id_ech = str_split_i(sample_before$id,"_",1)
+sample_after = merge(sample_before,meta[,c("id-ech","sample")],by.x = "id_ech",by.y = "id-ech", sort=FALSE)
+```
+Attributing the sample ID to the data
+```{r}
+colnames(p2_EC) = sample_after$sample
+colnames(p2_COG) = sample_after$sample
+write_rds(p2_EC,"Data FONCTIOMIC/picrust2out_ver2/p2_EC.rds")
+write_rds(p2_COG,"Data FONCTIOMIC/picrust2out_ver2/p2_COG.rds")
+```
