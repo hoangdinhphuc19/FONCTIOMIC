@@ -162,21 +162,27 @@ write_rds(res4_df, "Output/DA_EC_P2_Grass.rds")
 Heatmap of EC
 Data transformation
 ```{r}
-p2_EC_vst = assay(vst_P2)
+DA_EC_P2_Crop = read_rds("Output/DA_EC_P2_Crops.rds")
+DA_EC_P2_Grass = read_rds("Output/DA_EC_P2_Grass.rds")
+DA_EC_P2 = unique(intersect(DA_EC_P2_Crop$EC_number, DA_EC_P2_Grass$EC_number))
+count_P2 = p2_EC_cleaned
+count_P2[count_P2 == 0]<- 0.01
+count_P2 = clr(count_P2)
+count_P2 = count_P2 %>% as.data.frame() %>% filter(rownames(count_P2) %in% DA_EC_P2)
 ```
 Distance between the variables (intergroups, Control vs Amended)
 ```{r}
-dist_a_vs_c = vegan::vegdist(t(p2_EC_vst), method = "euclidean")
+dist_a_vs_c = vegan::vegdist(t(count_P2), method = "euclidean")
 tree_a_vs_c = hclust(dist_a_vs_c, method = "complete")
-cutree_a_vs_c = cutree(tree_a_vs_c, k = 3 )
+cutree_a_vs_c = cutree(tree_a_vs_c, k = 5 )
 table(cutree_a_vs_c)
 ```
 Distance between the observation (EC)
 ```{r}
-dist_ec = vegan::vegdist(p2_EC_vst, method = "euclidean")
+dist_ec = vegan::vegdist(count_P2, method = "euclidean")
 tree_ec = hclust(dist_ec, method = "complete")
 #cut into arbitrary clusters
-cutree_ec = cutree(tree_ec, k = 7 )
+cutree_ec = cutree(tree_ec, k = 8 )
 table(cutree_ec)
 ```
 Heatmap ##voir avec Domitille
@@ -190,10 +196,10 @@ anno_row = EC_number_class
 anno_row = dplyr::select(anno_row, -EC_number)
 vect_colours = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd", 
                 "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2")
-pheatmap(p2_EC_vst,
+pheatmap(count_P2,
             cluster_rows = tree_ec, cluster_cols = tree_a_vs_c,
               show_rownames = FALSE, 
-              cutree_rows = 7, #9, #5
+              cutree_rows = 8, #9, #5
               cutree_cols = 5,
               annotation_colors = list(Groups = vect_colours),
               annotation_col = anno_col, 

@@ -152,13 +152,17 @@ write_rds(res4_df, "Output/DA_EC_MGS_Grass.rds")
 Heatmap of EC
 Data transformation
 ```{r}
-count_MGS = assay(vst_MGS)
+DA_EC_MGS = read_rds("Output/DA_EC_MGS_Crops.rds")
+count_MGS = tb_ec_cleaned
+count_MGS[count_MGS == 0] <- 0.01
+count_MGS = clr(count_MGS)
+count_MGS = count_MGS %>% as.data.frame %>% filter(rownames(count_MGS) %in% DA_EC_MGS$EC_number)
 ```
 Distance between the variables (intergroups, Control vs Amended)
 ```{r}
 dist_a_vs_c = vegan::vegdist(t(count_MGS), method = "euclidean")
 tree_a_vs_c = hclust(dist_a_vs_c, method = "complete")
-cutree_a_vs_c = cutree(tree_a_vs_c, k = 3 )
+cutree_a_vs_c = cutree(tree_a_vs_c, k = 4 )
 table(cutree_a_vs_c)
 ```
 Distance between the observation (EC)
@@ -166,7 +170,7 @@ Distance between the observation (EC)
 dist_ec = vegan::vegdist(count_MGS, method = "euclidean")
 tree_ec = hclust(dist_ec, method = "complete")
 #cut into arbitrary clusters
-cutree_ec = cutree(tree_ec, k = 7 )
+cutree_ec = cutree(tree_ec, k = 5 )
 table(cutree_ec)
 ```
 Heatmap ##voir avec Domitille
@@ -183,8 +187,8 @@ vect_colours = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
 pheatmap(count_MGS,
             cluster_rows = tree_ec, cluster_cols = tree_a_vs_c,
               show_rownames = FALSE, 
-              cutree_rows = 7, #9, #5
-              cutree_cols = 3,
+              cutree_rows = 5, #9, #5
+              cutree_cols = 4,
               annotation_colors = list(Groups = vect_colours),
               annotation_col = anno_col, 
               annotation_row = anno_row)
