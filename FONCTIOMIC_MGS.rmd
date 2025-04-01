@@ -13,6 +13,7 @@ library(DESeq2)
 library(pheatmap)
 library(BiocParallel)
 library(Hotelling)
+library(FactoMineR)
 register(SnowParam(4))
 ```
 Data loading
@@ -74,6 +75,28 @@ ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCA_EC_MGS.png", width = 8, height = 10, dpi = 300)
 ```
+PCA analysis (Raw data)
+```{r}
+pcaData = PCA(tb_ec_cleaned, scale.unit = FALSE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
+  geom_point(size =7) +
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of MGS") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+
 Define of variables for subset matrix of EC
 ```{r}
 for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")){
@@ -182,14 +205,27 @@ anno_col$Groups = as.factor(anno_col$Groups)
 anno_col$Time = as.factor(anno_col$Time)
 anno_row = EC_number_class
 anno_row = dplyr::select(anno_row, -EC_number)
+time_colors <- c(
+  "0" = "#1f77b4",   
+  "3" = "#ff7f0e",   
+  "51" = "#2ca02c",  
+  "125" = "#d62728"  
+)
+ec_colors <- c("Hydrolases" = "#E41A1C",  # Red
+  "Isomerases" = "#377EB8",  # Blue
+  "Ligases" = "#4DAF4A",  # Green
+  "Lyases" = "#984EA3",  # Purple
+  "Oxidoreductases" = "#FF7F00",  # Orange
+  "Transferases" = "#A65628")  # Yellow)
 vect_colours = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd", 
                 "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2")
+list_colors = list(Groups = vect_colours, Time = time_colors, EC_class = ec_colors)
 pheatmap(count_MGS,
             cluster_rows = tree_ec, cluster_cols = tree_a_vs_c,
               show_rownames = FALSE, 
               cutree_rows = 5, #9, #5
               cutree_cols = 4,
-              annotation_colors = list(Groups = vect_colours),
+              annotation_colors = list_colors,
               annotation_col = anno_col, 
               annotation_row = anno_row)
 ```

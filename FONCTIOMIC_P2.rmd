@@ -164,7 +164,7 @@ Data transformation
 ```{r}
 DA_EC_P2_Crop = read_rds("Output/DA_EC_P2_Crops.rds")
 DA_EC_P2_Grass = read_rds("Output/DA_EC_P2_Grass.rds")
-DA_EC_P2 = unique(intersect(DA_EC_P2_Crop$EC_number, DA_EC_P2_Grass$EC_number))
+DA_EC_P2 = unique(c(DA_EC_P2_Crop$EC_number), c(DA_EC_P2_Grass$EC_number))
 count_P2 = p2_EC_cleaned
 count_P2[count_P2 == 0]<- 0.01
 count_P2 = clr(count_P2)
@@ -194,14 +194,27 @@ anno_col$Groups = as.factor(anno_col$Groups)
 anno_col$Time = as.factor(anno_col$Time)
 anno_row = EC_number_class
 anno_row = dplyr::select(anno_row, -EC_number)
+time_colors <- c(
+  "0" = "#1f77b4",   
+  "3" = "#ff7f0e",   
+  "51" = "#2ca02c",  
+  "125" = "#d62728"  
+)
+ec_colors <- c("Hydrolases" = "#E41A1C",  # Red
+  "Isomerases" = "#377EB8",  # Blue
+  "Ligases" = "#4DAF4A",  # Green
+  "Lyases" = "#984EA3",  # Purple
+  "Oxidoreductases" = "#FF7F00",  # Orange
+  "Transferases" = "#A65628")  # Yellow)
 vect_colours = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd", 
                 "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2")
+list_colors = list(Groups = vect_colours, Time = time_colors, EC_class = ec_colors)
 pheatmap(count_P2,
             cluster_rows = tree_ec, cluster_cols = tree_a_vs_c,
               show_rownames = FALSE, 
               cutree_rows = 8, #9, #5
               cutree_cols = 5,
-              annotation_colors = list(Groups = vect_colours),
+              annotation_colors = list_colors,
               annotation_col = anno_col, 
               annotation_row = anno_row)
 ```
