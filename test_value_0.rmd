@@ -125,8 +125,7 @@ for (groups in c("Control_Cropland","Amended_Cropland","Control_Grassland","Amen
 ```
 2) CLR transformation
 ```{r}
-MGS_EC_clr = clr(MGS_EC)
-p2_EC_clr = clr(p2_EC)
+
 rm(list = c("MGS_EC_norm","p2_EC_norm"))
 MGS_EC_clr = MGS_EC_clr[rowSums(is.na(MGS_EC_clr)) == 0,]
 p2_EC_clr = p2_EC_clr[rowSums(is.na(p2_EC_clr)) == 0,]
