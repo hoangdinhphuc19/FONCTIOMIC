@@ -13,6 +13,7 @@ library(DESeq2)
 library(pheatmap)
 library(BiocParallel)
 library(FactoMineR)
+library(Hotelling)
 library(microbiomeMarker)
 register(SnowParam(4))
 ```
@@ -53,6 +54,7 @@ meta_cleaned = meta_cleaned %>% mutate(time = fct_recode(campagne,
 ```
 Tidy up the table abundance of EC
 ```{r}
+#overlapping_ec = read_rds("Data FONCTIOMIC/overlapping_ec.rds")
 p2_EC_cleaned = p2_EC[,rownames(meta_cleaned)]
 ```
 PCA analysis (VST)
@@ -61,8 +63,8 @@ meta_cleaned$groups = as.factor(meta_cleaned$groups)
 meta_cleaned$groups = relevel(meta_cleaned$groups, ref = "Control Cropland")
 meta_cleaned$time = as.factor(meta_cleaned$time)
 meta_cleaned$time = relevel(meta_cleaned$time, ref = "0")
-p2_EC_cleaned = round(p2_EC_cleaned,0)
-dds_P2 = DESeqDataSetFromMatrix(countData = p2_EC_cleaned,
+p2_EC_vst = round(p2_EC_cleaned,0)
+dds_P2 = DESeqDataSetFromMatrix(countData = p2_EC_vst,
                                   colData = meta_cleaned,
                                   design = ~ groups + time, tidy = FALSE)
 vst_P2 = vst(dds_P2,blind = FALSE) # variance stabilizing transformation
@@ -73,7 +75,7 @@ ggplot(pcaData, aes(x = PC1, y = PC2, color = groups)) +
   geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
   xlab(paste0("PC1: ", percentVar[1], "% variance")) +
   ylab(paste0("PC2: ", percentVar[2], "% variance")) +
- ggtitle("PCA of EC abundance in output of PICRUSt2") +
+ ggtitle("PCA of EC abundance in output of PICRUSt2 (VST)") +
     scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
                                   "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
                         guide=FALSE) + 
@@ -87,12 +89,12 @@ ggsave("Output/PCA_EC_P2.png", width = 8, height = 10, dpi = 300)
 ```
 PCA analysis (Raw data)
 ```{r}
-res.pca = PCA(p2_EC_cleaned, scale.unit = FALSE)
+res.pca = PCA(p2_EC_cleaned, scale.unit = FALSE,graph = FALSE)
 pcaData = as.data.frame(res.pca$var$coord[,1:2])
 pcaData$sample = rownames(pcaData)
 pcaData = left_join(pcaData, meta_cleaned[,c("groups","time","sample")], join_by(sample == sample), )
 colnames(pcaData)[1:2] = c("PC1","PC2")
-percentVar <- round(100 * res.pca$eig[1:2] / sum(res.pca$eig), 1)
+percentVar <- round(res.pca$eig[1:2,2], 1)
 ggplot(pcaData, aes(x = PC1, y = PC2, color = groups)) +
   geom_point(size =7) +
   geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
@@ -113,12 +115,12 @@ ggsave("Output/PCA_EC_P2_raw.png", width = 8, height = 10, dpi = 300)
 PCA analysis (CLR transformation of package microbiomeMarker)
 ```{r}
 p2_EC_clr = microbiomeMarker::normalize(p2_EC_cleaned, method = "CLR")
-res.pca = PCA(p2_EC_clr, scale.unit = FALSE)
+res.pca = PCA(p2_EC_clr, scale.unit = FALSE,graph = FALSE)
 pcaData = as.data.frame(res.pca$var$coord[,1:2])
 pcaData$sample = rownames(pcaData)
 pcaData = left_join(pcaData, meta_cleaned[,c("groups","time","sample")], join_by(sample == sample), )
 colnames(pcaData)[1:2] = c("PC1","PC2")
-percentVar <- round(100 * res.pca$eig[1:2] / sum(res.pca$eig), 1)
+percentVar <- round(res.pca$eig[1:2,2], 1)
 ggplot(pcaData, aes(x = PC1, y = PC2, color = groups)) +
   geom_point(size =7) +
   geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
@@ -141,12 +143,12 @@ PCA analysis (CLR transformation + imputation)
 p2_EC_clr1 = p2_EC_cleaned
 p2_EC_clr1[p2_EC_clr1 == 0] = 0.01
 p2_EC_clr1 = clr(p2_EC_clr1)
-res.pca = PCA(p2_EC_clr1, scale.unit = FALSE)
+res.pca = PCA(p2_EC_clr1, scale.unit = FALSE,graph = FALSE)
 pcaData = as.data.frame(res.pca$var$coord[,1:2])
 pcaData$sample = rownames(pcaData)
 pcaData = left_join(pcaData, meta_cleaned[,c("groups","time","sample")], join_by(sample == sample), )
 colnames(pcaData)[1:2] = c("PC1","PC2")
-percentVar <- round(100 * res.pca$eig[1:2] / sum(res.pca$eig), 1)
+percentVar <- round(res.pca$eig[1:2,2], 1)
 ggplot(pcaData, aes(x = PC1, y = PC2, color = groups)) +
   geom_point(size =7) +
   geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
@@ -293,6 +295,7 @@ res4_df <- data.frame( baseMean=numeric(),
 p2_EC_cleaned = as.data.frame(p2_EC_cleaned)
 for ( dataset in c("P2_crop_0","P2_crop_3", "P2_crop_51", "P2_crop_125")){              # Erratum : manque de la variable P2_crop_3
   counts_matrix <- as.matrix(p2_EC_cleaned[,get(dataset)],rownames = TRUE)
+  counts_matrix <- round(counts_matrix,0)
   sample_data <- meta_cleaned[get(dataset),,drop=FALSE]
   res <- DESeqDataSetFromMatrix(countData = counts_matrix,
                                   colData = sample_data,
@@ -322,6 +325,7 @@ res4_df <- data.frame( baseMean=numeric(),
                         EC_number = character())
 for ( dataset in c("P2_grass_0", "P2_grass_3", "P2_grass_51","P2_grass_125")){             # Erratum : manque de la variable P2_grass_125
   counts_matrix <- as.matrix(p2_EC_cleaned[,get(dataset)],rownames = TRUE)
+  counts_matrix <- round(counts_matrix,0)
   sample_data <- meta_cleaned[get(dataset),,drop=FALSE]
   res <- DESeqDataSetFromMatrix(countData = counts_matrix,
                                   colData = sample_data,

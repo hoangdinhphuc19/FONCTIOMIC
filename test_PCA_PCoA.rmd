@@ -1,0 +1,457 @@
+---
+title: "Test PCA et PCoA avec le jeu des données après filtré des ECs en commun"
+auteur: "Dinh-Phuc Hoang"
+date: "2025-04-03"
+---
+
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(phyloseq)
+library(DESeq2)
+library(BiocParallel)
+library(FactoMineR)
+library(Hotelling)
+library(microbiomeMarker)
+register(SnowParam(4))
+```
+
+```{r}
+tb_ec = read_tsv("Data FONCTIOMIC/counts_by_EC_number.norm.tsv")
+meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
+meta = as.data.frame(meta)
+row.names(meta) = meta$sample_id
+p2_EC = read_rds("Data FONCTIOMIC/picrust2out_ver2/p2_EC.rds")
+p2_EC = p2_EC[,str_sort(colnames(p2_EC),decreasing = F)]
+```
+
+```{r}
+meta$Category = as.factor(meta$Category)
+meta$Category = relevel(meta$Category, ref = "Control Cropland")
+meta$time = as.factor(meta$time)
+meta$time = relevel(meta$time, ref = "0")
+meta$wheat_straw_amendment = as.factor(meta$wheat_straw_amendment)
+meta$wheat_straw_amendment = relevel(meta$wheat_straw_amendment, ref = "Control")
+p2_EC_cleaned = p2_EC[,rownames(meta)]
+tb_ec = as.data.frame(tb_ec)
+row.names(tb_ec) = paste0("EC:", tb_ec$EC_number)
+tb_ec_cleaned = tb_ec %>% filter(!str_detect(rownames(tb_ec), "-$"))
+tb_ec_cleaned = tb_ec_cleaned[,-c(1,50)]
+rm(tb_ec,p2_EC)
+```
+
+```{r}
+overlapping_ec = intersect(rownames(tb_ec_cleaned), rownames(p2_EC_cleaned))
+write_rds(overlapping_ec, "Data FONCTIOMIC/overlapping_ec.rds")
+tb_ec_cleaned = tb_ec_cleaned[overlapping_ec,]
+p2_EC_cleaned = p2_EC_cleaned[overlapping_ec,]
+```
+PCA analysis (VST transformation of DESeq2) of ECs in the output of MGS and PICRUSt2
+- _MGS_
+```{r}
+tb_ec_vst = round(tb_ec_cleaned,0)
+dds_MGS = DESeqDataSetFromMatrix(countData = tb_ec_vst,
+                                  colData = meta,
+                                  design = ~ Category + time, tidy = FALSE)
+vst_MGS = vst(dds_MGS,blind = FALSE) # variance stabilizing transformation
+#PCA plot
+pcaData = plotPCA(vst_MGS, intgroup = c("Category", "time"), returnData = TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
+  geom_point(size =7) +
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of MGS (VST)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+
+```
+- _P2_
+```{r}
+p2_ec_vst = round(p2_EC_cleaned,0)
+dds_P2 = DESeqDataSetFromMatrix(countData = p2_ec_vst,
+                                  colData = meta,
+                                  design = ~ Category + time, tidy = FALSE)
+vst_P2 = vst(dds_P2,blind = FALSE) # variance stabilizing transformation
+#PCA plot
+pcaData = plotPCA(vst_P2, intgroup = c("Category", "time"), returnData = TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
+  geom_point(size =7) +
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of P2 (VST)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+PCA analysis (Data raw) of ECs in the output of MGS and PICRUSt2
+
+```{r}
+res.pca = PCA(tb_ec_cleaned, scale.unit = FALSE,graph = FALSE)
+pcaData = as.data.frame(res.pca$var$coord[,1:2])
+pcaData$sample = rownames(pcaData)
+pcaData = left_join(pcaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+colnames(pcaData)[1:2] = c("PC1","PC2")
+percentVar <- round(res.pca$eig[1:2,2], 1)
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
+  geom_point(size =7) +
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of MGS (Data raw)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+```{r}
+res.pca = PCA(p2_EC_cleaned, scale.unit = FALSE,graph = FALSE)
+pcaData = as.data.frame(res.pca$var$coord[,1:2])
+pcaData$sample = rownames(pcaData)
+pcaData = left_join(pcaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+colnames(pcaData)[1:2] = c("PC1","PC2")
+percentVar <- round(res.pca$eig[1:2,2], 1)
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
+  geom_point(size =7) +
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of P2 (Data raw)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+
+```
+PCA analysis (CLR transformation) of ECs in the output of MGS and PICRUSt2
+
+```{r}
+tb_ec_clr = microbiomeMarker::normalize(tb_ec_cleaned, method = "CLR")
+res.pca = PCA(tb_ec_clr, scale.unit = FALSE, graph = FALSE)
+pcaData = as.data.frame(res.pca$var$coord[,1:2])
+pcaData$sample = rownames(pcaData)
+pcaData = left_join(pcaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+colnames(pcaData)[1:2] = c("PC1","PC2")
+percentVar <- round(res.pca$eig[1:2,2], 1)
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
+  geom_point(size =7) +
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of MGS (CLR transfomation)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+```{r}
+p2_ec_clr = microbiomeMarker::normalize(p2_EC_cleaned, method = "CLR")
+res.pca = PCA(p2_ec_clr, scale.unit = FALSE, graph = FALSE)
+pcaData = as.data.frame(res.pca$var$coord[,1:2])
+pcaData$sample = rownames(pcaData)
+pcaData = left_join(pcaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+colnames(pcaData)[1:2] = c("PC1","PC2")
+percentVar <- round(res.pca$eig[1:2,2], 1)
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
+  geom_point(size =7) +
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of P2 (CLR transfomation)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+
+```
+PCA analysis (CLR transformation + Imputation) of ECs in the output of MGS and PICRUSt2
+
+```{r}
+tb_ec_clr1 = tb_ec_cleaned
+tb_ec_clr1[tb_ec_clr1 == 0] = 0.01
+tb_ec_clr1 = clr(tb_ec_clr1)
+res.pca = PCA(tb_ec_clr1, scale.unit = FALSE,graph = FALSE)
+pcaData = as.data.frame(res.pca$var$coord[,1:2])
+pcaData$sample = rownames(pcaData)
+pcaData = left_join(pcaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+colnames(pcaData)[1:2] = c("PC1","PC2")
+percentVar <- round(res.pca$eig[1:2,2], 1)
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
+  geom_point(size =7) +
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of MGS (CLR transfomation + Imp)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+```{r}
+p2_ec_clr1 = p2_EC_cleaned
+p2_ec_clr1[p2_ec_clr1 == 0] = 0.01
+p2_ec_clr1 = clr(p2_ec_clr1)
+res.pca = PCA(p2_ec_clr1, scale.unit = FALSE,graph = FALSE)
+pcaData = as.data.frame(res.pca$var$coord[,1:2])
+pcaData$sample = rownames(pcaData)
+pcaData = left_join(pcaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+colnames(pcaData)[1:2] = c("PC1","PC2")
+percentVar <- round(res.pca$eig[1:2,2], 1)
+ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
+  geom_point(size =7) +
+  geom_text(aes(label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+ ggtitle("PCA of EC abundance in output of P2 (CLR transfomation + Imp)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+PCoA analysis (Bray-Curtis distance) of ECs in the output of MGS and PICRUSt2
+Raw data
+
+```{r}
+res.pcoa = ape::pcoa(vegan::vegdist(t(tb_ec_cleaned), method = "bray"))
+pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
+pcoaData$sample = rownames(pcoaData)
+pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+pcoaData.centroids = pcoaData %>% group_by(Category, time) %>% dplyr::summarise(mean.Axis.1 = mean(Axis.1), mean.Axis.2 = mean(Axis.2))
+pcoaData = left_join(pcoaData, pcoaData.centroids, by = c("Category", "time"))
+ggplot(pcoaData) +
+  geom_point(aes(x=Axis.1, y=Axis.2, colour=Category), size=1) +
+  geom_segment(aes(x=mean.Axis.1, y=mean.Axis.2, xend=Axis.1, yend=Axis.2, colour = Category))+
+  geom_point(aes(x=mean.Axis.1, y=mean.Axis.2, colour=Category), size=6) +
+  geom_text(aes(x=mean.Axis.1, y=mean.Axis.2,label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+ ggtitle("PCoaA of EC abundance in output of MGS (Data raw)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+```{r}
+res.pcoa = ape::pcoa(vegan::vegdist(t(p2_EC_cleaned), method = "bray"))
+pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
+pcoaData$sample = rownames(pcoaData)
+pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+pcoaData.centroids = pcoaData %>% group_by(Category, time) %>% dplyr::summarise(mean.Axis.1 = mean(Axis.1), mean.Axis.2 = mean(Axis.2))
+pcoaData = left_join(pcoaData, pcoaData.centroids, by = c("Category", "time"))
+ggplot(pcoaData) +
+  geom_point(aes(x=Axis.1, y=Axis.2, colour=Category), size=1) +
+  geom_segment(aes(x=mean.Axis.1, y=mean.Axis.2, xend=Axis.1, yend=Axis.2, colour = Category))+
+  geom_point(aes(x=mean.Axis.1, y=mean.Axis.2, colour=Category), size=6) +
+  geom_text(aes(x=mean.Axis.1, y=mean.Axis.2,label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+ ggtitle("PCoaA of EC abundance in output of P2 (Data raw)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+
+```
+
+PCoA analysis (VST) of ECs in the output of MGS and PICRUSt2
+```{r}
+res.pcoa = ape::pcoa(vegan::vegdist(t(assay(vst_MGS)), method = "euclidean"))
+pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
+pcoaData$sample = rownames(pcoaData)
+pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+pcoaData.centroids = pcoaData %>% group_by(Category, time) %>% dplyr::summarise(mean.Axis.1 = mean(Axis.1), mean.Axis.2 = mean(Axis.2))
+pcoaData = left_join(pcoaData, pcoaData.centroids, by = c("Category", "time"))
+ggplot(pcoaData) +
+  geom_point(aes(x=Axis.1, y=Axis.2, colour=Category), size=1) +
+  geom_segment(aes(x=mean.Axis.1, y=mean.Axis.2, xend=Axis.1, yend=Axis.2, colour = Category))+
+  geom_point(aes(x=mean.Axis.1, y=mean.Axis.2, colour=Category), size=6) +
+  geom_text(aes(x=mean.Axis.1, y=mean.Axis.2,label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+ ggtitle("PCoaA of EC abundance in output of MGS (VST)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+```{r}
+res.pcoa = ape::pcoa(vegan::vegdist(t(assay(vst_P2)), method = "euclidean"))
+pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
+pcoaData$sample = rownames(pcoaData)
+pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+pcoaData.centroids = pcoaData %>% group_by(Category, time) %>% dplyr::summarise(mean.Axis.1 = mean(Axis.1), mean.Axis.2 = mean(Axis.2))
+pcoaData = left_join(pcoaData, pcoaData.centroids, by = c("Category", "time"))
+ggplot(pcoaData) +
+  geom_point(aes(x=Axis.1, y=Axis.2, colour=Category), size=1) +
+  geom_segment(aes(x=mean.Axis.1, y=mean.Axis.2, xend=Axis.1, yend=Axis.2, colour = Category))+
+  geom_point(aes(x=mean.Axis.1, y=mean.Axis.2, colour=Category), size=6) +
+  geom_text(aes(x=mean.Axis.1, y=mean.Axis.2,label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+ ggtitle("PCoaA of EC abundance in output of P2 (VST)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+
+```
+PCoA analysis (CLR transformation) of ECs in the output of MGS and PICRUSt2
+```{r}
+res.pcoa = ape::pcoa(vegan::vegdist(t(tb_ec_clr), method = "euclidean"))
+pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
+pcoaData$sample = rownames(pcoaData)
+pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+pcoaData.centroids = pcoaData %>% group_by(Category, time) %>% dplyr::summarise(mean.Axis.1 = mean(Axis.1), mean.Axis.2 = mean(Axis.2))
+pcoaData = left_join(pcoaData, pcoaData.centroids, by = c("Category", "time"))
+ggplot(pcoaData) +
+  geom_point(aes(x=Axis.1, y=Axis.2, colour=Category), size=1) +
+  geom_segment(aes(x=mean.Axis.1, y=mean.Axis.2, xend=Axis.1, yend=Axis.2, colour = Category))+
+  geom_point(aes(x=mean.Axis.1, y=mean.Axis.2, colour=Category), size=6) +
+  geom_text(aes(x=mean.Axis.1, y=mean.Axis.2,label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+ ggtitle("PCoaA of EC abundance in output of MGS (CLR transformation)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+```{r}
+res.pcoa = ape::pcoa(vegan::vegdist(t(p2_ec_clr), method = "euclidean"))
+pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
+pcoaData$sample = rownames(pcoaData)
+pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+pcoaData.centroids = pcoaData %>% group_by(Category, time) %>% dplyr::summarise(mean.Axis.1 = mean(Axis.1), mean.Axis.2 = mean(Axis.2))
+pcoaData = left_join(pcoaData, pcoaData.centroids, by = c("Category", "time"))
+ggplot(pcoaData) +
+  geom_point(aes(x=Axis.1, y=Axis.2, colour=Category), size=1) +
+  geom_segment(aes(x=mean.Axis.1, y=mean.Axis.2, xend=Axis.1, yend=Axis.2, colour = Category))+
+  geom_point(aes(x=mean.Axis.1, y=mean.Axis.2, colour=Category), size=6) +
+  geom_text(aes(x=mean.Axis.1, y=mean.Axis.2,label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+ ggtitle("PCoaA of EC abundance in output of P2 (CLR transformation)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+PCoA analysis (CLR transformation + imp) of ECs in the output of MGS and PICRUSt2
+```{r}
+res.pcoa = ape::pcoa(vegan::vegdist(t(tb_ec_clr1), method = "euclidean"))
+pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
+pcoaData$sample = rownames(pcoaData)
+pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+pcoaData.centroids = pcoaData %>% group_by(Category, time) %>% dplyr::summarise(mean.Axis.1 = mean(Axis.1), mean.Axis.2 = mean(Axis.2))
+pcoaData = left_join(pcoaData, pcoaData.centroids, by = c("Category", "time"))
+ggplot(pcoaData) +
+  geom_point(aes(x=Axis.1, y=Axis.2, colour=Category), size=1) +
+  geom_segment(aes(x=mean.Axis.1, y=mean.Axis.2, xend=Axis.1, yend=Axis.2, colour = Category))+
+  geom_point(aes(x=mean.Axis.1, y=mean.Axis.2, colour=Category), size=6) +
+  geom_text(aes(x=mean.Axis.1, y=mean.Axis.2,label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+ ggtitle("PCoaA of EC abundance in output of MGS (CLR transformation + IMP)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
+
+```{r}
+res.pcoa = ape::pcoa(vegan::vegdist(t(p2_ec_clr1), method = "euclidean"))
+pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
+pcoaData$sample = rownames(pcoaData)
+pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
+pcoaData.centroids = pcoaData %>% group_by(Category, time) %>% dplyr::summarise(mean.Axis.1 = mean(Axis.1), mean.Axis.2 = mean(Axis.2))
+pcoaData = left_join(pcoaData, pcoaData.centroids, by = c("Category", "time"))
+ggplot(pcoaData) +
+  geom_point(aes(x=Axis.1, y=Axis.2, colour=Category), size=1) +
+  geom_segment(aes(x=mean.Axis.1, y=mean.Axis.2, xend=Axis.1, yend=Axis.2, colour = Category))+
+  geom_point(aes(x=mean.Axis.1, y=mean.Axis.2, colour=Category), size=6) +
+  geom_text(aes(x=mean.Axis.1, y=mean.Axis.2,label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+ ggtitle("PCoaA of EC abundance in output of P2 (CLR transformation + IMP)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+```
