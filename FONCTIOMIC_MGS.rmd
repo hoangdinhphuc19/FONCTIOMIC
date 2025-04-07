@@ -2,9 +2,12 @@
 title: "FONCTIOMIC_MGS"
 auteur: "Dinh-Phuc Hoang"
 date: "2025-03-21"
+output:
+  html_document:
+    code_folding: hide
 ---
 
-
+#Loading packages
 ```{r}
 library(tidyverse)
 library(dplyr)
@@ -16,7 +19,7 @@ library(FactoMineR)
 library(microbiomeMarker)
 register(SnowParam(4))
 ```
-Data loading
+#Data loading
 ```{r}
 tb_ec = read_tsv("Data FONCTIOMIC/counts_by_EC_number.norm.tsv")
 meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
@@ -28,13 +31,13 @@ tb_cog = read_tsv("Data FONCTIOMIC/counts_by_COG.raw.tsv")
 COG_anno = read_delim("description_mapfiles/cog_info.tsv.gz", delim = "\t", col_names = FALSE)
 names(COG_anno) = c("COG_number","description")
 ```
-**Data description**
+#**Data description**
 * tb_ec: abundance of EC number in the output of MGS
 * meta: metadata of samples
 * EC_number_class: description of EC number
 * tb_ec_cleaned: abundance of EC number in the output of MGS after cleaning
-Part I : _Analysis of EC abundance in the output of MGS_
-Tidy up the table abundance of EC
+#Part I : _Analysis of EC abundance in the output of MGS_
+##Tidy up the table abundance of EC
 ```{r}
 tb_ec = as.data.frame(tb_ec)
 row.names(tb_ec) = paste0("EC:", tb_ec$EC_number)
@@ -43,7 +46,7 @@ tb_ec_cleaned = tb_ec_cleaned[,-c(1,50)]
 #overlapping_ec = read_rds("Data FONCTIOMIC/overlapping_ec.rds")
 #tb_ec_cleaned = tb_ec_cleaned[overlapping_ec,]
 ```
-PCA analysis (VST)
+##PCA analysis (VST)
 ```{r}
 meta$Category = as.factor(meta$Category)
 meta$Category = relevel(meta$Category, ref = "Control Cropland")
@@ -76,7 +79,7 @@ ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCA_EC_MGS.png", width = 8, height = 10, dpi = 300)
 ```
-PCA analysis (Raw data)
+##PCA analysis (Raw data)
 ```{r}
 res.pca = PCA(tb_ec_cleaned, scale.unit = FALSE, graph = FALSE)
 pcaData = as.data.frame(res.pca$var$coord[,1:2])
@@ -101,7 +104,7 @@ ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCA_EC_MGS_raw.png", width = 8, height = 10, dpi = 300)
 ```
-PCA analysis (CLR transformation of package microbiomeMarker)
+##PCA analysis (CLR transformation of package microbiomeMarker)
 ```{r}
 tb_ec_clr = microbiomeMarker::normalize(tb_ec_cleaned, method = "CLR")
 res.pca = PCA(tb_ec_clr, scale.unit = FALSE,graph = FALSE)
@@ -127,7 +130,7 @@ ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCA_EC_MGS_CLR.png", width = 8, height = 10, dpi = 300)
 ```
-PCA analysis (CLR transformation + imputation)
+##PCA analysis (CLR transformation + imputation)
 ```{r}
 tb_ec_clr1 = tb_ec_cleaned
 tb_ec_clr1[tb_ec_clr1 == 0] = 0.01
@@ -155,7 +158,7 @@ ggplot(pcaData, aes(x = PC1, y = PC2, color = Category)) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCA_EC_MGS_CLR_imp.png", width = 8, height = 10, dpi = 300)
 ```
-PCoA analysis (Data raw)
+##PCoA analysis (Data raw)
 ```{r}
 res.pcoa = ape::pcoa(vegan::vegdist(t(tb_ec_cleaned), method = "bray"))
 pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
@@ -180,7 +183,7 @@ ggplot(pcoaData) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_EC_MGS.png", width = 8, height = 10, dpi = 300)
 ```
-PCoA analysis (CLR transformation)
+##PCoA analysis (CLR transformation)
 ```{r}
 res.pcoa = ape::pcoa(vegan::vegdist(t(tb_ec_clr), method = "euclidean"))
 pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
@@ -205,7 +208,7 @@ ggplot(pcoaData) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_EC_MGS_clr.png", width = 8, height = 10, dpi = 300)
 ```
-PCoA analysis (CLR transformation + imputation)
+##PCoA analysis (CLR transformation + imputation)
 ```{r}
 res.pcoa = ape::pcoa(vegan::vegdist(t(tb_ec_clr1), method = "euclidean"))
 pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
@@ -230,7 +233,7 @@ ggplot(pcoaData) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_EC_MGS_clr_imp.png", width = 8, height = 10, dpi = 300)
 ```
-PCoA analysis (VST)
+##PCoA analysis (VST)
 ```{r}
 res.pcoa = ape::pcoa(vegan::vegdist(t(assay(vst_MGS)), method = "euclidean"))
 pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
@@ -255,7 +258,7 @@ ggplot(pcoaData) +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_EC_MGS_VST.png", width = 8, height = 10, dpi = 300)
 ```
-Define of variables for subset matrix of EC
+##Define of variables for subset matrix of EC
 ```{r}
 for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")){
   for (time in c("0","3","51","125")){
@@ -271,7 +274,7 @@ grass_3 = c(Control_Grassland_3,Amended_Grassland_3)
 grass_51 = c(Control_Grassland_51,Amended_Grassland_51)
 grass_125 = c(Control_Grassland_125,Amended_Grassland_125)
 ```
-DAG analysis for Cropland
+##Differentially abundance analysis for Cropland
 ```{r}
 res4_df <- data.frame( baseMean=numeric(), 
                         log2FoldChange=numeric(), 
@@ -302,7 +305,7 @@ res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
 res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
 write_rds(res4_df, "Output/DA_EC_MGS_Crops.rds")
 ```
-DAG analysis for Grassland
+##Differentially abundance analysis for Grassland
 ```{r}
 res4_df <- data.frame( baseMean=numeric(), 
                         log2FoldChange=numeric(), 
@@ -332,22 +335,22 @@ res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
 res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
 write_rds(res4_df, "Output/DA_EC_MGS_Grass.rds")
 ```
-Heatmap of EC
-Data transformation
+#Heatmap of EC
+##Data transformation
 ```{r}
 DA_EC_MGS = read_rds("Output/DA_EC_MGS_Crops.rds")
 count_MGS = tb_ec_cleaned
 count_MGS = microbiomeMarker::normalize(count_MGS, method = "CLR")
 count_MGS = count_MGS %>% as.data.frame %>% filter(rownames(count_MGS) %in% DA_EC_MGS$EC_number)
 ```
-Distance between the variables (intergroups, Control vs Amended)
+##Distance between the variables (intergroups, Control vs Amended)
 ```{r}
 dist_a_vs_c = vegan::vegdist(t(count_MGS), method = "euclidean")
 tree_a_vs_c = hclust(dist_a_vs_c, method = "complete")
 cutree_a_vs_c = cutree(tree_a_vs_c, k = 4 )
 table(cutree_a_vs_c)
 ```
-Distance between the observation (EC)
+##Distance between the observation (EC)
 ```{r}
 dist_ec = vegan::vegdist(count_MGS, method = "euclidean")
 tree_ec = hclust(dist_ec, method = "complete")
@@ -355,7 +358,7 @@ tree_ec = hclust(dist_ec, method = "complete")
 cutree_ec = cutree(tree_ec, k = 5 )
 table(cutree_ec)
 ```
-Heatmap ##voir avec Domitille
+##Heatmap <!--Voir avec Domitille-->
 ```{r}
 anno_col = as.data.frame(meta[,c("Category","time")])
 colnames(anno_col) = c("Groups","Time")

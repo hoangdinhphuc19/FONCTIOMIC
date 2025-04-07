@@ -448,7 +448,7 @@ ggplot(pcoaData) +
     scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
                                   "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
                         guide=FALSE) + 
-    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+    scale_fill_manual(values = c("Amended Crop0land"="#fbbb3f", "Control Cropland"="#f2e0bd",
                                   "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
                       labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
                                   "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
