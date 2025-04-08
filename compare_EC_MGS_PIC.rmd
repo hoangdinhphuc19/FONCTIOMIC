@@ -14,15 +14,19 @@ library(gridExtra)
 ```
 
 ```{r}
-EC_P2 = read.delim("Data FONCTIOMIC/EC_P2.txt", sep ="\t")
-EC_MGS = read.delim("Data FONCTIOMIC/EC_MGS.txt", sep ="\t")
-EC_P2 = as.matrix(EC_P2)
-EC_MGS = as.matrix(EC_MGS)
-EC_number_class = read.delim("description_mapfiles/EC_number_class.txt", sep ="\t")
-rownames(EC_number_class) = EC_number_class$EC_number
-EC_class = as.data.frame(EC_number_class[,-1])
-colnames(EC_class) = "EC_class"
-rownames(EC_class) = EC_number_class$EC_number
+meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
+meta = as.data.frame(meta)
+row.names(meta) = meta$sample_id
+MGS_EC = read_rds("tb_ec_cleaned.rds")
+MGS_EC = as.matrix(MGS_EC)
+p2_EC = read_rds("Data FONCTIOMIC/picrust2out_ver2/p2_EC.rds")
+p2_EC = as.matrix(p2_EC)
+overlapping_EC = intersect(rownames(p2_EC), rownames(MGS_EC))
+MGS_EC = MGS_EC[overlapping_EC,colnames(MGS_EC) %in% rownames(meta)]
+p2_EC = p2_EC[overlapping_EC,colnames(p2_EC) %in% rownames(meta)]
+p2_EC = p2_EC[,str_sort(colnames(p2_EC),decreasing = F)]
+EC_number_class = read.table("description_mapfiles/EC_number_class.txt")
+rm( overlapping_EC)
 ```
 Correlation of Spearman on EC abundance between PICRUSt2 and MGS (Robust)
 ```{r}
@@ -143,6 +147,59 @@ view(top_EC_T0_CCvsGC_MGS)
 top_EC_T0_CCvsGC_P2=left_join(rownames_to_column(top_EC_T0_CCvsGC_P2), EC_number_class, by = c("rowname" = "EC_number"))
 view(top_EC_T0_CCvsGC_P2)
 ```
+Definition des variables
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")){
+  for (time in c("0","3","51","125")){
+  assign(paste0(gsub(" ","_",groups),"_",time), str_sort(rownames(meta[meta$Category == groups & meta$time == time,])))
+  }
+}
+rm(groups,time)
+```
+Extrait des matrices de données de MGS et PICRUSt2
+MGS
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), MGS_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+P2
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("P2_mat_", gsub(" ", "_", groups), "_", time), p2_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
+  }
+}
+```
+Calcul des différences entre les groupes de contrôle et de résidus
+MGS
+```{r}
+#Cropland
+dif_C_0 = mat_Control_Cropland_0 - mat_Amended_Cropland_0
+dif_C_3 = mat_Control_Cropland_3 - mat_Amended_Cropland_3
+dif_C_51 = mat_Control_Cropland_51 - mat_Amended_Cropland_51
+dif_C_125 = mat_Control_Cropland_125 - mat_Amended_Cropland_125
+#Grassland
+dif_G_0 = mat_Control_Grassland_0 - mat_Amended_Grassland_0
+dif_G_3 = mat_Control_Grassland_3 - mat_Amended_Grassland_3
+dif_G_51 = mat_Control_Grassland_51 - mat_Amended_Grassland_51
+dif_G_125 = mat_Control_Grassland_125 - mat_Amended_Grassland_125
+```
+P2
+```{r}
+#Cropland
+P2_dif_C_0 = P2_mat_Control_Cropland_0 - P2_mat_Amended_Cropland_0
+P2_dif_C_3 = P2_mat_Control_Cropland_3 - P2_mat_Amended_Cropland_3
+P2_dif_C_51 = P2_mat_Control_Cropland_51 - P2_mat_Amended_Cropland_51
+P2_dif_C_125 = P2_mat_Control_Cropland_125 - P2_mat_Amended_Cropland_125
+#Grassland
+P2_dif_G_0 = P2_mat_Control_Grassland_0 - P2_mat_Amended_Grassland_0
+P2_dif_G_3 = P2_mat_Control_Grassland_3 - P2_mat_Amended_Grassland_3
+P2_dif_G_51 = P2_mat_Control_Grassland_51 - P2_mat_Amended_Grassland_51
+P2_dif_G_125 = P2_mat_Control_Grassland_125 - P2_mat_Amended_Grassland_125
+```
 Correlation of Spearman on the difference of EC abundance between Control vs Residues (Cropland) from PICRUSt2 and MGS 
 ```{r}
 #At time 0
@@ -155,6 +212,18 @@ diag_cor_C_0 = merge(diag_cor_C_0, EC_number_class, by = "EC_number")
 plot_C_0 = ggplot(diag_cor_C_0, aes(x = diag_cor_C_0, y = EC_class, group = EC_class)) +
   geom_boxplot(fill="gray", alpha=0.2)+
   ggtitle("T0") +
+  xlab("Spearman correlation") +
+  ylab("EC class")
+#At time 3
+cor_C_3 = cor(t(dif_C_3),t(P2_dif_C_3), method = "spearman")
+corr_C_3 = cor.test(t(dif_C_3),t(P2_dif_C_3), method = "spearman")
+diag_cor_C_3= diag(cor_C_3)
+diag_cor_C_3 = as.data.frame(diag_cor_C_3)
+diag_cor_C_3$EC_number = rownames(diag_cor_C_3)
+diag_cor_C_3 = merge(diag_cor_C_3, EC_number_class, by = "EC_number")
+plot_C_3 = ggplot(diag_cor_C_3, aes(x = diag_cor_C_3, y = EC_class, group = EC_class)) +
+  geom_boxplot(fill="gray", alpha=0.2)+
+  ggtitle("T3") +
   xlab("Spearman correlation") +
   ylab("EC class")
 #At time 51
@@ -184,13 +253,13 @@ plot_C_125 = ggplot(diag_cor_C_125, aes(x = diag_cor_C_125, y = EC_class, group 
 ```
 Save the plot and add table of Rho value & P value 
 ```{r}
-table_Crop = data.frame(Rho = c(corr_C_0$estimate, corr_C_51$estimate, corr_C_125$estimate),
-                        P_value = c(corr_C_0$p.value, corr_C_51$p.value, corr_C_125$p.value),
-                        Time = c("T0", "T51", "T125"))
+table_Crop = data.frame(Rho = c(corr_C_0$estimate,corr_C_3$estimate, corr_C_51$estimate, corr_C_125$estimate),
+                        P_value = c(corr_C_0$p.value,corr_C_3$p.value, corr_C_51$p.value, corr_C_125$p.value),
+                        Time = c("T0","T3", "T51", "T125"))
 rownames(table_Crop) = table_Crop$Time
 table_Crop = table_Crop[,-3]
 table_Crop = round(table_Crop, 5)
-grid_plot_C = grid.arrange(plot_C_0, plot_C_51, plot_C_125, nrow =2,
+grid_plot_C = grid.arrange(plot_C_0,plot_C_3, plot_C_51, plot_C_125, nrow =2,
 top = "Spearman correlation of differences EC abundance between Control vs Residues (Cropland) from PICRUSt2 and MGS",
 tableGrob(table_Crop))
 ggsave("Output/Spearman_correlation_Cropland.png", grid_plot_C, width = 10, height = 10, units = "in")
@@ -198,8 +267,8 @@ ggsave("Output/Spearman_correlation_Cropland.png", grid_plot_C, width = 10, heig
 Correlation of Spearman on the difference of EC abundance between Control vs Residues (Grassland) from PICRUSt2 and MGS 
 ```{r}
 #At time 0
-cor_G_0 = cor(t(dif_G_0[overlapping_EC,]),t(P2_dif_G_0[overlapping_EC,]), method = "spearman")
-corr_G_0 = cor.test(t(dif_G_0[overlapping_EC,]),t(P2_dif_G_0[overlapping_EC,]), method = "spearman")
+cor_G_0 = cor(t(dif_G_0),t(P2_dif_G_0), method = "spearman")
+corr_G_0 = cor.test(t(dif_G_0),t(P2_dif_G_0), method = "spearman")
 diag_cor_G_0 = diag(cor_G_0)
 diag_cor_G_0 = as.data.frame(diag_cor_G_0)
 diag_cor_G_0$EC_number = rownames(diag_cor_G_0)
@@ -210,8 +279,8 @@ plot_G_0 = ggplot(diag_cor_G_0, aes(x = diag_cor_G_0, y = EC_class, group = EC_c
   xlab("Spearman correlation") +
   ylab("EC class")
 #At time 3
-cor_G_3 = cor(t(dif_G_3[overlapping_EC,]),t(P2_dif_G_3[overlapping_EC,]), method = "spearman")
-corr_G_3 = cor.test(t(dif_G_3[overlapping_EC,]),t(P2_dif_G_3[overlapping_EC,]), method = "spearman")
+cor_G_3 = cor(t(dif_G_3),t(P2_dif_G_3), method = "spearman")
+corr_G_3 = cor.test(t(dif_G_3),t(P2_dif_G_3), method = "spearman")
 diag_cor_G_3 = diag(cor_G_3)
 diag_cor_G_3 = as.data.frame(diag_cor_G_3)
 diag_cor_G_3$EC_number = rownames(diag_cor_G_3)
@@ -222,8 +291,8 @@ plot_G_3 = ggplot(diag_cor_G_3, aes(x = diag_cor_G_3, y = EC_class, group = EC_c
   xlab("Spearman correlation") +
   ylab("EC class")
 #At time 51
-cor_G_51 = cor(t(dif_G_51[overlapping_EC,]),t(P2_dif_G_51[overlapping_EC,]), method = "spearman")
-corr_G_51 = cor.test(t(dif_G_51[overlapping_EC,]),t(P2_dif_G_51[overlapping_EC,]), method = "spearman")
+cor_G_51 = cor(t(dif_G_51),t(P2_dif_G_51), method = "spearman")
+corr_G_51 = cor.test(t(dif_G_51),t(P2_dif_G_51), method = "spearman")
 diag_cor_G_51 = diag(cor_G_51)
 diag_cor_G_51 = as.data.frame(diag_cor_G_51)
 diag_cor_G_51$EC_number = rownames(diag_cor_G_51)
@@ -233,17 +302,31 @@ plot_G_51 = ggplot(diag_cor_G_51, aes(x = diag_cor_G_51, y = EC_class, group = E
   ggtitle("T51") +
   xlab("Spearman correlation") +
   ylab("EC class")
+#At time 125
+cor_G_125 = cor(t(dif_G_125),t(P2_dif_G_125), method = "spearman")
+corr_G_125 = cor.test(t(dif_G_125),t(P2_dif_G_125), method = "spearman")
+diag_cor_G_125 = diag(cor_G_125)
+diag_cor_G_125 = as.data.frame(diag_cor_G_125)
+diag_cor_G_125$EC_number = rownames(diag_cor_G_125)
+diag_cor_G_125 = merge(diag_cor_G_125, EC_number_class, by = "EC_number")
+plot_G_125 = ggplot(diag_cor_G_125, aes(x = diag_cor_G_125, y = EC_class, group = EC_class)) +
+  geom_boxplot(fill="gray", alpha=0.2)+
+  ggtitle("T125") +
+  xlab("Spearman correlation") +
+  ylab("EC class")
+
 ```
 Save the plot and add table of Rho value & P value
 ```{r}
-table_Grass = data.frame(Rho = c(corr_G_0$estimate, corr_G_3$estimate, corr_G_51$estimate),
-                        P_value = c(corr_G_0$p.value, corr_G_3$p.value, corr_G_51$p.value),
-                        Time = c("T0", "T3", "T51"))
+table_Grass = data.frame(Rho = c(corr_G_0$estimate, corr_G_3$estimate, corr_G_51$estimate, corr_G_125$estimate),
+                        P_value = c(corr_G_0$p.value, corr_G_3$p.value, corr_G_51$p.value, corr_G_125$p.value),
+                        Time = c("T0", "T3", "T51","125"))
 rownames(table_Grass) = table_Grass$Time
 table_Grass = table_Grass[,-3]
 table_Grass = round(table_Grass, 5)
-grid_plot_G = grid.arrange(plot_G_0, plot_G_3, plot_G_51, nrow =2,
+grid_plot_G = grid.arrange(plot_G_0, plot_G_3, plot_G_51,plot_G_125, nrow =2,
 top = "Spearman correlation of differences EC abundance between Control vs Residues (Grassland) from PICRUSt2 and MGS",
 tableGrob(table_Grass))
 ggsave("Output/Spearman_correlation_Grassland.png", grid_plot_G, width = 10, height = 10, units = "in")
 ```
+

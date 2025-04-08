@@ -74,11 +74,9 @@ for (groups in c("Control_Cropland","Amended_Cropland","Control_Grassland","Amen
             diag(get(paste0("cor_", groups, "_", time))))
         assign(paste0("corr_", groups, "_", time), 
             cor.test(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
-
   }
 }
 ```
-
 ##Data transformation
 1) Data transformation : DESeq2 TMM normalization
 ```{r}
@@ -245,46 +243,34 @@ for (groups in c("control","amended")) {
   }
 }
 ```
-Test de normalité
 ```{r}
-for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
-  for (time in c("0","3","51","125")) {
-    assign(paste0("mat_", gsub(" ", "_", groups), "_", time), MGS_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
-  }
-}
+cor_global = cor(t(MGS_EC_vst), t(p2_EC_vst), method = "spearman")
+d_cor_global = as.data.frame(diag(cor_global))
+names(d_cor_global) = c("coeff")
+d_cor_global$EC_number = rownames(d_cor_global)
+corr_global = cor.test(t(MGS_EC_vst), t(p2_EC_vst), method = "spearman")
+d_cor_global = merge(d_cor_global, EC_number_class, by = "EC_number")
+ggplot(d_cor_global, aes(x = coeff, y = EC_class, group = EC_class)) +
+  geom_boxplot(fill="gray", alpha=0.2)+
+  ggtitle("Correlation of Spearman on data global (VST)") +
+  xlab("Spearman correlation") +
+  ylab("EC class")
 ```
-
 ```{r}
-for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")) {
-  for (time in c("0","3","51","125")) {
-    assign(paste0("P2_mat_", gsub(" ", "_", groups), "_", time), p2_EC[, get(paste0(gsub(" ", "_", groups), "_", time))])
-  }
-}
+tb_ec_vst = round(MGS_EC,0)
+dds_MGS = DESeqDataSetFromMatrix(countData = tb_ec_vst,
+                                  colData = meta,
+                                  design = ~ Category + time, tidy = FALSE)
+vst_MGS = vst(dds_MGS,blind = FALSE) # variance stabilizing transformation
+MGS_EC_vst = assay(vst_MGS)
+p2_ec_vst = round(p2_EC,0)
+dds_P2 = DESeqDataSetFromMatrix(countData = p2_ec_vst,
+                                  colData = meta,
+                                  design = ~ Category + time, tidy = FALSE)
+vst_P2 = vst(dds_P2,blind = FALSE) # variance stabilizing transformation
+p2_EC_vst = assay(vst_P2)
 ```
-
-```{r}
-ggpairs(mat_control_0,upper=list(continuous=wrap(ggally_cor,method = "spearman")))
-ggpairs(P2_mat_control_0,upper=list(continuous=wrap(ggally_cor,method = "spearman")))
-```
-
-```{r}
-CC0_MGSvsP2 = cbind(mat_Control_Cropland_0,P2_mat_Control_Cropland_0)
-colnames(CC0_MGSvsP2) = c(paste0("MGS_",colnames(mat_Control_Cropland_0)),paste0("P2_",colnames(P2_mat_Control_Cropland_0)))
-ggpairs(CC0_MGSvsP2,upper=list(continuous=wrap(ggally_cor,method = "spearman")))
-```
-
-```{r}
-AG51_MGSvsP2 = cbind(mat_Amended_Grassland_51,P2_mat_Amended_Grassland_51)
-colnames(AG51_MGSvsP2) = c(paste0("MGS_",colnames(mat_Amended_Grassland_51)),paste0("P2_",colnames(P2_mat_Amended_Grassland_51)))
-ggpairs(AG51_MGSvsP2,upper=list(continuous=wrap(ggally_cor,method = "spearman")))
-```
-
-```{r}
-control0_MGSvsP2 = cbind(mat_control_0,P2_mat_control_0)
-colnames(control0_MGSvsP2) = c(paste0("MGS_",colnames(mat_control_0)),paste0("P2_",colnames(P2_mat_control_0)))
-ggpairs(control0_MGSvsP2,upper=list(continuous=wrap(ggally_cor,method = "spearman")))
-```
-
+##Scatterplot
 ```{r}
 threshold = 2
 scatter_data <- data.frame(x = as.vector(MGS_EC_imp), y = as.vector(p2_EC_imp))
@@ -361,7 +347,7 @@ plot_grid_Crop <- ggarrange(splot_Control_Cropland_0, splot_Control_Cropland_3, 
                             splot_Amended_Cropland_0, splot_Amended_Cropland_3, splot_Amended_Cropland_51, splot_Amended_Cropland_125,
           ncol = 4, nrow = 2)
 plot_grid_Grass <- ggarrange(splot_Control_Grassland_0, splot_Control_Grassland_3, splot_Control_Grassland_51, splot_Control_Grassland_125,
-          splot_Amended_Cropland_0, splot_Amended_Cropland_3, splot_Amended_Cropland_51, splot_Amended_Cropland_125,
+          splot_Amended_Grassland_0, splot_Amended_Grassland_3, splot_Amended_Grassland_51, splot_Amended_Grassland_125,
           ncol = 4, nrow = 2)
 plot_grid_Crop <- annotate_figure(plot_grid_Crop, top = text_grob("Cropland", face = "bold", size = 14))
 plot_grid_Grass <- annotate_figure(plot_grid_Grass, top = text_grob("Grassland", face = "bold", size = 14))
