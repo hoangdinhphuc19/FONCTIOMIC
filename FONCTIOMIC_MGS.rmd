@@ -160,7 +160,10 @@ ggsave("Output/PCA_EC_MGS_CLR_imp.png", width = 8, height = 10, dpi = 300)
 ```
 ##PCoA analysis (Data raw)
 ```{r}
+set.seed(38)
 res.pcoa = ape::pcoa(vegan::vegdist(t(tb_ec_cleaned), method = "bray"))
+permanova = vegan::adonis2(as.matrix(vegan::vegdist(t(tb_ec_cleaned)),method = "bray") ~ Category * time, data = meta, method = "bray", permutations = 999,sqrt.dist = FALSE, add = FALSE, by = "terms")
+pv = permanova$`Pr(>F)`[1]
 pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
 pcoaData$sample = rownames(pcoaData)
 pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
@@ -179,13 +182,18 @@ ggplot(pcoaData) +
                                   "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
                       labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
                                   "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+    xlab(paste0("Axis.1 [", round(res.pcoa$values$Relative_eig[[1]] * 100, digits = 2), " %] ", "(pvalue=", pv, ")")) +
+    ylab(paste0("Axis.2 [", round(res.pcoa$values$Relative_eig[[2]] * 100, digits = 2), " %]")) +
   guides(color = guide_legend(title = "Groups")) +  
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_EC_MGS.png", width = 8, height = 10, dpi = 300)
 ```
 ##PCoA analysis (CLR transformation)
 ```{r}
+set.seed(38)
 res.pcoa = ape::pcoa(vegan::vegdist(t(tb_ec_clr), method = "euclidean"))
+permanova = vegan::adonis2(as.matrix(vegan::vegdist(t(tb_ec_clr)),method = "euclidean") ~ Category * time, data = meta, method = "euclidean", permutations = 999,sqrt.dist = FALSE, add = FALSE, by = "terms")
+pv = permanova$`Pr(>F)`[1]
 pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
 pcoaData$sample = rownames(pcoaData)
 pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
@@ -204,13 +212,18 @@ ggplot(pcoaData) +
                                   "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
                       labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
                                   "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+    xlab(paste0("Axis.1 [", round(res.pcoa$values$Relative_eig[[1]] * 100, digits = 2), " %] ", "(pvalue=", pv, ")")) +
+    ylab(paste0("Axis.2 [", round(res.pcoa$values$Relative_eig[[2]] * 100, digits = 2), " %]")) +
   guides(color = guide_legend(title = "Groups")) +  
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_EC_MGS_clr.png", width = 8, height = 10, dpi = 300)
 ```
 ##PCoA analysis (CLR transformation + imputation)
 ```{r}
+set.seed(38)
 res.pcoa = ape::pcoa(vegan::vegdist(t(tb_ec_clr1), method = "euclidean"))
+permanova = vegan::adonis2(as.matrix(vegan::vegdist(t(tb_ec_clr1)),method = "euclidean") ~ Category * time, data = meta, method = "euclidean", permutations = 999,sqrt.dist = FALSE, add = FALSE, by = "terms")
+pv = permanova$`Pr(>F)`[1]
 pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
 pcoaData$sample = rownames(pcoaData)
 pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
@@ -229,13 +242,18 @@ ggplot(pcoaData) +
                                   "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
                       labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
                                   "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+    xlab(paste0("Axis.1 [", round(res.pcoa$values$Relative_eig[[1]] * 100, digits = 2), " %] ", "(pvalue=", pv, ")")) +
+    ylab(paste0("Axis.2 [", round(res.pcoa$values$Relative_eig[[2]] * 100, digits = 2), " %]")) +
   guides(color = guide_legend(title = "Groups")) +  
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_EC_MGS_clr_imp.png", width = 8, height = 10, dpi = 300)
 ```
 ##PCoA analysis (VST)
 ```{r}
+set.seed(38)
 res.pcoa = ape::pcoa(vegan::vegdist(t(assay(vst_MGS)), method = "euclidean"))
+permanova = vegan::adonis2(as.matrix(vegan::vegdist(t(assay(vst_MGS))),method = "euclidean") ~ Category * time, data = meta, method = "euclidean", permutations = 999,sqrt.dist = FALSE, add = FALSE, by = "terms")
+pv = permanova$`Pr(>F)`[1]
 pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
 pcoaData$sample = rownames(pcoaData)
 pcoaData = left_join(pcoaData, meta[,c("Category","time","sample_id")], join_by(sample == sample_id), )
@@ -254,6 +272,8 @@ ggplot(pcoaData) +
                                   "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
                       labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
                                   "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  xlab(paste0("Axis.1 [", round(res.pcoa$values$Relative_eig[[1]] * 100, digits = 2), " %] ", "(pvalue=", pv, ")")) +
+  ylab(paste0("Axis.2 [", round(res.pcoa$values$Relative_eig[[2]] * 100, digits = 2), " %]")) +
   guides(color = guide_legend(title = "Groups")) +  
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_EC_MGS_VST.png", width = 8, height = 10, dpi = 300)
