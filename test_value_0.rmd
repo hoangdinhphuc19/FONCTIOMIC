@@ -213,7 +213,6 @@ amended_3 = c(Amended_Cropland_3,Amended_Grassland_3)
 amended_51 = c(Amended_Cropland_51,Amended_Grassland_51)
 amended_125 = c(Amended_Cropland_125,Amended_Grassland_125)
 ```
-
 ```{r}
 for (groups in c("control","amended")) {
   for (time in c("0","3","51","125")) {
@@ -221,11 +220,37 @@ for (groups in c("control","amended")) {
   }
 }
 ```
-
 ```{r}
 for (groups in c("control","amended")) {
   for (time in c("0","3","51","125")) {
     assign(paste0("P2_mat_", groups, "_", time), p2_EC[, get(paste0(groups, "_", time))])
+  }
+}
+```
+Regroupement des abondances ECs en fonction des occupations de sol
+```{r}
+crop_0 = c(Control_Cropland_0,Amended_Cropland_0)
+crop_3 = c(Control_Cropland_3,Amended_Cropland_3)
+crop_51 = c(Control_Cropland_51,Amended_Cropland_51)
+crop_125 = c(Control_Cropland_125,Amended_Cropland_125)
+grass_0 = c(Control_Grassland_0,Amended_Grassland_0)
+grass_3 = c(Control_Grassland_3,Amended_Grassland_3)
+grass_51 = c(Control_Grassland_51,Amended_Grassland_51)
+grass_125 = c(Control_Grassland_125,Amended_Grassland_125)
+```
+
+```{r}
+for (groups in c("crop","grass")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", groups, "_", time), MGS_EC_vst[, get(paste0(groups, "_", time))])
+  }
+}
+```
+
+```{r}
+for (groups in c("crop","grass")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("P2_mat_", groups, "_", time), p2_EC_vst[, get(paste0(groups, "_", time))])
   }
 }
 ```
@@ -242,6 +267,41 @@ for (groups in c("control","amended")) {
 
   }
 }
+plot_cor = list()
+for (groups in c("crop","grass")) {
+  for (time in c("0","3","51","125")) {
+    d_cor = as.data.frame(get(paste0("d_cor_", groups, "_", time)))
+    names(d_cor) = c("coeff")
+    d_cor$EC_number = rownames(d_cor)
+    d_cor = merge(d_cor, EC_number_class, by = "EC_number")
+    plot_cor[[paste0(groups, "_", time)]] = ggplot(d_cor, aes(x = coeff, y = EC_class, group = EC_class, fill = EC_class)) +
+      geom_boxplot(alpha=0.2)+
+      geom_jitter(color="black", size=0.4, alpha=0.9)+
+      geom_vline(xintercept = 0, linetype="dotted", 
+                color = "#000000", linewidth=0.4)+
+      ggtitle(paste("Correlation of Spearman on data", groups, time)) +
+      xlab("Spearman correlation") +
+      ylab("EC class")
+  }
+}
+plot_grid_Crop <- ggarrange(plot_cor$crop_0, plot_cor$crop_3, plot_cor$crop_51, plot_cor$crop_125,
+                            ncol = 2, nrow = 2)
+plot_grid_Grass <- ggarrange(plot_cor$grass_0, plot_cor$grass_3, plot_cor$grass_51, plot_cor$grass_125,
+                            ncol = 2, nrow = 2)
+d_cor_control_0 = as.data.frame(d_cor_control_0)
+names(d_cor_control_0) = c("coeff")
+d_cor_control_0 = d_cor_control_0 %>% filter(coeff > 0)
+d_cor_control_3 = as.data.frame(d_cor_control_3)
+names(d_cor_control_3) = c("coeff")
+d_cor_control_3 = d_cor_control_3 %>% filter(coeff > 0)
+d_cor_control_51 = as.data.frame(d_cor_control_51)
+names(d_cor_control_51) = c("coeff")
+d_cor_control_51 = d_cor_control_51 %>% filter(coeff > 0)
+d_cor_control_125 = as.data.frame(d_cor_control_125)
+names(d_cor_control_125) = c("coeff")
+d_cor_control_125 = d_cor_control_125 %>% filter(coeff > 0)
+b = intersect(intersect(rownames(d_cor_control_0),rownames(d_cor_control_3)),
+              intersect(rownames(d_cor_control_51),rownames(d_cor_control_125)))
 ```
 ```{r}
 cor_global = cor(t(MGS_EC_vst), t(p2_EC_vst), method = "spearman")
@@ -273,8 +333,8 @@ p2_EC_vst = assay(vst_P2)
 ##Scatterplot
 ```{r}
 threshold = 2
-scatter_data <- data.frame(x = as.vector(MGS_EC_imp), y = as.vector(p2_EC_imp))
-scatter_data$EC_number = rep(rownames(MGS_EC), ncol(MGS_EC))
+scatter_data <- data.frame(x = as.vector(MGS_EC_imp[a,]), y = as.vector(p2_EC_imp[a,]))
+scatter_data$EC_number = rep(rownames(MGS_EC_imp[a,]), ncol(MGS_EC_imp[a,]))
 scatter_data = left_join(scatter_data, EC_number_class, by = "EC_number")
 scatter_data$EC_class = as.factor(scatter_data$EC_class)
 scatter_data <- scatter_data %>%
@@ -298,17 +358,11 @@ ec_colors <- c("Hydrolases" = "#E41A1C",  # Red
   "Transferases" = "#A65628")  # Yellow)
 scatterplot_global <- ggplot(scatter_data, aes(x = x, y = y, color = EC_class)) +
   geom_point(size = 2, alpha = 0.8) +  # Adjust point size and transparency
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +  # Identity line
-  geom_abline(slope = 1, intercept = threshold, linetype = "dotted", color = "red") +  # Upper bound
-  geom_abline(slope = 1, intercept = -threshold, linetype = "dotted", color = "blue") +  # Lower bound
   labs(x = "MGS EC Abundance", y = "P2 EC Abundance", title = "MGS vs P2 Comparison by EC Class") +
   scale_color_manual(values = ec_colors) +  # Apply the custom color palette
   theme_bw()+
-  theme(
-plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
-    axis.title = element_text(size = 14),
-    legend.title = element_text(size = 12),
-    legend.text = element_text(size = 10))
+  theme()
+
 ggsave(plot = scatterplot_global, filename = "Output/scatterplot_global.png", width = 15, height = 25, dpi = 300)
 ```
 
@@ -318,9 +372,9 @@ for (groups in c("Control_Cropland","Amended_Cropland","Control_Grassland","Amen
      mat_MGS <- get(paste0("mat_", groups, "_", time))
     mat_P2 <- get(paste0("P2_mat_", groups, "_", time))
     scatter_data_temp <- data.frame(
-      x = as.vector(mat_MGS),
-      y = as.vector(mat_P2),
-      EC_number = rep(rownames(mat_MGS), ncol(mat_MGS))
+      x = as.vector(mat_MGS[a,]),
+      y = as.vector(mat_P2[a,]),
+      EC_number = rep(rownames(mat_MGS[a,]), ncol(mat_MGS[a,]))
     )
     scatter_data_temp <- left_join(scatter_data_temp, EC_number_class, by = "EC_number")
     scatter_data_temp$EC_class <- as.factor(scatter_data_temp$EC_class)
