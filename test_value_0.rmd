@@ -237,6 +237,8 @@ grass_0 = c(Control_Grassland_0,Amended_Grassland_0)
 grass_3 = c(Control_Grassland_3,Amended_Grassland_3)
 grass_51 = c(Control_Grassland_51,Amended_Grassland_51)
 grass_125 = c(Control_Grassland_125,Amended_Grassland_125)
+crop = c(crop_0,crop_3,crop_51,crop_125)
+grass = c(grass_0,grass_3,grass_51,grass_125)
 ```
 
 ```{r}
@@ -256,7 +258,7 @@ for (groups in c("crop","grass")) {
 ```
 
 ```{r}
-for (groups in c("control","amended")) {
+for (groups in c("crop","grass")) {
   for (time in c("0","3","51","125")) {
     assign(paste0("cor_", groups, "_", time), 
             cor(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
@@ -267,6 +269,12 @@ for (groups in c("control","amended")) {
 
   }
 }
+ec_colors <- c("Hydrolases" = "#E41A1C",  # Red
+      "Isomerases" = "#377EB8",  # Blue
+      "Ligases" = "#4DAF4A",  # Green
+      "Lyases" = "#984EA3",  # Purple
+      "Oxidoreductases" = "#FF7F00",  # Orange
+      "Transferases" = "#A65628")  # Yellow)
 plot_cor = list()
 for (groups in c("crop","grass")) {
   for (time in c("0","3","51","125")) {
@@ -274,34 +282,40 @@ for (groups in c("crop","grass")) {
     names(d_cor) = c("coeff")
     d_cor$EC_number = rownames(d_cor)
     d_cor = merge(d_cor, EC_number_class, by = "EC_number")
-    plot_cor[[paste0(groups, "_", time)]] = ggplot(d_cor, aes(x = coeff, y = EC_class, group = EC_class, fill = EC_class)) +
-      geom_boxplot(alpha=0.2)+
+    plot_cor[[paste0(groups, "_", time)]] = ggplot(d_cor, aes(x = coeff, y = EC_class, group = EC_class, color = EC_class, fill = EC_class)) +
+      geom_boxplot(alpha=0.5)+
       geom_jitter(color="black", size=0.4, alpha=0.9)+
       geom_vline(xintercept = 0, linetype="dotted", 
-                color = "#000000", linewidth=0.4)+
-      ggtitle(paste("Correlation of Spearman on data", groups, time)) +
+                color = "#000000", linewidth=0.7)+
+      scale_fill_manual(values = ec_colors) +
+      scale_color_manual(values = ec_colors) +
+      theme(legend.key.size = unit(3, 'cm'),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 14)) +
+      ggtitle(paste("Correlation of Spearman on group", groups, time)) +
       xlab("Spearman correlation") +
       ylab("EC class")
   }
 }
+d_cor_crop_3 = as.data.frame(d_cor_crop_0)
+names(d_cor_crop_3) = c("coeff")
+d_cor_crop_3 = d_cor_crop_3 %>% filter(coeff > 0)
+
+d_cor_crop_51 = as.data.frame(d_cor_crop_51)
+names(d_cor_crop_51) = c("coeff")
+d_cor_crop_51 = d_cor_crop_51 %>% filter(coeff > 0)
+
+d_cor_crop_125 = as.data.frame(d_cor_crop_125)
+names(d_cor_crop_125) = c("coeff")
+d_cor_crop_125 = d_cor_crop_125 %>% filter(coeff > 0)
+
+a = intersect(intersect(rownames(d_cor_crop_3),rownames(d_cor_crop_51)),rownames(d_cor_crop_125))
 plot_grid_Crop <- ggarrange(plot_cor$crop_0, plot_cor$crop_3, plot_cor$crop_51, plot_cor$crop_125,
-                            ncol = 2, nrow = 2)
+                            ncol = 2, nrow = 2, common.legend = TRUE, legend = "right")
 plot_grid_Grass <- ggarrange(plot_cor$grass_0, plot_cor$grass_3, plot_cor$grass_51, plot_cor$grass_125,
-                            ncol = 2, nrow = 2)
-d_cor_control_0 = as.data.frame(d_cor_control_0)
-names(d_cor_control_0) = c("coeff")
-d_cor_control_0 = d_cor_control_0 %>% filter(coeff > 0)
-d_cor_control_3 = as.data.frame(d_cor_control_3)
-names(d_cor_control_3) = c("coeff")
-d_cor_control_3 = d_cor_control_3 %>% filter(coeff > 0)
-d_cor_control_51 = as.data.frame(d_cor_control_51)
-names(d_cor_control_51) = c("coeff")
-d_cor_control_51 = d_cor_control_51 %>% filter(coeff > 0)
-d_cor_control_125 = as.data.frame(d_cor_control_125)
-names(d_cor_control_125) = c("coeff")
-d_cor_control_125 = d_cor_control_125 %>% filter(coeff > 0)
-b = intersect(intersect(rownames(d_cor_control_0),rownames(d_cor_control_3)),
-              intersect(rownames(d_cor_control_51),rownames(d_cor_control_125)))
+                            ncol = 2, nrow = 2,common.legend = TRUE, legend = "right")
+ggsave(plot = plot_grid_Crop, filename = "Output/boxplot_cor_spearman_Crop.png", width = 20, height = 30, dpi = 300)
+ggsave(plot = plot_grid_Grass, filename = "Output/boxplot_cor_spearman_Grass.png", width = 20, height = 30, dpi = 300)
 ```
 ```{r}
 cor_global = cor(t(MGS_EC_vst), t(p2_EC_vst), method = "spearman")
@@ -330,26 +344,36 @@ dds_P2 = DESeqDataSetFromMatrix(countData = p2_ec_vst,
 vst_P2 = vst(dds_P2,blind = FALSE) # variance stabilizing transformation
 p2_EC_vst = assay(vst_P2)
 ```
+```{r}
+for (groups in c("crop","grass")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", groups, "_", time), MGS_EC_vst[, get(paste0(groups, "_", time))])
+  }
+}
+for (groups in c("crop","grass")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("P2_mat_", groups, "_", time), p2_EC_vst[, get(paste0(groups, "_", time))])
+  }
+}
+EC1 = as.data.frame(MGS_EC) %>% filter(grepl("EC:1", rownames(MGS_EC))) %>% rownames()
+EC2 = as.data.frame(MGS_EC) %>% filter(grepl("EC:2", rownames(MGS_EC))) %>% rownames()
+EC3 = as.data.frame(MGS_EC) %>% filter(grepl("EC:3", rownames(MGS_EC))) %>% rownames()
+EC4 = as.data.frame(MGS_EC) %>% filter(grepl("EC:4", rownames(MGS_EC))) %>% rownames()
+EC5 = as.data.frame(MGS_EC) %>% filter(grepl("EC:5", rownames(MGS_EC))) %>% rownames()
+EC6 = as.data.frame(MGS_EC) %>% filter(grepl("EC:6", rownames(MGS_EC))) %>% rownames()
+EC1_mod = intersect(EC1,a)
+EC2_mod = intersect(EC2,a)
+EC3_mod = intersect(EC3,a)
+EC4_mod = intersect(EC4,a)
+EC5_mod = intersect(EC5,a)
+EC6_mod = intersect(EC6,a)
+```
 ##Scatterplot
 ```{r}
-threshold = 2
-scatter_data <- data.frame(x = as.vector(MGS_EC_imp[a,]), y = as.vector(p2_EC_imp[a,]))
-scatter_data$EC_number = rep(rownames(MGS_EC_imp[a,]), ncol(MGS_EC_imp[a,]))
+scatter_data <- data.frame(x = as.vector(MGS_EC_imp[EC2_mod,crop]), y = as.vector(p2_EC_imp[EC2_mod,crop]))
+scatter_data$EC_number = rep(rownames(MGS_EC_imp[EC2_mod,crop]), ncol(MGS_EC_imp[EC2_mod,crop]))
 scatter_data = left_join(scatter_data, EC_number_class, by = "EC_number")
 scatter_data$EC_class = as.factor(scatter_data$EC_class)
-scatter_data <- scatter_data %>%
-  mutate(
-    deviation = y - x,  # Calculate deviation from the identity line y = x
-    classification = case_when(
-      deviation > threshold ~ "Overestimated",  # Above the upper bound
-      deviation < -threshold ~ "Underestimated",  # Below the lower bound
-      TRUE ~ "Within Zone"  # Within the confidence zone
-    )
-  )
-percentages <- scatter_data %>%
-  group_by(classification) %>%
-  dplyr::summarise(count = n()) %>%
-  mutate(percentage = count / sum(count) * 100)
 ec_colors <- c("Hydrolases" = "#E41A1C",  # Red
   "Isomerases" = "#377EB8",  # Blue
   "Ligases" = "#4DAF4A",  # Green
@@ -408,4 +432,71 @@ plot_grid_Grass <- annotate_figure(plot_grid_Grass, top = text_grob("Grassland",
 ggsave(plot = plot_grid_Crop, filename = "Output/scatterplot_EC_Crop.png", width = 40, height = 15, dpi = 300)
 ggsave(plot = plot_grid_Grass, filename = "Output/scatterplot_EC_Grass.png", width = 40, height = 15, dpi = 300)
 ```
+```{r}
+mat_MGS_crop = MGS_EC_imp[, crop]
+mat_P2_crop = p2_EC_imp[, crop]
+for (EC in c("EC1","EC2","EC3","EC4","EC5","EC6")){ 
+     mat_MGS <- mat_MGS_crop[get(paste0(EC)),]
+    mat_P2 <- mat_P2_crop[get(paste0(EC)),]
+    scatter_data_temp <- data.frame(
+      x = as.vector(mat_MGS),
+      y = as.vector(mat_P2),
+      EC_number = rep(rownames(mat_MGS), ncol(mat_MGS))
+    )
+    scatter_data_temp <- left_join(scatter_data_temp, EC_number_class, by = "EC_number")
+    scatter_data_temp$EC_class <- as.factor(scatter_data_temp$EC_class)
+    ec_colors <- c("Hydrolases" = "#E41A1C",  # Red
+      "Isomerases" = "#377EB8",  # Blue
+      "Ligases" = "#4DAF4A",  # Green
+      "Lyases" = "#984EA3",  # Purple
+      "Oxidoreductases" = "#FF7F00",  # Orange
+      "Transferases" = "#A65628")  # Yellow)
 
+     tmp <- ggplot(scatter_data_temp, aes(x = x, y = y, color = EC_class)) +
+        geom_point(size = 2, alpha = 0.8) +  # Adjust point size and transparency
+        labs(x = "MGS", y = "P2") +
+        scale_color_manual(values = ec_colors) +  # Apply the custom color palette
+        theme(
+        plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        axis.title = element_text(size = 14),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10))
+      
+      assign(paste0("splot_", EC, "_crop_a"), tmp)
+  }
+plot_grid_Crop <- ggarrange(splot_EC1_crop_a, splot_EC2_crop_a, splot_EC3_crop_a, splot_EC4_crop_a,
+                            splot_EC5_crop_a, splot_EC6_crop_a,ncol = 3, nrow = 2, legend = "bottom")
+```
+```{r}
+for (EC in c("EC1_mod","EC2_mod","EC3_mod","EC4_mod","EC5_mod","EC6_mod")){ 
+     mat_MGS <- mat_MGS_crop[get(paste0(EC)),]
+    mat_P2 <- mat_P2_crop[get(paste0(EC)),]
+    scatter_data_temp <- data.frame(
+      x = as.vector(mat_MGS),
+      y = as.vector(mat_P2),
+      EC_number = rep(rownames(mat_MGS), ncol(mat_MGS))
+    )
+    scatter_data_temp <- left_join(scatter_data_temp, EC_number_class, by = "EC_number")
+    scatter_data_temp$EC_class <- as.factor(scatter_data_temp$EC_class)
+    ec_colors <- c("Hydrolases" = "#E41A1C",  # Red
+      "Isomerases" = "#377EB8",  # Blue
+      "Ligases" = "#4DAF4A",  # Green
+      "Lyases" = "#984EA3",  # Purple
+      "Oxidoreductases" = "#FF7F00",  # Orange
+      "Transferases" = "#A65628")  # Yellow)
+
+     tmp <- ggplot(scatter_data_temp, aes(x = x, y = y, color = EC_class)) +
+        geom_point(size = 2, alpha = 0.8) +  # Adjust point size and transparency
+        labs(x = "MGS", y = "P2") +
+        scale_color_manual(values = ec_colors) +  # Apply the custom color palette
+        theme(
+        plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        axis.title = element_text(size = 14),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10))
+      
+      assign(paste0("splot_", EC, "_crop_b"), tmp)
+  }
+plot_grid_Crop_b <- ggarrange(splot_EC1_mod_crop_b, splot_EC2_mod_crop_b, splot_EC3_mod_crop_b, splot_EC4_mod_crop_b,
+                            splot_EC5_mod_crop_b, splot_EC6_mod_crop_b,ncol = 3, nrow = 2, legend = "bottom")
+```
