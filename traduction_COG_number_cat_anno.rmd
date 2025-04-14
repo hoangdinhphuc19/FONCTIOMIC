@@ -1,0 +1,36 @@
+---
+title: "Joinction P2 Sample ID"
+auteur: "Dinh-Phuc Hoang"
+date: "2025-03-31"
+---
+Loading the libraries
+```{r}
+library(readr)
+library(dplyr)
+library(tidyverse)
+```
+Loading the data
+```{r}
+COG_anno = read_delim("description_mapfiles/COG_cat.txt",delim = "\t",col_names = FALSE)
+COG_cat_anno = read_delim("description_mapfiles/translate_COG_cat_anno.txt",delim = "\t",col_names = FALSE)
+COG_cat_anno = as.data.frame(COG_cat_anno)
+COG_anno = as.data.frame(COG_anno)
+rownames(COG_anno) = COG_anno[,1]
+COG_anno = COG_anno[,-1]
+names(COG_anno) = c("COG_letter","COG_description")
+names(COG_cat_anno) = c("COG_letter","COG_category")
+COG_anno$COG_letter = substr(COG_anno$COG_letter, 1, 1)
+COG_anno = dplyr::select(COG_anno,COG_letter,COG_description)
+COG_anno_cat = left_join(COG_anno,COG_cat_anno,by = "COG_letter")
+rownames(COG_anno_cat) = rownames(COG_anno)
+write_rds(COG_anno_cat,"description_mapfiles/COG_anno.rds")
+```
+
+```{r}
+col_COG = read_delim("description_mapfiles/cog-24.fun.tab.txt",delim = "\t",col_names = FALSE)
+col_COG = col_COG[,1:2]
+col_COG = as.data.frame(col_COG)
+rownames(col_COG) = col_COG[,1]
+col_COG_a = c(col_COG[,2])
+names(col_COG_a) = col_COG[,1]
+```
