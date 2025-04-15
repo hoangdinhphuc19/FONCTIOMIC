@@ -27,10 +27,29 @@ write_rds(COG_anno_cat,"description_mapfiles/COG_anno.rds")
 ```
 
 ```{r}
-col_COG = read_delim("description_mapfiles/cog-24.fun.tab.txt",delim = "\t",col_names = FALSE)
-col_COG = col_COG[,1:2]
-col_COG = as.data.frame(col_COG)
-rownames(col_COG) = col_COG[,1]
-col_COG_a = c(col_COG[,2])
-names(col_COG_a) = col_COG[,1]
+COG_cat_anno$text = paste0(COG_cat_anno$COG_letter,":[",COG_cat_anno$COG_category,"]")
+color = c("#ff0000","#c2af58","#ff9900","#ffff00",
+"#ffc600",
+"#99ff00",
+"#493126",
+"#ff008a",
+"#0000ff",
+"#9ec928",
+"#006633",
+"#660099",
+"#336699",
+"#33cc99",
+"#00ffff",
+"#9900ff",
+"#805642",
+"#ff00ff",
+"#99334d",
+"#727dcc",
+"#5c5a1b",
+"#0099ff",
+"#ffcc99",
+"#ff9999",
+"#d6aadf")
+a = c(COG_cat_anno$text)
+names(a) = color
 ```

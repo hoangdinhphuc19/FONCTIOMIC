@@ -412,6 +412,8 @@ pheatmap(zscore_EC,
               annotation_col = anno_col, 
               annotation_row = anno_row)
 ```
+
+
 Part II : _Analysis of COG abundance in the output of MGS_
 Tidy up the table abundance of COG
 ```{r}
@@ -574,25 +576,46 @@ time_colors <- c(
   "0" = "#1f77b4",   
   "3" = "#ff7f0e",   
   "51" = "#2ca02c",  
-  "125" = "#d62728"  
-)
+  "125" = "#d62728")
 vect_colours = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd", 
                 "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2")
-list_colors = list(Groups = vect_colours, Time = time_colors)
-ha = rowAnnotation(COG_letter = anno_row$COG_letter,
-                   col = list(COG_letter = c(J = "#FCCCFC", A = "#FCDCFC", K = "#FCDCEC", L = "#FCDCDC", 
-B = "#FCDCCC", D = "#FCFCCC", Y = "#FCFCBC", V = "#FCFCAC", T = "#ECFCAC", 
-M = "#DCFCAC", N = "#CCFCAC", Z = "#BCFCAC", W = "#ACFCAC", U = "#9CFCAC", 
-O = "#9CFC9C", X = "#A2AAF6", C = "#BCFCFC", G = "#CCFCFC", E = "#DCFCFC", 
-F = "#DCECFC", H = "#DCDCFC", I = "#DCCCFC", P = "#CCCCFC", Q = "#BCCCFC", 
-R = "#E0E0E0", S = "#CCCCCC")))
-pheatmap(zscore_COG, name = "Z-score",
+hb = HeatmapAnnotation(which = "column",
+                       Groups = anno_col$Groups,
+                       Time = anno_col$Time,
+                       col = list(Groups = vect_colours, Time = time_colors),
+                       show_legend = TRUE,
+                       annotation_name_side = "right",
+                       annotation_name_gp = gpar(fontsize = 10, fontface = "bold"),
+                       annotation_legend_param = list(direction = "vertical", title_gp = gpar(fontsize = 10, fontface = "bold")))
+ha = rowAnnotation(COG = anno_row$annotation,
+                   col = list(COG = c("J:[Translation, ribosomal structure and biogenesis]" = "#ff0000", 
+"A:[RNA processing and modification]" = "#c2af58", "K:[Transcription]" = "#ff9900", 
+"L:[Replication, recombination and repair]" = "#ffff00", "B:[Chromatin structure and dynamics]" = "#ffc600", 
+"D:[Cell cycle control, cell division, chromosome partitioning]" = "#99ff00", 
+"Y:[Nuclear structure]" = "#493126", "V:[Defense mechanisms]" = "#ff008a", 
+"T:[Signal transduction mechanisms]" = "#0000ff", "M:[Cell wall/membrane/envelope biogenesis]" = "#9ec928", 
+"N:[Cell motility]" = "#006633", "Z:[Cytoskeleton]" = "#660099", 
+"W:[Extracellular structures]" = "#336699", "U:[Intracellular trafficking, secretion, and vesicular transport]" = "#33cc99", 
+"O:[Posttranslational modification, protein turnover, chaperones]" = "#00ffff", 
+"X:[Mobilome: prophages, transposons]" = "#9900ff", "C:[Energy production and conversion]" = "#805642", 
+"G:[Carbohydrate transport and metabolism]" = "#ff00ff", "E:[Amino acid transport and metabolism]" = "#99334d", 
+"F:[Nucleotide transport and metabolism]" = "#727dcc", "H:[Coenzyme transport and metabolism]" = "#5c5a1b", 
+"I:[Lipid transport and metabolism]" = "#0099ff", "P:[Inorganic ion transport and metabolism]" = "#ffcc99", 
+"Q:[Secondary metabolites biosynthesis, transport and catabolism]" = "#ff9999", 
+"R:[General function prediction only]" = "#d6aadf", "S:[Function unknown]" = "#FFFFFF")))
+
+p = pheatmap(zscore_COG, name = "Z-score",
             cluster_rows = tree_cog, cluster_cols = tree_a_vs_c,
               cutree_rows = 11, #9, #5
               cutree_cols = 6,
-              annotation_colors = list_colors,
-              annotation_col = anno_col,
-              right_annotation = ha,
+              top_annotation = hb,
+              right_annotation = ha ,
               show_rownames = FALSE)
+pdf("Output/Heatmap_COG_MGS.pdf", width = 10, height = 16)
+draw(p,align_heatmap_legend = "heatmap_top",merge_legend = TRUE, heatmap_legend_side = "right", annotation_legend_side = "right")
+dev.off()
+```
+
+```{r}
 
 ```
