@@ -564,7 +564,7 @@ table(cutree_a_vs_c)
 dist_cog = vegan::vegdist(count_COG_P2, method = "euclidean")
 tree_cog = hclust(dist_cog, method = "complete")
 #cut into arbitrary clusters
-cutree_cog = cutree(tree_cog, k = 18 )
+cutree_cog = cutree(tree_cog, k = 18)
 table(cutree_cog)
 ```
 Heatmap for COG
@@ -576,6 +576,7 @@ anno_col$Groups = as.factor(anno_col$Groups)
 anno_col$Time = as.factor(anno_col$Time)
 anno_row = COG_anno[rownames(zscore_COG),]
 anno_row$annotation = paste0(anno_row$COG_letter,":[",anno_row$COG_category,"]")
+anno_row$cluster = cutree_cog
 time_colors <- c(
   "0" = "#1f77b4",   
   "3" = "#ff7f0e",   
@@ -591,7 +592,7 @@ hb = HeatmapAnnotation(which = "column",
                        annotation_name_side = "right",
                        annotation_name_gp = gpar(fontsize = 10, fontface = "bold"),
                        annotation_legend_param = list(direction = "vertical", title_gp = gpar(fontsize = 10, fontface = "bold")))
-ha = rowAnnotation(COG = anno_row$annotation,
+ha = rowAnnotation(COG = anno_row$annotation, 
                    col = list(COG = c("J:[Translation, ribosomal structure and biogenesis]" = "#ff0000", 
 "A:[RNA processing and modification]" = "#c2af58", "K:[Transcription]" = "#ff9900", 
 "L:[Replication, recombination and repair]" = "#ffff00", "B:[Chromatin structure and dynamics]" = "#ffc600", 
@@ -606,7 +607,13 @@ ha = rowAnnotation(COG = anno_row$annotation,
 "F:[Nucleotide transport and metabolism]" = "#727dcc", "H:[Coenzyme transport and metabolism]" = "#5c5a1b", 
 "I:[Lipid transport and metabolism]" = "#0099ff", "P:[Inorganic ion transport and metabolism]" = "#ffcc99", 
 "Q:[Secondary metabolites biosynthesis, transport and catabolism]" = "#ff9999", 
-"R:[General function prediction only]" = "#d6aadf", "S:[Function unknown]" = "#FFFFFF")))
+"R:[General function prediction only]" = "#d6aadf", "S:[Function unknown]" = "#FFFFFF")),
+                    Cluster = anno_block(gp = gpar(fill = c("1" = "#8DD3C7", "2" = "#FFFFB3", "3" = "#BEBADA", 
+                                            "4" = "#FB8072", "5" = "#80B1D3", "6" = "#FDB462", 
+                                            "7" = "#B3DE69", "8" = "#FCCDE5", "9" = "#D9D9D9",
+                                            "10" = "#BC80BD", "11" = "#CCEBC5", "12" = "#FFED6F",
+                                            "13" = "#E41A1C", "14" = "#377EB8", "15" = "#4DAF4A",
+                                            "16" = "#984EA3", "17" = "#FF7F00", "18" = "#FFFF33")),labels = c(1:18), labels_gp = gpar(fontsize = 8)))
 
 p = pheatmap(zscore_COG, name = "Z-score",
             cluster_rows = tree_cog, cluster_cols = tree_a_vs_c,

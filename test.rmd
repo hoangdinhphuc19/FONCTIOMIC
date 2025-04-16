@@ -29,6 +29,14 @@ p2_EC = p2_EC[,str_sort(colnames(p2_EC),decreasing = F)]
 #p2_EC = p2_EC[rowMeans(p2_EC == 0) < 0.9 ,]
 #MGS_EC = MGS_EC[rowMeans(p2_EC == 0) < 0.9 ,]
 EC_number_class = read.table("description_mapfiles/EC_number_class.txt")
+COG_anno =  read_rds("description_mapfiles/COG_anno.rds")
+p2_COG = read_rds("Data FONCTIOMIC/picrust2out_ver2/p2_COG.rds")
+p2_COG = p2_COG[,str_sort(colnames(p2_COG),decreasing = F)]
+p2_COG = p2_COG[,rownames(meta)]
+MGS_COG = read_tsv("Data FONCTIOMIC/counts_by_COG.raw.tsv")
+MGS_COG = as.data.frame(MGS_COG)
+  rownames(MGS_COG) = MGS_COG[,1]
+  MGS_COG = MGS_COG[,-1]
 rm(overlapping_EC)
 ```
 Data transformation : DESeq2 TMM normalization
@@ -240,4 +248,139 @@ DA_COG_P2_Grass = read_rds("Output/DA_COG_P2_Grass.rds")
 ```
 
 ```{r}
+DA_COG_Crop = unique(intersect(DA_COG_MGS_Crop$COG,DA_COG_P2_Crop$COG))
+DA_COG_Grass = unique(intersect(DA_COG_MGS_Grass$COG,DA_COG_P2_Grass$COG))
 ```
+
+```{r}
+MGS_COG_vst = round(MGS_COG,0)
+dds_MGS_COG <- DESeqDataSetFromMatrix(countData = MGS_COG_vst,
+                                  colData = meta,
+                                  design = ~ Category + time, tidy = FALSE)
+vst_COG_MGS = vst(dds_MGS_COG,blind = FALSE)
+count_COG_MGS = assay(vst_COG_MGS)
+p2_COG_vst = round(p2_COG,0)
+dds_p2_COG <- DESeqDataSetFromMatrix(countData = p2_COG_vst,
+                                  colData = meta,
+                                  design = ~ Category + time, tidy = FALSE)
+vst_COG_P2 = vst(dds_p2_COG,blind = FALSE)
+count_COG_P2 = assay(vst_COG_P2)
+```
+
+```{r}
+venn.diagram(
+        x = list(rownames(count_COG_MGS), rownames(count_COG_P2)),
+        category.names = c("MGS" , "PICRUSt2"),
+        filename = 'Output/#venn_diagramm_COG.png',
+        output=TRUE,
+        imagetype="png" ,
+        lwd = 2,
+        lty = 'blank',
+        fill = c("cornflowerblue", "pink"),
+        cat.fontface = "bold",
+        cat.default.pos = "outer",
+        cat.fontfamily = "sans",
+)
+```
+```{r}
+overlapping_COG = intersect(rownames(count_COG_MGS), rownames(count_COG_P2))
+count_COG_MGS = count_COG_MGS[overlapping_COG,]
+count_COG_P2 = count_COG_P2[overlapping_COG,]
+rm(overlapping_COG)
+```
+Definition des variables
+```{r}
+for (groups in c("Control Cropland","Amended Cropland","Control Grassland","Amended Grassland")){
+  for (time in c("0","3","51","125")){
+  assign(paste0(gsub(" ","_",groups),"_",time), str_sort(rownames(meta[meta$Category == groups & meta$time == time,])))
+  }
+}
+rm(groups,time)
+```
+Regroupement des abondances ECs en fonction des conditions
+```{r}
+crop_0 = c(Control_Cropland_0,Amended_Cropland_0)
+crop_3 = c(Control_Cropland_3,Amended_Cropland_3)
+crop_51 = c(Control_Cropland_51,Amended_Cropland_51)
+crop_125 = c(Control_Cropland_125,Amended_Cropland_125)
+grass_0 = c(Control_Grassland_0,Amended_Grassland_0)
+grass_3 = c(Control_Grassland_3,Amended_Grassland_3)
+grass_51 = c(Control_Grassland_51,Amended_Grassland_51)
+grass_125 = c(Control_Grassland_125,Amended_Grassland_125)
+```
+```{r}
+for (groups in c("crop","grass")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("mat_", groups, "_", time), count_COG_MGS[, get(paste0(groups, "_", time))])
+  }
+}
+```
+```{r}
+for (groups in c("crop","grass")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("P2_mat_", groups, "_", time), count_COG_P2[, get(paste0(groups, "_", time))])
+  }
+}
+```
+```{r}
+for (groups in c("crop","grass")) {
+  for (time in c("0","3","51","125")) {
+    assign(paste0("cor_", groups, "_", time), 
+            cor(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+    assign(paste0("d_cor_", groups, "_", time), 
+            diag(get(paste0("cor_", groups, "_", time))))
+        assign(paste0("corr_", groups, "_", time), 
+            cor.test(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
+  }
+}
+```
+
+```{r}
+COG_anno$annotation = paste0(COG_anno$COG_letter,":[",COG_anno$COG_category,"]")
+COG_anno$COG = rownames(COG_anno)
+cog_color = c("J"="#ff0000", 
+"A:" = "#c2af58", "K" = "#ff9900", 
+"L" = "#ffff00", "B" = "#ffc600", 
+"D" = "#99ff00", 
+"Y" = "#ff008a", 
+"T" = "#0000ff", "M" = "#9ec928", 
+"N" = "#006633", "Z" = "#660099", 
+"W" = "#336699", "U" = "#33cc99", 
+"O" = "#00ffff", 
+"X" = "#9900ff", "C" = "#805642", 
+"G" = "#ff00ff", "E" = "#99334d", 
+"F" = "#727dcc", "H" = "#5c5a1b", 
+"I" = "#0099ff", "P" = "#ffcc99", 
+"Q" = "#ff9999", 
+"R" = "#d6aadf", "S" = "#FFFFFF")
+plot_cor = list()
+for (groups in c("crop","grass")) {
+  for (time in c("0","3","51","125")) {
+    d_cor = as.data.frame(get(paste0("d_cor_", groups, "_", time)))
+    names(d_cor) = c("coeff")
+    d_cor$COG = rownames(d_cor)
+    d_cor = merge(d_cor, COG_anno[,c(1,5)], by = "COG")
+    plot_cor[[paste0(groups, "_", time)]] = ggplot(d_cor, aes(x = coeff, y = COG_letter, group = COG_letter, color = COG_letter, fill = COG_letter)) +
+      geom_boxplot(alpha=0.5,show.legend = FALSE)+
+      geom_jitter(color="black", size=0.4, alpha=0.9,show.legend = FALSE)+
+      geom_vline(xintercept = 0, linetype="dotted", 
+                color = "#000000", linewidth=0.7)+
+      scale_fill_manual(values = cog_color) +
+      scale_color_manual(values = cog_color) +
+      ggtitle(paste("Correlation of Spearman on group", groups, time)) +
+      xlab("Spearman correlation") +
+      ylab("COG")
+  }
+}
+plot_grid_Crop <- ggarrange(plot_cor$crop_0, plot_cor$crop_3, plot_cor$crop_51, plot_cor$crop_125,
+                            ncol = 2, nrow = 2)
+plot_grid_Grass <- ggarrange(plot_cor$grass_0, plot_cor$grass_3, plot_cor$grass_51, plot_cor$grass_125,
+                            ncol = 2, nrow = 2)
+ggsave(plot = plot_grid_Crop, filename = "Output/boxplot_cor_spearman_Crop_COG.png", width = 20, height = 30, dpi = 300)
+ggsave(plot = plot_grid_Grass, filename = "Output/boxplot_cor_spearman_Grass_COG.png", width = 20, height = 30, dpi = 300)
+
+```
+
+ ```{r}
+ 
+ ```
