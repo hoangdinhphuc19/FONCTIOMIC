@@ -46,6 +46,14 @@ grass_0 = c(Control_Grassland_0,Amended_Grassland_0)
 grass_3 = c(Control_Grassland_3,Amended_Grassland_3)
 grass_51 = c(Control_Grassland_51,Amended_Grassland_51)
 grass_125 = c(Control_Grassland_125,Amended_Grassland_125)
+control_0 = c(Control_Cropland_0,Control_Grassland_0)
+control_3 = c(Control_Cropland_3,Control_Grassland_3)
+control_51 = c(Control_Cropland_51,Control_Grassland_51)
+control_125 = c(Control_Cropland_125,Control_Grassland_125)
+amended_0 = c(Amended_Cropland_0,Amended_Grassland_0)
+amended_3 = c(Amended_Cropland_3,Amended_Grassland_3)
+amended_51 = c(Amended_Cropland_51,Amended_Grassland_51)
+amended_125 = c(Amended_Cropland_125,Amended_Grassland_125)
 ```
 
 #**Data description**
@@ -356,6 +364,68 @@ res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
 res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
 write_rds(res4_df, "Output/DA_EC_MGS_Grass.rds")
 ```
+##Differentially abundance analysis for Control (Land-use effect)
+```{r}
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        EC_number = character())
+tb_ec_cleaned = as.data.frame(tb_ec_cleaned)
+for ( dataset in c("control_0", "control_3", "control_51", "control_125")){
+  counts_matrix <- as.matrix(tb_ec_cleaned[,get(dataset)],rownames = TRUE)
+  counts_matrix <- round(counts_matrix,0)
+  sample_data <- meta[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ land_use, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$EC_number = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
+res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
+res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
+write_rds(res4_df, "Output/DA_EC_MGS_Control_(land_use).rds")
+```
+##Differentially abundance analysis for Amended (Land use effect)
+```{r}
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        EC_number = character())
+tb_ec_cleaned = as.data.frame(tb_ec_cleaned)
+for ( dataset in c("amended_0", "amended_3", "amended_51", "amended_125")){
+  counts_matrix <- as.matrix(tb_ec_cleaned[,get(dataset)],rownames = TRUE)
+  counts_matrix <- round(counts_matrix,0)
+  sample_data <- meta[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ land_use, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$EC_number = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
+res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
+res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
+write_rds(res4_df, "Output/DA_EC_MGS_Amended_(land_use).rds")
+```
 #Heatmap of EC
 ##Data transformation
 ```{r}
@@ -602,7 +672,12 @@ ha = rowAnnotation(COG = anno_row$annotation,
 "F:[Nucleotide transport and metabolism]" = "#727dcc", "H:[Coenzyme transport and metabolism]" = "#5c5a1b", 
 "I:[Lipid transport and metabolism]" = "#0099ff", "P:[Inorganic ion transport and metabolism]" = "#ffcc99", 
 "Q:[Secondary metabolites biosynthesis, transport and catabolism]" = "#ff9999", 
-"R:[General function prediction only]" = "#d6aadf", "S:[Function unknown]" = "#FFFFFF")))
+"R:[General function prediction only]" = "#d6aadf", "S:[Function unknown]" = "#FFFFFF")),
+                    Cluster = anno_block(gp = gpar(fill = c("1" = "#8DD3C7", "2" = "#FFFFB3", "3" = "#BEBADA", 
+                                            "4" = "#FB8072", "5" = "#80B1D3", "6" = "#FDB462", 
+                                            "7" = "#B3DE69", "8" = "#FCCDE5", "9" = "#D9D9D9",
+                                            "10" = "#BC80BD", "11" = "#CCEBC5")),labels = c(1:11), labels_gp = gpar(fontsize = 8)))
+
 
 p = pheatmap(zscore_COG, name = "Z-score",
             cluster_rows = tree_cog, cluster_cols = tree_a_vs_c,
@@ -617,5 +692,6 @@ dev.off()
 ```
 
 ```{r}
+count_COG_MGS = assay(vst_COG_MGS)
 
 ```

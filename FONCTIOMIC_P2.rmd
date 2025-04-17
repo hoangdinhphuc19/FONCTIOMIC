@@ -58,7 +58,15 @@ P2_crop_125 = c(Control_Cropland_125,Amended_Cropland_125)
 P2_grass_0 = c(Control_Grassland_0,Amended_Grassland_0)
 P2_grass_3 = c(Control_Grassland_3,Amended_Grassland_3)
 P2_grass_51 = c(Control_Grassland_51,Amended_Grassland_51)
-P2_grass_125 = c(Control_Grassland_125,Amended_Grassland_125)# Erratum : manque de la variable Control_Grassland_125 : P1-C-T6 et P5-C-T6
+P2_grass_125 = c(Control_Grassland_125,Amended_Grassland_125)
+P2_control_0 = c(Control_Cropland_0,Control_Grassland_0)
+P2_control_3 = c(Control_Cropland_3,Control_Grassland_3)
+P2_control_51 = c(Control_Cropland_51,Control_Grassland_51)
+P2_control_125 = c(Control_Cropland_125,Control_Grassland_125)
+P2_amended_0 = c(Amended_Cropland_0,Amended_Grassland_0)
+P2_amended_3 = c(Amended_Cropland_3,Amended_Grassland_3)
+P2_amended_51 = c(Amended_Cropland_51,Amended_Grassland_51)
+P2_amended_125 = c(Amended_Cropland_125,Amended_Grassland_125)
 ```
 
 **Data description**
@@ -362,6 +370,69 @@ res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
 res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
 res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
 write_rds(res4_df, "Output/DA_EC_P2_Grass.rds")
+```
+### DAG analysis for Control (land use effect)
+```{r}
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        EC_number = character())
+p2_EC_cleaned = as.data.frame(p2_EC_cleaned)
+for ( dataset in c("P2_control_0", "P2_control_3", "P2_control_51", "P2_control_125")){
+  counts_matrix <- as.matrix(p2_EC_cleaned[,get(dataset)],rownames = TRUE)
+  counts_matrix <- round(counts_matrix,0)
+  sample_data <- meta_cleaned[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ bloc, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$EC_number = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
+res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
+res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
+write_rds(res4_df, "Output/DA_EC_P2_Control_(land_use).rds")
+```
+
+## DA analysis for Amended (land use effect)
+```{r}
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        EC_number = character())
+p2_EC_cleaned = as.data.frame(p2_EC_cleaned)
+for ( dataset in c("P2_amended_0", "P2_amended_3", "P2_amended_51", "P2_amended_125")){
+  counts_matrix <- as.matrix(p2_EC_cleaned[,get(dataset)],rownames = TRUE)
+  counts_matrix <- round(counts_matrix,0)
+  sample_data <- meta_cleaned[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ bloc, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$EC_number = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
+res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
+res4_df = left_join(res4_df, EC_number_class, by = "EC_number")
+write_rds(res4_df, "Output/DA_EC_P2_Amended_(land_use).rds")
 ```
 Heatmap of EC
 Data transformation

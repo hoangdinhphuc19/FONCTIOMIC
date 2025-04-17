@@ -249,6 +249,8 @@ DA_COG_P2_Grass = read_rds("Output/DA_COG_P2_Grass.rds")
 
 ```{r}
 DA_COG_Crop = unique(intersect(DA_COG_MGS_Crop$COG,DA_COG_P2_Crop$COG))
+b = setdiff(DA_COG_MGS_Crop$COG,DA_COG_P2_Crop$COG)
+c = setdiff(DA_COG_P2_Crop$COG,DA_COG_MGS_Crop$COG)
 DA_COG_Grass = unique(intersect(DA_COG_MGS_Grass$COG,DA_COG_P2_Grass$COG))
 ```
 
@@ -382,5 +384,87 @@ ggsave(plot = plot_grid_Grass, filename = "Output/boxplot_cor_spearman_Grass_COG
 ```
 
  ```{r}
- 
- ```
+COG_anno$COG = rownames(COG_anno)
+COG_anno$annotation = paste0(COG_anno$COG_letter,":[",COG_anno$COG_category,"]")
+count_COG_MGS = as.data.frame(count_COG_MGS)
+count_COG_P2 = as.data.frame(count_COG_P2)
+count_COG_MGS$COG = rownames(count_COG_MGS)
+count_COG_MGS = count_COG_MGS %>% left_join(COG_anno[,c(4,5)], by = "COG")
+count_COG_P2$COG = rownames(count_COG_P2)
+count_COG_P2 = count_COG_P2 %>% left_join(COG_anno[,c(4,5)], by = "COG")
+```
+
+```{r}
+count_COG_MGS = count_COG_MGS %>% pivot_longer(cols = -c(COG, annotation), names_to = "sample", values_to = "counts")
+count_COG_P2 = count_COG_P2 %>% pivot_longer(cols = -c(COG, annotation), names_to = "sample", values_to = "counts")
+```
+
+```{r}
+count_COG_MGS = count_COG_MGS[count_COG_MGS$sample %in% c("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T6", "P3-C-T6", "P5-C-T6"),]
+aggregate(count_COG_MGS$counts, by = list(COG_anno = count_COG_MGS$annotation,
+                                          sample = count_COG_MGS$sample), FUN = sum) -> count_COG_MGS
+count_COG_MGS$COG_counts = count_COG_MGS$x
+for (samp in c ("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T6", "P3-C-T6", "P5-C-T6")){
+  count_COG_MGS[count_COG_MGS$sample  == samp,"total_sample"] = sum(count_COG_MGS[count_COG_MGS$sample == samp,"COG_counts"])
+}
+count_COG_MGS$per_counts = (count_COG_MGS$COG_counts / count_COG_MGS$total_sample*100)
+count_COG_MGS$method = "MGS"
+```
+
+```{r}
+count_COG_P2 = count_COG_P2[count_COG_P2$sample %in% c("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T6", "P3-C-T6", "P5-C-T6"),]
+aggregate(count_COG_P2$counts, by = list(COG_anno = count_COG_P2$annotation,
+                                          sample = count_COG_P2$sample), FUN = sum) -> count_COG_P2
+count_COG_P2$COG_counts = count_COG_P2$x
+for (samp in c ("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T6", "P3-C-T6", "P5-C-T6")){
+  count_COG_P2[count_COG_P2$sample  == samp,"total_sample"] = sum(count_COG_P2[count_COG_P2$sample == samp,"COG_counts"])
+}
+count_COG_P2$per_counts = (count_COG_P2$COG_counts / count_COG_P2$total_sample*100)
+count_COG_P2$method = "P2"
+```
+
+```{r}
+data_df = rbind(count_COG_MGS, count_COG_P2)
+data_df$COG_anno = as.factor(data_df$COG_anno)
+data_df$method = as.factor(data_df$method)
+data_df$sample = as.character(data_df$sample)
+keep_COG = data_df[data_df$per_counts > 1,"COG_anno"]
+data_df[startsWith(data_df$sample, "C"), "land_use"] <- "cropland"
+data_df[startsWith(data_df$sample, "P"), "land_use"] <- "grassland"
+test_data_df = data_df[data_df$COG_anno %in% keep_COG,]
+#color for COG and strips
+col_COG = c("J:[Translation, ribosomal structure and biogenesis]" = "#ff0000", 
+"A:[RNA processing and modification]" = "#c2af58", "K:[Transcription]" = "#ff9900", 
+"L:[Replication, recombination and repair]" = "#ffff00", "B:[Chromatin structure and dynamics]" = "#ffc600", 
+"D:[Cell cycle control, cell division, chromosome partitioning]" = "#99ff00", 
+"Y:[Nuclear structure]" = "#493126", "V:[Defense mechanisms]" = "#ff008a", 
+"T:[Signal transduction mechanisms]" = "#0000ff", "M:[Cell wall/membrane/envelope biogenesis]" = "#9ec928", 
+"N:[Cell motility]" = "#006633", "Z:[Cytoskeleton]" = "#660099", 
+"W:[Extracellular structures]" = "#336699", "U:[Intracellular trafficking, secretion, and vesicular transport]" = "#33cc99", 
+"O:[Posttranslational modification, protein turnover, chaperones]" = "#00ffff", 
+"X:[Mobilome: prophages, transposons]" = "#9900ff", "C:[Energy production and conversion]" = "#805642", 
+"G:[Carbohydrate transport and metabolism]" = "#ff00ff", "E:[Amino acid transport and metabolism]" = "#99334d", 
+"F:[Nucleotide transport and metabolism]" = "#727dcc", "H:[Coenzyme transport and metabolism]" = "#5c5a1b", 
+"I:[Lipid transport and metabolism]" = "#0099ff", "P:[Inorganic ion transport and metabolism]" = "#ffcc99", 
+"Q:[Secondary metabolites biosynthesis, transport and catabolism]" = "#ff9999", 
+"R:[General function prediction only]" = "#d6aadf", "S:[Function unknown]" = "#FFFFFF")
+
+scales <- list(scale_x_discrete(labels=c("C1.C.T0", "C3.C.T0", "C5.C.T0")),
+               scale_x_discrete(labels=c("P1-C-T6", "P3-C-T6", "P5-C-T6")),
+               scale_x_discrete(labels=c("C1.C.T0", "C3.C.T0", "C5.C.T0")),
+               scale_x_discrete(labels=c("P1-C-T6", "P3-C-T6", "P5-C-T6")))
+
+custom_strips <- strip_nested(background_x = elem_list_rect(fill = c(rep("lightgrey", 2), rep(c("#f2e0bd", "#b2d9b2"),2)) ),
+                              by_layer_x = FALSE)
+
+ggplot(data=test_data_df, aes(x=sample, y=per_counts, fill=COG_anno)) + 
+  facet_nested(~ method + land_use, strip = custom_strips, scales="free_x") +
+  facetted_pos_scales(x=scales) +
+  geom_bar(stat="identity", position="fill", color="white") +
+  guides(fill=guide_legend(title = "COG Category", ncol = 4)) +
+  scale_fill_manual(values = col_COG) +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size=5),
+        strip.text = element_text(size=20),
+        axis.text.x = element_text(size=12))
+```
