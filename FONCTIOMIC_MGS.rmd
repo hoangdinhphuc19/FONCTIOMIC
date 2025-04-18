@@ -30,6 +30,7 @@ EC_number_class = read.table("description_mapfiles/EC_number_class.txt", header 
 rownames(EC_number_class) = EC_number_class$EC_number
 tb_cog = read_tsv("Data FONCTIOMIC/counts_by_COG.raw.tsv")
 COG_anno = read_rds("description_mapfiles/COG_anno.rds")
+COG_anno$COG_number = rownames(COG_anno)
 ```
 ##Define of variables for subset matrix of EC
 ```{r}
@@ -493,7 +494,7 @@ tb_cog = as.data.frame(tb_cog)
 ```
 PCA for COG
 ```{r}
-tb_cog_cleaned = round(tb_cog,0)
+tb_cog_cleaned = round(tb_cog[overlapping_COG,],0)
 dds_MGS = DESeqDataSetFromMatrix(countData = tb_cog_cleaned,
                                   colData = meta,
                                   design = ~ Category + time, tidy = FALSE)

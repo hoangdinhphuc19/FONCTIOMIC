@@ -27,6 +27,7 @@ p2_COG = read_rds("Data FONCTIOMIC/picrust2out_ver2/p2_COG.rds")
 p2_COG = p2_COG[,str_sort(colnames(p2_COG),decreasing = F)]
 rownames(EC_number_class) = EC_number_class$EC_number
 COG_anno = read_rds("description_mapfiles/COG_anno.rds")
+COG_anno$COG_number = rownames(COG_anno)
 ```
 Tidy up the metadata of samples
 ```{r}
@@ -495,7 +496,7 @@ pheatmap(count_P2,
 Part II : _Analysis of COG abundance in the output of P2_
 tidy up the COG table
 ```{r}
-p2_COG_cleaned = p2_COG[,rownames(meta_cleaned)]
+p2_COG_cleaned = p2_COG[overlapping_COG,rownames(meta_cleaned)]
 ```
 PCA analysis for COG
 ```{r}
@@ -635,7 +636,7 @@ table(cutree_a_vs_c)
 dist_cog = vegan::vegdist(count_COG_P2, method = "euclidean")
 tree_cog = hclust(dist_cog, method = "complete")
 #cut into arbitrary clusters
-cutree_cog = cutree(tree_cog, k = 18)
+cutree_cog = cutree(tree_cog, k = 16)
 table(cutree_cog)
 ```
 Heatmap for COG
@@ -684,11 +685,11 @@ ha = rowAnnotation(COG = anno_row$annotation,
                                             "7" = "#B3DE69", "8" = "#FCCDE5", "9" = "#D9D9D9",
                                             "10" = "#BC80BD", "11" = "#CCEBC5", "12" = "#FFED6F",
                                             "13" = "#E41A1C", "14" = "#377EB8", "15" = "#4DAF4A",
-                                            "16" = "#984EA3", "17" = "#FF7F00", "18" = "#FFFF33")),labels = c(1:18), labels_gp = gpar(fontsize = 8)))
+                                            "16" = "#984EA3", "17" = "#FF7F00", "18" = "#FFFF33")),labels = c(1:16), labels_gp = gpar(fontsize = 8)))
 
 p = pheatmap(zscore_COG, name = "Z-score",
             cluster_rows = tree_cog, cluster_cols = tree_a_vs_c,
-              cutree_rows = 18, #18, #6
+              cutree_rows = 16, #18, #6
               cutree_cols = 5,
               top_annotation = hb,
               right_annotation = ha ,

@@ -248,10 +248,8 @@ DA_COG_P2_Grass = read_rds("Output/DA_COG_P2_Grass.rds")
 ```
 
 ```{r}
-DA_COG_Crop = unique(intersect(DA_COG_MGS_Crop$COG,DA_COG_P2_Crop$COG))
-b = setdiff(DA_COG_MGS_Crop$COG,DA_COG_P2_Crop$COG)
-c = setdiff(DA_COG_P2_Crop$COG,DA_COG_MGS_Crop$COG)
-DA_COG_Grass = unique(intersect(DA_COG_MGS_Grass$COG,DA_COG_P2_Grass$COG))
+DA_COG_MGS = unique(intersect(DA_COG_MGS_Crop$COG_number,DA_COG_MGS_Grass$COG_number))
+DA_COG_P2 = unique(intersect(DA_COG_P2_Crop$COG_number,DA_COG_P2_Grass$COG_number))
 ```
 
 ```{r}
@@ -285,9 +283,9 @@ venn.diagram(
 )
 ```
 ```{r}
-overlapping_COG = intersect(rownames(count_COG_MGS), rownames(count_COG_P2))
-count_COG_MGS = count_COG_MGS[overlapping_COG,]
-count_COG_P2 = count_COG_P2[overlapping_COG,]
+overlapping_COG = intersect(rownames(MGS_COG), rownames(p2_COG))
+count_COG_MGS = MGS_COG[DA_COG_MGS,meta$sample_id]
+count_COG_P2 = p2_COG[DA_COG_P2,meta$sample_id]
 rm(overlapping_COG)
 ```
 Definition des variables
@@ -400,11 +398,11 @@ count_COG_P2 = count_COG_P2 %>% pivot_longer(cols = -c(COG, annotation), names_t
 ```
 
 ```{r}
-count_COG_MGS = count_COG_MGS[count_COG_MGS$sample %in% c("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T6", "P3-C-T6", "P5-C-T6"),]
+count_COG_MGS = count_COG_MGS[count_COG_MGS$sample %in% c("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T0", "P3-C-T0", "P5-C-T0"),]
 aggregate(count_COG_MGS$counts, by = list(COG_anno = count_COG_MGS$annotation,
                                           sample = count_COG_MGS$sample), FUN = sum) -> count_COG_MGS
 count_COG_MGS$COG_counts = count_COG_MGS$x
-for (samp in c ("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T6", "P3-C-T6", "P5-C-T6")){
+for (samp in c ("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T0", "P3-C-T0", "P5-C-T0")){
   count_COG_MGS[count_COG_MGS$sample  == samp,"total_sample"] = sum(count_COG_MGS[count_COG_MGS$sample == samp,"COG_counts"])
 }
 count_COG_MGS$per_counts = (count_COG_MGS$COG_counts / count_COG_MGS$total_sample*100)
@@ -412,11 +410,11 @@ count_COG_MGS$method = "MGS"
 ```
 
 ```{r}
-count_COG_P2 = count_COG_P2[count_COG_P2$sample %in% c("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T6", "P3-C-T6", "P5-C-T6"),]
+count_COG_P2 = count_COG_P2[count_COG_P2$sample %in% c("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T0", "P3-C-T0", "P5-C-T0"),]
 aggregate(count_COG_P2$counts, by = list(COG_anno = count_COG_P2$annotation,
                                           sample = count_COG_P2$sample), FUN = sum) -> count_COG_P2
 count_COG_P2$COG_counts = count_COG_P2$x
-for (samp in c ("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T6", "P3-C-T6", "P5-C-T6")){
+for (samp in c ("C1-C-T0", "C3-C-T0", "C5-C-T0","P1-C-T0", "P3-C-T0", "P5-C-T0")){
   count_COG_P2[count_COG_P2$sample  == samp,"total_sample"] = sum(count_COG_P2[count_COG_P2$sample == samp,"COG_counts"])
 }
 count_COG_P2$per_counts = (count_COG_P2$COG_counts / count_COG_P2$total_sample*100)
@@ -450,21 +448,162 @@ col_COG = c("J:[Translation, ribosomal structure and biogenesis]" = "#ff0000",
 "R:[General function prediction only]" = "#d6aadf", "S:[Function unknown]" = "#FFFFFF")
 
 scales <- list(scale_x_discrete(labels=c("C1.C.T0", "C3.C.T0", "C5.C.T0")),
-               scale_x_discrete(labels=c("P1-C-T6", "P3-C-T6", "P5-C-T6")),
+               scale_x_discrete(labels=c("P1-C-T0", "P3-C-T0", "P5-C-T0")),
                scale_x_discrete(labels=c("C1.C.T0", "C3.C.T0", "C5.C.T0")),
-               scale_x_discrete(labels=c("P1-C-T6", "P3-C-T6", "P5-C-T6")))
+               scale_x_discrete(labels=c("P1-C-T0", "P3-C-T0", "P5-C-T0")))
 
 custom_strips <- strip_nested(background_x = elem_list_rect(fill = c(rep("lightgrey", 2), rep(c("#f2e0bd", "#b2d9b2"),2)) ),
                               by_layer_x = FALSE)
 
-ggplot(data=test_data_df, aes(x=sample, y=per_counts, fill=COG_anno)) + 
+ggplot(data=data_df, aes(x=sample, y=COG_counts, fill=COG_anno)) + 
   facet_nested(~ method + land_use, strip = custom_strips, scales="free_x") +
   facetted_pos_scales(x=scales) +
   geom_bar(stat="identity", position="fill", color="white") +
   guides(fill=guide_legend(title = "COG Category", ncol = 4)) +
   scale_fill_manual(values = col_COG) +
   theme(legend.position = "bottom",
-        legend.text = element_text(size=5),
-        strip.text = element_text(size=20),
+        legend.text = element_text(size=6),
+        strip.text = element_text(size=12),
         axis.text.x = element_text(size=12))
+```
+
+Profiling COGs abundances regarding to the method and land use
+```{r}
+aggregate(count_COG_MGS$counts, by = list(COG_anno = count_COG_MGS$annotation,
+                                          sample = count_COG_MGS$sample), FUN = sum) -> count_COG_MGS
+count_COG_MGS$COG_counts = count_COG_MGS$x
+for (samp in append(crop,grass)){
+  count_COG_MGS[count_COG_MGS$sample  == samp,"total_sample"] = sum(count_COG_MGS[count_COG_MGS$sample == samp,"COG_counts"])
+}
+count_COG_MGS$per_counts = (count_COG_MGS$COG_counts / count_COG_MGS$total_sample*100)
+count_COG_MGS$method = "MGS"
+```
+
+```{r}
+aggregate(count_COG_P2$counts, by = list(COG_anno = count_COG_P2$annotation,
+                                          sample = count_COG_P2$sample), FUN = sum) -> count_COG_P2
+count_COG_P2$COG_counts = count_COG_P2$x
+for (samp in append(crop,grass)){
+  count_COG_P2[count_COG_P2$sample  == samp,"total_sample"] = sum(count_COG_P2[count_COG_P2$sample == samp,"COG_counts"])
+}
+count_COG_P2$per_counts = (count_COG_P2$COG_counts / count_COG_P2$total_sample*100)
+count_COG_P2$method = "P2"
+```
+
+```{r}
+data_df = rbind(count_COG_MGS, count_COG_P2)
+data_df$COG_anno = as.factor(data_df$COG_anno)
+data_df$method = as.factor(data_df$method)
+data_df$sample = as.character(data_df$sample)
+keep_COG = data_df[data_df$per_counts > 1,"COG_anno"]
+data_df[startsWith(data_df$sample, "C"), "land_use"] <- "cropland"
+data_df[startsWith(data_df$sample, "P"), "land_use"] <- "grassland"
+data_df[str_detect(data_df$sample, "-C-"), "treatment"] <- "control"
+data_df[str_detect(data_df$sample, "-R-"), "treatment"] <- "amended"
+data_df[endsWith(data_df$sample, "0"), "time"] <- "0"
+data_df[endsWith(data_df$sample, "1"), "time"] <- "3"
+data_df[endsWith(data_df$sample, "4"), "time"] <- "51"
+data_df[endsWith(data_df$sample, "6"), "time"] <- "125"
+data_df$time <- factor(data_df$time, levels=c("0", "3", "51", "125"))
+test_data_df = data_df[data_df$COG_anno %in% keep_COG,]
+#color for COG and strips
+col_COG = c("J:[Translation, ribosomal structure and biogenesis]" = "#ff0000", 
+"A:[RNA processing and modification]" = "#c2af58", "K:[Transcription]" = "#ff9900", 
+"L:[Replication, recombination and repair]" = "#ffff00", "B:[Chromatin structure and dynamics]" = "#ffc600", 
+"D:[Cell cycle control, cell division, chromosome partitioning]" = "#99ff00", 
+"Y:[Nuclear structure]" = "#493126", "V:[Defense mechanisms]" = "#ff008a", 
+"T:[Signal transduction mechanisms]" = "#0000ff", "M:[Cell wall/membrane/envelope biogenesis]" = "#9ec928", 
+"N:[Cell motility]" = "#006633", "Z:[Cytoskeleton]" = "#660099", 
+"W:[Extracellular structures]" = "#336699", "U:[Intracellular trafficking, secretion, and vesicular transport]" = "#33cc99", 
+"O:[Posttranslational modification, protein turnover, chaperones]" = "#00ffff", 
+"X:[Mobilome: prophages, transposons]" = "#9900ff", "C:[Energy production and conversion]" = "#805642", 
+"G:[Carbohydrate transport and metabolism]" = "#ff00ff", "E:[Amino acid transport and metabolism]" = "#99334d", 
+"F:[Nucleotide transport and metabolism]" = "#727dcc", "H:[Coenzyme transport and metabolism]" = "#5c5a1b", 
+"I:[Lipid transport and metabolism]" = "#0099ff", "P:[Inorganic ion transport and metabolism]" = "#ffcc99", 
+"Q:[Secondary metabolites biosynthesis, transport and catabolism]" = "#ff9999", 
+"R:[General function prediction only]" = "#d6aadf", "S:[Function unknown]" = "#FFFFFF")
+
+scales <- list(scale_x_discrete(labels=c("T0", "T0", "T0")),
+               scale_x_discrete(labels=c("T3", "T3", "T3")),
+               scale_x_discrete(labels=c("T51", "T51", "T51")),
+               scale_x_discrete(labels=c("T125", "T125", "T125")),
+              scale_x_discrete(labels=c("T0", "T0", "T0")),
+               scale_x_discrete(labels=c("T3", "T3", "T3")),
+               scale_x_discrete(labels=c("T51", "T51", "T51")),
+               scale_x_discrete(labels=c("T125", "T125", "T125")),
+              scale_x_discrete(labels=c("T0", "T0", "T0")),
+               scale_x_discrete(labels=c("T3", "T3", "T3")),
+               scale_x_discrete(labels=c("T51", "T51", "T51")),
+               scale_x_discrete(labels=c("T125", "T125", "T125")),
+               scale_x_discrete(labels=c("T0", "T0", "T0")),
+               scale_x_discrete(labels=c("T3", "T3", "T3")),
+               scale_x_discrete(labels=c("T51", "T51", "T51")),
+               scale_x_discrete(labels=c("T125", "T125", "T125")),
+               scale_x_discrete(labels=c("T0", "T0", "T0")),
+               scale_x_discrete(labels=c("T3", "T3", "T3")),
+               scale_x_discrete(labels=c("T51", "T51", "T51")),
+               scale_x_discrete(labels=c("T125", "T125", "T125")),
+               scale_x_discrete(labels=c("T0", "T0", "T0")),
+               scale_x_discrete(labels=c("T3", "T3", "T3")),
+               scale_x_discrete(labels=c("T51", "T51", "T51")),
+               scale_x_discrete(labels=c("T125", "T125", "T125")),
+               scale_x_discrete(labels=c("T0", "T0", "T0")),
+               scale_x_discrete(labels=c("T3", "T3", "T3")),
+               scale_x_discrete(labels=c("T51", "T51", "T51")),
+               scale_x_discrete(labels=c("T125", "T125", "T125")),
+               scale_x_discrete(labels=c("T0", "T0", "T0")),
+               scale_x_discrete(labels=c("T3", "T3", "T3")),
+               scale_x_discrete(labels=c("T51", "T51", "T51")),
+               scale_x_discrete(labels=c("T125", "T125", "T125")))
+
+custom_strips <- strip_nested(background_x = elem_list_rect(fill = c(rep("lightgrey", 2),
+                                                                     rep(c("#f2e0bd", "#b2d9b2"), 2),
+                                                                     rep(c("#fbbb3f", "#f2e0bd", "#2abf2a", "#b2d9b2"),2),
+                                                                     rep(c("white"), 48))),
+                              by_layer_x = FALSE)
+
+ggplot(data=test_data_df, aes(x=sample, y=COG_counts, fill=COG_anno)) + 
+  facet_nested(~ method + land_use + treatment + time, strip = custom_strips, scales="free_x") +
+  facetted_pos_scales(x=scales) +
+  geom_bar(stat="identity", position="fill", color="white") +
+  guides(fill=guide_legend(title = "COG Category", ncol = 4)) +
+  scale_fill_manual(values = col_COG) +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size=6),
+        strip.text = element_text(size=12),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) -> plot_COG_bar
+ggsave (plot = plot_COG_bar, filename = "Output/COG_barplot.png", width = 10, height = 8, dpi = 200)
+```
+On filtre les COGs significatifs => relevé des variations intergroupes
+```{r}
+count_COG_MGS = filter(count_COG_MGS, COG %in% DA_COG_MGS)
+aggregate(count_COG_MGS[1:48], by = list(COG_anno = count_COG_MGS$annotation), FUN = sum) -> count_COG_MGS
+rownames(count_COG_MGS) = count_COG_MGS$COG_anno
+count_COG_MGS = count_COG_MGS[,-1]
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        COG = character())
+count_COG_MGS = as.data.frame(count_COG_MGS)
+for ( dataset in c("grass_0", "grass_3", "grass_51", "grass_125")){
+  counts_matrix <- as.matrix(count_COG_MGS[,get(dataset)],rownames = TRUE)
+  sample_data <- meta[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ wheat_straw_amendment, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$COG = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
+res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
 ```
