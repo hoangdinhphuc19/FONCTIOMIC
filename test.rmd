@@ -248,8 +248,8 @@ DA_COG_P2_Grass = read_rds("Output/DA_COG_P2_Grass.rds")
 ```
 
 ```{r}
-DA_COG_MGS = unique(intersect(DA_COG_MGS_Crop$COG_number,DA_COG_MGS_Grass$COG_number))
-DA_COG_P2 = unique(intersect(DA_COG_P2_Crop$COG_number,DA_COG_P2_Grass$COG_number))
+DA_COG_MGS = unique(c(DA_COG_MGS_Crop$COG_number,DA_COG_MGS_Grass$COG_number))
+DA_COG_P2 = unique(c(DA_COG_P2_Crop$COG_number,DA_COG_P2_Grass$COG_number))
 ```
 
 ```{r}
@@ -455,7 +455,7 @@ scales <- list(scale_x_discrete(labels=c("C1.C.T0", "C3.C.T0", "C5.C.T0")),
 custom_strips <- strip_nested(background_x = elem_list_rect(fill = c(rep("lightgrey", 2), rep(c("#f2e0bd", "#b2d9b2"),2)) ),
                               by_layer_x = FALSE)
 
-ggplot(data=data_df, aes(x=sample, y=COG_counts, fill=COG_anno)) + 
+ggplot(data=test_data_df, aes(x=sample, y=COG_counts, fill=COG_anno)) + 
   facet_nested(~ method + land_use, strip = custom_strips, scales="free_x") +
   facetted_pos_scales(x=scales) +
   geom_bar(stat="identity", position="fill", color="white") +
