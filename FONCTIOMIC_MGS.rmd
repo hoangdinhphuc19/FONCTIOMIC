@@ -510,12 +510,16 @@ tb_cog = as.data.frame(tb_cog)
 overlapping_COG = read_rds("Output/overlapping_COG.rds")
 tb_cog_cleaned = round(tb_cog[overlapping_COG,],0)
 ```
-PCA for COG
+
 ```{r}
 dds_MGS = DESeqDataSetFromMatrix(countData = tb_cog_cleaned,
                                   colData = meta,
                                   design = ~ Category + time, tidy = FALSE)
 vst_COG_MGS = vst(dds_MGS,blind = FALSE) # variance stabilizing transformation
+```
+
+PCA for COG
+```{r}
 #PCA plot
 pcaData = plotPCA(vst_COG_MGS, intgroup = c("Category", "time"), returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
@@ -730,41 +734,21 @@ COG_DA_a_vs_c$cluster = as.factor(COG_DA_a_vs_c$cluster)
 ```
 
 ```{r}
-count_COG_MGS$cluster = COG_DA_a_vs_c$cluster
-df_count_COG_MGS = as.data.frame(count_COG_MGS)
+df_count_COG_MGS = as.data.frame(tb_cog[DA_COG,])
 df_count_COG_MGS$cluster = COG_DA_a_vs_c$cluster
 df_count_COG_MGS = arrange(df_count_COG_MGS, cluster)
 COG_DA_a_vs_c = arrange(COG_DA_a_vs_c, cluster)
 write_rds(df_count_COG_MGS, "Output/DA_count_COG_MGS.rds")
 write_delim(COG_DA_a_vs_c, "Output/DA_COG_MGS.tsv", col_names = TRUE, delim = "\t")
 ```
+Split df for each cluster
+```{r}
+list_cluster = list()
+for(n in c(1:11)){
+  list_cluster[[paste0("cluster_", n)]] = df_count_COG_MGS[df_count_COG_MGS$cluster == n,]
+  }
+```
 
 ```{r}
-df_count_COG_MGS_cluster_6 = df_count_COG_MGS[df_count_COG_MGS$cluster == 6,]
-df_count_COG_MGS_cluster_6$anno = COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 6,"annotation"]
-df_count_COG_MGS_cluster_6 = aggregate(df_count_COG_MGS_cluster_6[,1:48], by = list(df_count_COG_MGS_cluster_6$anno), FUN = sum)
-rownames(df_count_COG_MGS_cluster_6) = df_count_COG_MGS_cluster_6[,1]
-df_count_COG_MGS_cluster_6 = df_count_COG_MGS_cluster_6[,-1]
-df_plot = t(df_count_COG_MGS_cluster_6)
-df_plot = as.data.frame(df_plot)
-df_plot$sample_id = rownames(df_plot)
-df_plot = left_join(df_plot, meta[,c("Category","time","sample_id")], join_by(sample_id == sample_id), )
-rownames(df_plot) = df_plot$sample_id
-df_plot = df_plot[,-23]
-df_plot = aggregate(df_plot[1:22], by = list(df_plot$Category, df_plot$time), FUN = mean)
-names(df_plot)[1:2] = c("category","time")
-df_plot$category = factor(df_plot$category, levels = c("Amended Cropland","Control Cropland","Amended Grassland","Control Grassland"))
-df_plot$time = factor(df_plot$time, levels = c("0","3","51","125"))
 
-ggplot(df_plot, aes(x=time,y=df_plot[,7], fill=category)) +
-  geom_bar(stat="identity", position = "dodge") +
-  scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
-                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
-                        labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
-                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  ylab("Abundance") + xlab("Time") +
-  ggtitle("Abundance of COG in output of MGS (Cluster 6)") +
-  guides(fill = guide_legend(title = "Groups")) +  
-  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ```

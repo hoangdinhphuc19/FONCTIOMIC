@@ -250,21 +250,7 @@ DA_COG_P2_Grass = read_rds("Output/DA_COG_P2_Grass.rds")
 ```{r}
 DA_COG_MGS = unique(c(DA_COG_MGS_Crop$COG_number,DA_COG_MGS_Grass$COG_number))
 DA_COG_P2 = unique(c(DA_COG_P2_Crop$COG_number,DA_COG_P2_Grass$COG_number))
-```
-
-```{r}
-MGS_COG_vst = round(MGS_COG,0)
-dds_MGS_COG <- DESeqDataSetFromMatrix(countData = MGS_COG_vst,
-                                  colData = meta,
-                                  design = ~ Category + time, tidy = FALSE)
-vst_COG_MGS = vst(dds_MGS_COG,blind = FALSE)
-count_COG_MGS = assay(vst_COG_MGS)
-p2_COG_vst = round(p2_COG,0)
-dds_p2_COG <- DESeqDataSetFromMatrix(countData = p2_COG_vst,
-                                  colData = meta,
-                                  design = ~ Category + time, tidy = FALSE)
-vst_COG_P2 = vst(dds_p2_COG,blind = FALSE)
-count_COG_P2 = assay(vst_COG_P2)
+a = intersect(DA_COG_MGS,DA_COG_P2)
 ```
 
 ```{r}
@@ -333,6 +319,21 @@ for (groups in c("crop","grass")) {
             cor.test(t(get(paste0("mat_", groups, "_", time))), t(get(paste0("P2_mat_", groups, "_", time))), method = "spearman"))
   }
 }
+```
+
+```{r}
+MGS_COG_vst = round(MGS_COG,0)
+dds_MGS_COG <- DESeqDataSetFromMatrix(countData = MGS_COG_vst,
+                                  colData = meta,
+                                  design = ~ Category + time, tidy = FALSE)
+vst_COG_MGS = vst(dds_MGS_COG,blind = FALSE)
+count_COG_MGS = assay(vst_COG_MGS)
+p2_COG_vst = round(p2_COG,0)
+dds_p2_COG <- DESeqDataSetFromMatrix(countData = p2_COG_vst,
+                                  colData = meta,
+                                  design = ~ Category + time, tidy = FALSE)
+vst_COG_P2 = vst(dds_p2_COG,blind = FALSE)
+count_COG_P2 = assay(vst_COG_P2)
 ```
 
 ```{r}

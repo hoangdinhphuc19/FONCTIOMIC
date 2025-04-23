@@ -496,15 +496,21 @@ pheatmap(count_P2,
 Part II : _Analysis of COG abundance in the output of P2_
 tidy up the COG table
 ```{r}
+overlapping_COG = read_rds("Output/overlapping_COG.rds")
 p2_COG_cleaned = p2_COG[overlapping_COG,rownames(meta_cleaned)]
 ```
-PCA analysis for COG
+DESeq2 object
 ```{r}
 p2_COG_cleaned = round(p2_COG_cleaned,0)
 dds_P2 = DESeqDataSetFromMatrix(countData = p2_COG_cleaned,
                                   colData = meta_cleaned,
                                   design = ~ groups + time, tidy = FALSE)
 vst_COG_P2 = vst(dds_P2,blind = FALSE) # variance stabilizing transformation
+
+```
+
+PCA analysis for COG
+```{r}
 pcaData = plotPCA(vst_COG_P2, intgroup = c("groups", "time"), returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 ggplot(pcaData, aes(x = PC1, y = PC2, color = groups)) +
@@ -698,4 +704,34 @@ p = pheatmap(zscore_COG, name = "Z-score",
 pdf("Output/Heatmap_COG_P2.pdf", width = 10, height = 16)
 draw(p,align_heatmap_legend = "heatmap_top",merge_legend = TRUE, heatmap_legend_side = "right", annotation_legend_side = "right")
 dev.off()
+```
+
+```{r}
+COG_DA_a_vs_c = anno_row
+COG_DA_a_vs_c$cluster = cutree_cog
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 1,"cluster"] = "0.1"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 2,"cluster"] = "0.2"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 3,"cluster"] = "0.9"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 4,"cluster"] = "0.3"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 5,"cluster"] = "0.7"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 6,"cluster"] = "1.0"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 7,"cluster"] = "0.5"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 8,"cluster"] = "0.4"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 9,"cluster"] = "1.3"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 10,"cluster"] = "0.8"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 11,"cluster"] = "1.1"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 12,"cluster"] = "1.2"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 13,"cluster"] = "0.6"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 14,"cluster"] = "1.6"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 15,"cluster"] = "1.5"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 16,"cluster"] = "1.4"
+
+COG_DA_a_vs_c$cluster = as.numeric(COG_DA_a_vs_c$cluster)
+COG_DA_a_vs_c$cluster = COG_DA_a_vs_c$cluster * 10
+COG_DA_a_vs_c$cluster = as.factor(COG_DA_a_vs_c$cluster)
+```
+
+```{r}
+COG_DA_a_vs_c = arrange(COG_DA_a_vs_c, cluster)
+write_delim(COG_DA_a_vs_c, "Output/DA_COG_P2.tsv", delim = "\t", col_names = TRUE)
 ```
