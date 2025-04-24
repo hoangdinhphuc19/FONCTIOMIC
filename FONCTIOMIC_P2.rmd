@@ -12,6 +12,9 @@ library(phyloseq)
 library(DESeq2)
 library(ggplot2)
 library(ComplexHeatmap)
+library(gridExtra)
+library(GGally)
+library(ggpubr)
 library(BiocParallel)
 library(FactoMineR)
 library(microbiomeMarker)
@@ -493,6 +496,8 @@ pheatmap(count_P2,
               annotation_col = anno_col, 
               annotation_row = anno_row)
 ```
+
+
 Part II : _Analysis of COG abundance in the output of P2_
 tidy up the COG table
 ```{r}
@@ -732,6 +737,76 @@ COG_DA_a_vs_c$cluster = as.factor(COG_DA_a_vs_c$cluster)
 ```
 
 ```{r}
+df_count_COG_P2 = as.data.frame(p2_COG[DA_COG,rownames(meta_cleaned)])
+df_count_COG_P2$cluster = COG_DA_a_vs_c$cluster
 COG_DA_a_vs_c = arrange(COG_DA_a_vs_c, cluster)
+df_count_COG_P2 = arrange(df_count_COG_P2, cluster)
 write_delim(COG_DA_a_vs_c, "Output/DA_COG_P2.tsv", delim = "\t", col_names = TRUE)
+```
+
+Split df for each cluster
+```{r}
+list_cluster = list()
+for(n in c(1:16)){
+  list_cluster[[paste0("cluster_", n)]] = df_count_COG_P2[df_count_COG_P2$cluster == n,]
+  }
+```
+
+```{r}
+plot_da_cog = list()
+for (n in (1:16)){
+    for ( time in c(0, 3, 51, 125)){
+  df_cluster = list_cluster[[n]][,c(get(paste0("P2_crop_", time)), get(paste0("P2_grass_", time)))]
+  df_plot_cluster <- data.frame(
+      dif_C_1 = df_cluster[, 4] - df_cluster[, 1],
+      dif_C_2 = df_cluster[, 5] - df_cluster[, 2],
+      dif_C_3 = df_cluster[, 6] - df_cluster[, 3],
+      dif_G_1 = df_cluster[, 10] - df_cluster[, 7],
+      dif_G_2 = df_cluster[, 11] - df_cluster[, 8],
+      dif_G_3 = df_cluster[, 12] - df_cluster[, 9]
+    )
+  names(df_plot_cluster) = c("dif_C_1", "dif_C_2","dif_C_3","dif_G_1","dif_G_2","dif_G_3")
+  rownames(df_plot_cluster) = rownames(df_cluster)
+  df_plot_cluster$anno = factor(COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == n,"COG_letter"],levels = c("Z","Y","X","W","V","U","T","S","R","Q","P","O","N","M","L","K","J","I","H","G","F","E","D","C","B","A"))
+  df_plot_cluster = df_plot_cluster %>% pivot_longer(cols = 1:6, names_to = "sample", values_to = "abundance")
+  df_plot_cluster$sample = rep(c("Crop","Grass"), each = 3, times = nrow(df_plot_cluster)/6)
+  df_plot_cluster$sample = factor(df_plot_cluster$sample, levels = c("Grass","Crop"))
+  plot_da_cog[[paste0("cluster_",n,"_T",time)]] = ggplot(df_plot_cluster, aes(x = abundance, y = anno, fill = sample, color = anno)) +
+    geom_boxplot(outlier.shape = NA) +
+    xlab(NULL) +
+    ylab(NULL) +
+    ggtitle(paste0("Cluster ", n, " (T",time,")")) +
+    scale_fill_manual(values = c("Crop" = "#fbbb3f", "Grass" = "#2abf2a")) +
+    scale_color_manual(values = c("J" = "#ff0000", 
+"A" = "#c2af58", "K" = "#ff9900", 
+"L" = "#ffff00", "B" = "#ffc600", 
+"D" = "#99ff00", 
+"Y" = "#493126", "V" = "#ff008a", 
+"T" = "#0000ff", "M" = "#9ec928", 
+"N" = "#006633", "Z" = "#660099", 
+"W" = "#336699", "U" = "#33cc99", 
+"O" = "#00ffff", 
+"X" = "#9900ff", "C" = "#805642", 
+"G" = "#ff00ff", "E" = "#99334d", 
+"F" = "#727dcc", "H" = "#5c5a1b", 
+"I" = "#0099ff", "P" = "#ffcc99", 
+"Q" = "#ff9999", 
+"R" = "#d6aadf", "S" = "#FFFFFF")) +
+    geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
+    theme_bw() +
+    guides(color = "none") +
+    theme(plot.title = element_text(size = 8, hjust =0.5, face = "bold"),
+          axis.text.y = element_text(size = 8, face = "bold"),
+          legend.title=element_blank(),
+          legend.key.size = unit(0.5, 'cm'),
+          legend.text = element_text(size=3))
+}
+    }
+```
+
+```{r}
+plot_grid = list()
+  for (i in c(1,5,9,13,17,21,25,29,33,37,41,45,49,53,57,61)){
+    plot_grid[[paste0("Cluster ",i)]] = ggarrange(plot_da_cog[[i]],plot_da_cog[[i+1]],plot_da_cog[[i+2]],plot_da_cog[[i+3]], ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
+  }
 ```
