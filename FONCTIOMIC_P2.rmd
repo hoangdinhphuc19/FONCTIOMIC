@@ -810,3 +810,7 @@ plot_grid = list()
     plot_grid[[paste0("Cluster ",i)]] = ggarrange(plot_da_cog[[i]],plot_da_cog[[i+1]],plot_da_cog[[i+2]],plot_da_cog[[i+3]], ncol = 2, nrow = 2, common.legend = TRUE, legend = "bottom")
   }
 ```
+
+```{r}
+
+```
