@@ -250,7 +250,9 @@ DA_COG_P2_Grass = read_rds("Output/DA_COG_P2_Grass.rds")
 ```{r}
 DA_COG_MGS = unique(c(DA_COG_MGS_Crop$COG_number,DA_COG_MGS_Grass$COG_number))
 DA_COG_P2 = unique(c(DA_COG_P2_Crop$COG_number,DA_COG_P2_Grass$COG_number))
-a = intersect(DA_COG_MGS,DA_COG_P2)
+DA_COG_commun = intersect(DA_COG_MGS,DA_COG_P2)
+df_DA_COG_MGS = rbind(DA_COG_MGS_Crop,DA_COG_MGS_Grass)
+df_DA_COG_MGS = df_DA_COG_MGS[df_DA_COG_MGS$COG_number %in% DA_COG_commun,]
 ```
 
 ```{r}

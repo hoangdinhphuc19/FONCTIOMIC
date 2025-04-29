@@ -23,6 +23,10 @@ p2_COG = read_delim("Data FONCTIOMIC/picrust2out_ver2/COG_metagenome_out/pred_me
 p2_COG = as.data.frame(p2_COG)
   rownames(p2_COG) = p2_COG[,1]
   p2_COG = p2_COG[,-1]
+p2_pathways = read_delim("Data FONCTIOMIC/picrust2out_ver2/pathways_out/path_abun_unstrat.tsv.gz",delim = "\t",col_names = TRUE)
+p2_pathways = as.data.frame(p2_pathways)
+  rownames(p2_pathways) = p2_pathways[,1]
+  p2_pathways = p2_pathways[,-1]
 ```
 Extracting the column names of the data
 ```{r}
@@ -35,6 +39,8 @@ Attributing the sample ID to the data
 ```{r}
 colnames(p2_EC) = sample_after$sample
 colnames(p2_COG) = sample_after$sample
+colnames(p2_pathways) = sample_after$sample
 write_rds(p2_EC,"Data FONCTIOMIC/picrust2out_ver2/p2_EC.rds")
 write_rds(p2_COG,"Data FONCTIOMIC/picrust2out_ver2/p2_COG.rds")
+write_rds(p2_pathways,"Data FONCTIOMIC/picrust2out_ver2/p2_pathways.rds")
 ```

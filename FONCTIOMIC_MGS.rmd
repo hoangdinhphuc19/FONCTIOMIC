@@ -34,6 +34,7 @@ rownames(EC_number_class) = EC_number_class$EC_number
 tb_cog = read_tsv("Data FONCTIOMIC/counts_by_COG.raw.tsv")
 COG_anno = read_rds("description_mapfiles/COG_anno.rds")
 COG_anno$COG_number = rownames(COG_anno)
+tb_pathways = read_delim("Data FONCTIOMIC/pathways_mgs.tabular", delim = "\t")
 ```
 ##Define of variables for subset matrix
 ```{r}
@@ -640,7 +641,7 @@ DA_COG_MGS_Grass = read_rds("Output/DA_COG_MGS_Grass.rds")
 COG_Crop = unique(DA_COG_MGS_Crop$COG_number)
 COG_Grass = unique(DA_COG_MGS_Grass$COG_number)
 DA_COG = unique(c(COG_Crop, COG_Grass))
-count_COG_MGS = assay(vst_COG_MGS)[DA_COG,]
+count_COG_MGS = assay(vst_COG_MGS)[DA_COG_commun,]
 zscore_COG = t(scale(t(count_COG_MGS), center = TRUE, scale = TRUE))
 ```
 ##Distance between the variables (intergroups, Control vs Amended)
@@ -719,17 +720,17 @@ dev.off()
 ```{r}
 COG_DA_a_vs_c = anno_row
 COG_DA_a_vs_c$cluster = cutree_cog
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 1,"cluster"] = "0.6"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 2,"cluster"] = "0.9"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 3,"cluster"] = "0.8"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 4,"cluster"] = "1.1"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 5,"cluster"] = "0.7"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 1,"cluster"] = "0.3"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 2,"cluster"] = "0.2"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 3,"cluster"] = "1.1"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 4,"cluster"] = "0.8"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 5,"cluster"] = "0.5"
 COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 6,"cluster"] = "0.4"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 7,"cluster"] = "0.1"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 8,"cluster"] = "0.3"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 7,"cluster"] = "0.6"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 8,"cluster"] = "0.9"
 COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 9,"cluster"] = "1.0"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 10,"cluster"] = "0.2"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 11,"cluster"] = "0.5"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 10,"cluster"] = "0.7"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 11,"cluster"] = "0.1"
 
 COG_DA_a_vs_c$cluster = as.numeric(COG_DA_a_vs_c$cluster)
 COG_DA_a_vs_c$cluster = COG_DA_a_vs_c$cluster * 10
@@ -737,7 +738,7 @@ COG_DA_a_vs_c$cluster = as.factor(COG_DA_a_vs_c$cluster)
 ```
 
 ```{r}
-df_count_COG_MGS = as.data.frame(tb_cog[DA_COG,])
+df_count_COG_MGS = as.data.frame(tb_cog[DA_COG_commun,])
 df_count_COG_MGS$cluster = COG_DA_a_vs_c$cluster
 df_count_COG_MGS = arrange(df_count_COG_MGS, cluster)
 COG_DA_a_vs_c = arrange(COG_DA_a_vs_c, cluster)
@@ -773,7 +774,7 @@ for (n in (1:11)){
   df_plot_cluster$sample = rep(c("Crop","Grass"), each = 3, times = nrow(df_plot_cluster)/6)
   df_plot_cluster$sample = factor(df_plot_cluster$sample, levels = c("Grass","Crop"))
   plot_da_cog[[paste0("cluster_",n,"_T",time)]] = ggplot(df_plot_cluster, aes(x = abundance, y = anno, fill = sample, color = anno)) +
-    geom_boxplot(outlier.shape = NA) +
+    geom_bar(position = "dodge", stat = "summary", fun = "mean" ) +
     xlab(NULL) +
     ylab(NULL) +
     ggtitle(paste0("Cluster ", n, " (T",time,")")) +
@@ -801,7 +802,6 @@ for (n in (1:11)){
           legend.title=element_blank(),
           legend.key.size = unit(0.5, 'cm'),
           legend.text = element_text(size=3))
-
   }
 }
 ```
@@ -879,3 +879,10 @@ rownames(res4_df_cat_grass) = NULL
 res4_df_cat_grass = res4_df_cat_grass[order(res4_df_cat_grass$log2FoldChange, decreasing = TRUE),]
 #res4_df_cat_grass = left_join(res4_df_cat_grass, COG_anno, by = "COG_letter")
 ```
+
+```{r}
+tb_pathways = as.data.frame(tb_pathways)
+rownames(tb_pathways) = tb_pathways[,1]
+tb_pathways = tb_pathways[,-1]
+```
+
