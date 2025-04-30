@@ -811,3 +811,196 @@ plot_grid = list()
 ```{r}
 p2_pathways_cleaned = p2_pathways[,rownames(meta_cleaned)]
 ```
+
+```{r}
+p2_pathways_dds = round(p2_pathways_cleaned,0)
+dds_P2 = DESeqDataSetFromMatrix(countData = p2_pathways_dds,
+                                  colData = meta_cleaned,
+                                  design = ~ groups + time, tidy = FALSE)
+vst_pathways_P2 = varianceStabilizingTransformation(dds_P2,blind = FALSE) # variance stabilizing transformation
+```
+
+```{r}
+set.seed(38)
+res.pcoa = ape::pcoa(vegan::vegdist(t(assay(vst_pathways_P2)), method = "euclidean"))
+permanova = vegan::adonis2(as.matrix(vegan::vegdist(t(assay(vst_pathways_P2))),method = "euclidean") ~ groups * time, data = meta_cleaned, method = "euclidean", permutations = 999,sqrt.dist = FALSE, add = FALSE, by = "terms")
+pv = permanova$`Pr(>F)`[1]
+pcoaData = as.data.frame(res.pcoa$vectors[,1:2])
+pcoaData$sample = rownames(pcoaData)
+pcoaData = left_join(pcoaData, meta_cleaned[,c("groups","time","sample")], join_by(sample == sample), )
+pcoaData.centroids = pcoaData %>% group_by(groups, time) %>% dplyr::summarise(mean.Axis.1 = mean(Axis.1), mean.Axis.2 = mean(Axis.2))
+pcoaData = left_join(pcoaData, pcoaData.centroids, by = c("groups", "time"))
+ggplot(pcoaData) +
+  geom_point(aes(x=Axis.1, y=Axis.2, colour = groups), size=1) +
+  geom_segment(aes(x=mean.Axis.1, y=mean.Axis.2, xend=Axis.1, yend=Axis.2, colour = groups))+
+  geom_point(aes(x=mean.Axis.1, y=mean.Axis.2, colour = groups), size=6) +
+  geom_text(aes(x=mean.Axis.1, y=mean.Axis.2,label = time), fontface = "bold", colour = "black", size = 3, alpha = 0.6)+
+ ggtitle("PCoaA of metabolics pathways abundance in output of P2 (VST)") +
+    scale_colour_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                        guide=FALSE) + 
+    scale_fill_manual(values = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
+                                  "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2"),
+                      labels = c("Amended Cropland"='Amended Crops', "Control Cropland"='Control Crops', 
+                                  "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
+  xlab(paste0("Axis.1 [", round(res.pcoa$values$Relative_eig[[1]] * 100, digits = 2), " %] ", "(pvalue=", pv, ")")) +
+  ylab(paste0("Axis.2 [", round(res.pcoa$values$Relative_eig[[2]] * 100, digits = 2), " %]")) +
+  guides(color = guide_legend(title = "Groups")) +  
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+ggsave("Output/PCoA_metacyc_P2_VST.png", width = 8, height = 10, dpi = 300)
+```
+
+```{r}
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        pathways = character())
+p2_pathways_cleaned = as.data.frame(p2_pathways_cleaned)
+for ( dataset in c("P2_crop_0","P2_crop_3", "P2_crop_51", "P2_crop_125")){              
+  counts_matrix <- as.matrix(p2_pathways_cleaned[,get(dataset)],rownames = TRUE)
+  counts_matrix <- round(counts_matrix,0)
+  sample_data <- meta_cleaned[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ modality, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$pathways = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
+res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
+write_rds(res4_df, "Output/DA_pathways_P2_Crops.rds")
+```
+
+```{r}
+res4_df <- data.frame( baseMean=numeric(), 
+                        log2FoldChange=numeric(), 
+                        lfcSE=numeric(), 
+                        stat=numeric(), 
+                        pvalue=numeric(), 
+                        padj=numeric(),
+                        conditions = factor(),
+                        pathways = character())
+p2_pathways_cleaned = as.data.frame(p2_pathways_cleaned)
+for ( dataset in c("P2_grass_0","P2_grass_3", "P2_grass_51", "P2_grass_125")){              
+  counts_matrix <- as.matrix(p2_pathways_cleaned[,get(dataset)],rownames = TRUE)
+  counts_matrix <- round(counts_matrix,0)
+  sample_data <- meta_cleaned[get(dataset),,drop=FALSE]
+  res <- DESeqDataSetFromMatrix(countData = counts_matrix,
+                                  colData = sample_data,
+                                  design = ~ modality, tidy = FALSE)
+ res <- DESeq(res, parallel = TRUE)
+ res_1 = results(res, parallel = TRUE)
+  res_2 = as.data.frame((res_1))
+  res_2$pathways = rownames(res_2)
+  res_2$conditions = as.factor(rep(dataset, nrow(res_2)))
+  res4_df <- bind_rows(res4_df, res_2)
+}
+rownames(res4_df) = NULL
+res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
+res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
+write_rds(res4_df, "Output/DA_pathways_P2_Grass.rds")
+```
+
+```{r}
+DA_pathways_P2_Crop = read_rds("Output/DA_pathways_P2_Crops.rds")
+DA_pathways_P2_Grass = read_rds("Output/DA_pathways_P2_Grass.rds")
+pathways_Crop = unique(DA_pathways_P2_Crop$pathways)
+pathways_Grass = unique(DA_pathways_P2_Grass$pathways)
+DA_pathways = unique(c(pathways_Crop, pathways_Grass))
+DA_pathways_signif = read_rds("DA_metacyc_signif.rds")
+count_pathways_P2 = assay(vst_pathways_P2)[DA_pathways_signif,]
+zscore_pathways = t(scale(t(count_pathways_P2), center = TRUE, scale = TRUE))
+```
+##Distance between the variables (intergroups, Control vs Amended)
+```{r}
+dist_a_vs_c = vegan::vegdist(t(count_pathways_P2), method = "euclidean")
+tree_a_vs_c = hclust(dist_a_vs_c, method = "complete")
+cutree_a_vs_c = cutree(tree_a_vs_c, k = 5 )
+table(cutree_a_vs_c)
+```
+##Distance between the observation (pathways)
+```{r}
+dist_metacyc = vegan::vegdist(count_pathways_P2, method = "euclidean")
+tree_metacyc = hclust(dist_metacyc, method = "complete")
+#cut into arbitrary clusters
+cutree_metacyc = cutree(tree_metacyc, k = 7)
+table(cutree_metacyc)
+```
+
+```{r}
+anno_col = as.data.frame(meta_cleaned[,c("groups","time")])
+colnames(anno_col) = c("Groups","Time")
+rownames(anno_col) = rownames(meta_cleaned)
+anno_col$Groups = as.factor(anno_col$Groups)
+anno_col$Time = as.factor(anno_col$Time)
+time_colors <- c(
+  "0" = "#1f77b4",   
+  "3" = "#ff7f0e",   
+  "51" = "#2ca02c",  
+  "125" = "#d62728")
+vect_colours = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd", 
+                "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2")
+hb = HeatmapAnnotation(which = "column",
+                       Groups = anno_col$Groups,
+                       Time = anno_col$Time,
+                       col = list(Groups = vect_colours, Time = time_colors),
+                       show_legend = TRUE,
+                       annotation_name_side = "right",
+                       annotation_name_gp = gpar(fontsize = 10, fontface = "bold"),
+                       annotation_legend_param = list(direction = "vertical", title_gp = gpar(fontsize = 10, fontface = "bold")))
+pheatmap(zscore_pathways, name = "Z-score",
+            cluster_rows = tree_metacyc, cluster_cols = tree_a_vs_c,
+              cutree_rows = 7, #18, #6
+              cutree_cols = 5,
+              top_annotation = hb,
+              show_rownames = TRUE)
+```
+
+```{r}
+bar_plot = list()
+for ( time in c(0, 3, 51, 125)){
+  df_count = count_pathways_P2[,c(get(paste0("P2_crop_", time)), get(paste0("P2_grass_", time)))]
+  df_dif <- data.frame(
+      dif_C_1 = df_count[, 4] - df_count[, 1],
+      dif_C_2 = df_count[, 5] - df_count[, 2],
+      dif_C_3 = df_count[, 6] - df_count[, 3],
+      dif_G_1 = df_count[, 10] - df_count[, 7],
+      dif_G_2 = df_count[, 11] - df_count[, 8],
+      dif_G_3 = df_count[, 12] - df_count[, 9]
+    )
+  names(df_dif) = c("dif_C_1", "dif_C_2","dif_C_3","dif_G_1","dif_G_2","dif_G_3")
+  rownames(df_dif) = rownames(df_count)
+  df_dif$mean_C = rowMeans(df_dif[,1:3])
+  df_dif$mean_G = rowMeans(df_dif[,4:6])
+  df_dif$sd_C = apply(df_dif[,1:3], 1, sd)
+  df_dif$sd_G = apply(df_dif[,4:6], 1, sd)
+  df_dif$anno = as.factor(rownames(df_dif))
+  df_plot = df_dif[,7:11]
+  df_plot = df_plot %>% pivot_longer(cols = 1:4,names_to = c(".value", "type"),names_sep = "_")
+  df_plot$type = factor(df_plot$type, levels = c("G","C"))
+  bar_plot[[paste0("T",time)]] = ggplot(df_plot, aes(x = mean, y = anno, fill = type)) +
+    geom_bar(position = "dodge", stat = "identity") +
+    geom_errorbar(aes(y = anno, xmin = mean - sd, xmax = mean + sd), width = 0.2, position = position_dodge(0.9)) +
+    xlim(-0.5, 1) +
+    xlab(NULL) +
+    ylab(NULL) +
+    ggtitle(paste0("Difference between Amended and Control at "," (T",time,") PICRUSt2's outcome")) +
+    scale_fill_manual(values = c("C" = "#fbbb3f", "G" = "#2abf2a"), labels = c("C" = "Cropland","G" = "Grassland")) +
+    geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 8, hjust =0.5, face = "bold"),
+          axis.text.y = element_text(size = 8, face = "bold"),
+          legend.title=element_blank(),
+          legend.key.size = unit(1, 'cm'),
+          legend.text = element_text(size=8))
+}
+```
