@@ -312,7 +312,8 @@ ggplot(pcoaData) +
                                   "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
   xlab(paste0("Axis.1 [", round(res.pcoa$values$Relative_eig[[1]] * 100, digits = 2), " %] ", "(pvalue=", pv, ")")) +
   ylab(paste0("Axis.2 [", round(res.pcoa$values$Relative_eig[[2]] * 100, digits = 2), " %]")) +
-  guides(color = guide_legend(title = "Groups")) +  
+  guides(color = guide_legend(title = "Groups")) +
+  theme_bw() + 
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_EC_P2_VST.png", width = 8, height = 10, dpi = 300)
 ```
@@ -563,7 +564,8 @@ ggplot(pcoaData) +
                                   "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
   xlab(paste0("Axis.1 [", round(res.pcoa$values$Relative_eig[[1]] * 100, digits = 2), " %] ", "(pvalue=", pv, ")")) +
   ylab(paste0("Axis.2 [", round(res.pcoa$values$Relative_eig[[2]] * 100, digits = 2), " %]")) +
-  guides(color = guide_legend(title = "Groups")) +  
+  guides(color = guide_legend(title = "Groups")) +
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_COG_P2_VST.png", width = 8, height = 10, dpi = 300)
 ```
@@ -629,11 +631,15 @@ write_rds(res4_df, "Output/DA_COG_P2_Grass.rds")
 ```
 
 ```{r}
+DA_COG_MGS_Crop = read_rds("Output/DA_COG_MGS_Crops.rds")
+DA_COG_MGS_Grass = read_rds("Output/DA_COG_MGS_Grass.rds")
 DA_COG_P2_Crop = read_rds("Output/DA_COG_P2_Crops.rds")
 DA_COG_P2_Grass = read_rds("Output/DA_COG_P2_Grass.rds")
 COG_Crop = unique(DA_COG_P2_Crop$COG_number)
 COG_Grass = unique(DA_COG_P2_Grass$COG_number)
 DA_COG = unique(c(COG_Crop, COG_Grass))
+DA_COG_commun = intersect(unique(c(DA_COG_MGS_Crop$COG_number,DA_COG_MGS_Grass$COG_number)), 
+                          unique(c(DA_COG_P2_Crop$COG_number,DA_COG_P2_Grass$COG_number)))
 count_COG_P2 = assay(vst_COG_P2)[DA_COG_commun,]
 zscore_COG = t(scale(t(count_COG_P2), center = TRUE, scale = TRUE))
 ```
@@ -712,7 +718,56 @@ pdf("Output/Heatmap_COG_P2.pdf", width = 10, height = 16)
 draw(p,align_heatmap_legend = "heatmap_top",merge_legend = TRUE, heatmap_legend_side = "right", annotation_legend_side = "right")
 dev.off()
 ```
+Regroupement des COGs en fonction de leur catégorie
+```{r}
+cat_count_COG = as.data.frame(count_COG_P2)
+cat_count_COG$COG_number = rownames(cat_count_COG)
+cat_count_COG = left_join(cat_count_COG, COG_anno[,c(1,4)], by = "COG_number")
+cat_count_COG = cat_count_COG %>% dplyr::select(-COG_number)
+cat_count_COG$COG_letter = factor(cat_count_COG$COG_letter, levels = c("Z","Y","X","W","V","U","T","S","R","Q","P","O","N","M","L","K","J","I","H","G","F","E","D","C","B","A"))
+cat_count_COG = aggregate(. ~ COG_letter, data = cat_count_COG, FUN = sum)
+rownames(cat_count_COG) = cat_count_COG$COG_letter
+cat_count_COG = cat_count_COG %>% dplyr::select(-COG_letter)
+```
 
+```{r}
+bar_plot_cog = list()
+for ( time in c(0, 3, 51, 125)){
+  df_count = cat_count_COG[,c(get(paste0("P2_crop_", time)), get(paste0("P2_grass_", time)))]
+  df_dif <- data.frame(
+      dif_C_1 = df_count[, 4] - df_count[, 1],
+      dif_C_2 = df_count[, 5] - df_count[, 2],
+      dif_C_3 = df_count[, 6] - df_count[, 3],
+      dif_G_1 = df_count[, 10] - df_count[, 7],
+      dif_G_2 = df_count[, 11] - df_count[, 8],
+      dif_G_3 = df_count[, 12] - df_count[, 9]
+    )
+  names(df_dif) = c("dif_C_1", "dif_C_2","dif_C_3","dif_G_1","dif_G_2","dif_G_3")
+  rownames(df_dif) = rownames(df_count)
+  df_dif$mean_C = rowMeans(df_dif[,1:3])
+  df_dif$mean_G = rowMeans(df_dif[,4:6])
+  df_dif$sd_C = apply(df_dif[,1:3], 1, sd)
+  df_dif$sd_G = apply(df_dif[,4:6], 1, sd)
+  df_dif$COG_letter = as.factor(rownames(df_dif))
+  df_plot = df_dif[,7:11]
+  df_plot = df_plot %>% pivot_longer(cols = 1:4,names_to = c(".value", "type"),names_sep = "_")
+  df_plot$type = factor(df_plot$type, levels = c("G","C"))
+  bar_plot_cog[[paste0("T",time)]] = ggplot(df_plot, aes(x = mean, y = COG_letter, fill = type)) +
+    geom_bar(position = "dodge", stat = "identity") +
+    geom_errorbar(aes(y = COG_letter, xmin = mean - sd, xmax = mean + sd), width = 0.2, position = position_dodge(0.9)) +
+    xlab(NULL) +
+    ylab(NULL) +
+    ggtitle(paste0("Difference between Amended and Control at "," (T",time,") P2's outcome")) +
+    scale_fill_manual(values = c("C" = "#fbbb3f", "G" = "#2abf2a"), labels = c("C" = "Cropland","G" = "Grassland")) +
+    geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 8, hjust = 0.5, face = "bold"),
+          axis.text.y = element_text(size = 8, face = "bold"),
+          legend.title=element_blank(),
+          legend.key.size = unit(1, 'cm'),
+          legend.text = element_text(size=8))
+}
+```
 ```{r}
 COG_DA_a_vs_c = anno_row
 COG_DA_a_vs_c$cluster = cutree_cog
@@ -845,7 +900,8 @@ ggplot(pcoaData) +
                                   "Amended Grassland"='Amended Grassland', "Control Grassland"='Control Grassland'))+
   xlab(paste0("Axis.1 [", round(res.pcoa$values$Relative_eig[[1]] * 100, digits = 2), " %] ", "(pvalue=", pv, ")")) +
   ylab(paste0("Axis.2 [", round(res.pcoa$values$Relative_eig[[2]] * 100, digits = 2), " %]")) +
-  guides(color = guide_legend(title = "Groups")) +  
+  guides(color = guide_legend(title = "Groups")) + 
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
 ggsave("Output/PCoA_metacyc_P2_VST.png", width = 8, height = 10, dpi = 300)
 ```
