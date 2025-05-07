@@ -49,6 +49,7 @@ meta_cleaned = meta_cleaned %>% mutate(time = fct_recode(campagne,
 "0" = "0", "3" = "1", "51" = "4", "125" = "6")) %>% mutate(groups = fct_recode(groupe2, 
 "Control Cropland" = "crops_control", "Amended Cropland" = "crops_residues", 
 "Control Grassland" = "grasslands_control", "Amended Grassland" = "grasslands_residues"))
+meta_cleaned$modality = factor(meta_cleaned$modality, levels = c("control","residues"))
 ```
 Define of variables for subset matrix of EC
 ```{r}
@@ -712,8 +713,7 @@ p = pheatmap(zscore_COG, name = "Z-score",
               cutree_cols = 6,
               top_annotation = hb,
               right_annotation = ha ,
-              show_rownames = FALSE,
-              use_raster = FALSE)
+              show_rownames = FALSE)
 pdf("Output/Heatmap_COG_P2.pdf", width = 10, height = 16)
 draw(p,align_heatmap_legend = "heatmap_top",merge_legend = TRUE, heatmap_legend_side = "right", annotation_legend_side = "right")
 dev.off()
@@ -1059,4 +1059,8 @@ for ( time in c(0, 3, 51, 125)){
           legend.key.size = unit(1, 'cm'),
           legend.text = element_text(size=8))
 }
+```
+
+```{r}
+
 ```

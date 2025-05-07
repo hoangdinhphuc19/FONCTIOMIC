@@ -610,3 +610,11 @@ rownames(res4_df) = NULL
 res4_df = filter(res4_df, padj < 0.01 & abs(log2FoldChange) > 0.25)
 res4_df = res4_df[order(res4_df$log2FoldChange, decreasing = TRUE),]
 ```
+
+```{r}
+a = read_delim("Output/DA_COG_MGS.tsv", delim = "\t")
+b = read_delim("Output/DA_COG_P2.tsv", delim = "\t")
+a = as.data.frame (a)
+b = as.data.frame (b)
+length(intersect(a[a$cluster == 5,"COG_number"], b[b$cluster == 1,"COG_number"]))
+```

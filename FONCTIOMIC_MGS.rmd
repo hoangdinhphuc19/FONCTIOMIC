@@ -29,6 +29,7 @@ tb_ec = read_tsv("Data FONCTIOMIC/counts_by_EC_number.norm.tsv")
 meta = read_tsv("Data FONCTIOMIC/complete_metadata_table.tsv")
 meta = as.data.frame(meta)
 row.names(meta) = meta$sample_id
+meta$wheat_straw_amendment = factor(meta$wheat_straw_amendment, levels =  c("Control","Amended"))
 EC_number_class = read.table("description_mapfiles/EC_number_class.txt", header = TRUE, sep = "\t")
 rownames(EC_number_class) = EC_number_class$EC_number
 tb_cog = read_tsv("Data FONCTIOMIC/counts_by_COG.raw.tsv")
@@ -775,17 +776,17 @@ for ( time in c(0, 3, 51, 125)){
 ```{r}
 COG_DA_a_vs_c = anno_row
 COG_DA_a_vs_c$cluster = cutree_cog
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 1,"cluster"] = "0.3"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 1,"cluster"] = "0.1"
 COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 2,"cluster"] = "0.2"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 3,"cluster"] = "1.1"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 4,"cluster"] = "0.8"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 3,"cluster"] = "0.3"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 4,"cluster"] = "0.4"
 COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 5,"cluster"] = "0.5"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 6,"cluster"] = "0.4"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 7,"cluster"] = "0.6"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 8,"cluster"] = "0.9"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 9,"cluster"] = "1.0"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 10,"cluster"] = "0.7"
-COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 11,"cluster"] = "0.1"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 6,"cluster"] = "1.0"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 7,"cluster"] = "0.8"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 8,"cluster"] = "1.1"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 9,"cluster"] = "0.9"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 10,"cluster"] = "0.6"
+COG_DA_a_vs_c[COG_DA_a_vs_c$cluster == 11,"cluster"] = "0.7"
 
 COG_DA_a_vs_c$cluster = as.numeric(COG_DA_a_vs_c$cluster)
 COG_DA_a_vs_c$cluster = COG_DA_a_vs_c$cluster * 10
@@ -1067,5 +1068,9 @@ for ( time in c(0, 3, 51, 125)){
           legend.key.size = unit(1, 'cm'),
           legend.text = element_text(size=8))
 }
+```
+
+```{r}
+
 ```
 

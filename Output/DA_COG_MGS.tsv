@@ -1,290 +1,290 @@
 COG_letter	COG_description	COG_category	COG_number	annotation	cluster
-S	Uncharacterized conserved protein YloU, alkaline shock protein (Asp23) family	Function unknown	COG1302	S:[Function unknown]	1
-M	Outer membrane protein OmpW	Cell wall/membrane/envelope biogenesis	COG3047	M:[Cell wall/membrane/envelope biogenesis]	1
-H	ABC-type cobalamin transport system, permease component BtuC	Coenzyme transport and metabolism	COG4139	H:[Coenzyme transport and metabolism]	1
-F	ppGpp synthetase catalytic domain (RelA/SpoT-type nucleotidyltranferase)	Nucleotide transport and metabolism	COG2357	F:[Nucleotide transport and metabolism]	1
-M	Surface polysaccharide O-acyltransferase WecH	Cell wall/membrane/envelope biogenesis	COG3274	M:[Cell wall/membrane/envelope biogenesis]	1
-P	ABC-type enterobactin transport system, permease component	Inorganic ion transport and metabolism	COG4779	P:[Inorganic ion transport and metabolism]	1
-N	Flagellar basal body P-ring formation protein FlgA	Cell motility	COG1261	N:[Cell motility]	1
-O	Predicted ATP-dependent protease	Posttranslational modification, protein turnover, chaperones	COG1067	O:[Posttranslational modification, protein turnover, chaperones]	1
-E	Citrulline hydrolase RocB	Amino acid transport and metabolism	COG4187	E:[Amino acid transport and metabolism]	1
-D	Spore germination protein GerM	Cell cycle control, cell division, chromosome partitioning	COG5401	D:[Cell cycle control, cell division, chromosome partitioning]	1
-E	Succinylglutamate desuccinylase	Amino acid transport and metabolism	COG2988	E:[Amino acid transport and metabolism]	1
-E	ABC-type proline/glycine betaine transport system, periplasmic component	Amino acid transport and metabolism	COG2113	E:[Amino acid transport and metabolism]	1
-P	Inorganic triphosphatase YgiF, contains CYTH and CHAD domains	Inorganic ion transport and metabolism	COG3025	P:[Inorganic ion transport and metabolism]	1
-T	sRNA-binding protein ProQ	Signal transduction mechanisms	COG3109	T:[Signal transduction mechanisms]	1
-P	Putative heme degradation protein	Inorganic ion transport and metabolism	COG3720	P:[Inorganic ion transport and metabolism]	1
-U	Type Vc autotransporter adhesin, Ata/Hia family	Intracellular trafficking, secretion, and vesicular transport	COG5295	U:[Intracellular trafficking, secretion, and vesicular transport]	1
-N	Phosphoaspartate phosphatase CheZ, dephosphorylates CheY~P	Cell motility	COG3143	N:[Cell motility]	1
-I	CDP-diacylglycerol pyrophosphatase	Lipid transport and metabolism	COG2134	I:[Lipid transport and metabolism]	1
-K	Transcriptional regulator TyrR of aromatic amino acids metabolism	Transcription	COG3283	K:[Transcription]	1
-R	Putative effector of murein hydrolase LrgA, UPF0299 family	General function prediction only	COG1380	R:[General function prediction only]	1
-D	Cell division protein ZipA, interacts with FtsZ	Cell cycle control, cell division, chromosome partitioning	COG3115	D:[Cell cycle control, cell division, chromosome partitioning]	1
-O	Peptide backbone phosphorylating domain YcaO, involved in protein thioamidation and methylthiolation	Posttranslational modification, protein turnover, chaperones	COG1944	O:[Posttranslational modification, protein turnover, chaperones]	1
-K	Predicted transcriptional regulator YheO, contains PAS and DNA-binding HTH domains	Transcription	COG2964	K:[Transcription]	1
-T	RseA, negative regulator of sigma E activity	Signal transduction mechanisms	COG3073	T:[Signal transduction mechanisms]	1
-C	Hydroxylamine reductase (hybrid-cluster protein)	Energy production and conversion	COG1151	C:[Energy production and conversion]	1
-R	Predicted RNA-binding protein, contains ribosomal protein S1 (RPS1) domain	General function prediction only	COG1098	R:[General function prediction only]	1
-C	Inorganic pyrophosphatase/exopolyphosphatase	Energy production and conversion	COG1227	C:[Energy production and conversion]	1
-R	Predicted carbohydrate-binding protein, contains CBM5 and CBM33 domains	General function prediction only	COG3397	R:[General function prediction only]	1
-C	Butyrate kinase	Energy production and conversion	COG3426	C:[Energy production and conversion]	1
-E	ABC-type histidine transport system, ATPase component	Amino acid transport and metabolism	COG4598	E:[Amino acid transport and metabolism]	1
-E	Alanine-alpha-ketoisovalerate (or valine-pyruvate) aminotransferase	Amino acid transport and metabolism	COG3977	E:[Amino acid transport and metabolism]	1
-E	L-cystine transporter TcyP, sodium:dicarboxylate symporter family	Amino acid transport and metabolism	COG1823	E:[Amino acid transport and metabolism]	1
-L	Predicted ATPase SbcE/YhaN involved in DNA double-strand break repair, contains AAA domain	Replication, recombination and repair	COG4717	L:[Replication, recombination and repair]	1
-M	Lipopolysaccharide export system protein LptC	Cell wall/membrane/envelope biogenesis	COG3117	M:[Cell wall/membrane/envelope biogenesis]	1
-L	DNA repair exonuclease SbcCD ATPase subunit	Replication, recombination and repair	COG0419	L:[Replication, recombination and repair]	1
-X	Phage repressor protein C, contains Cro/C1-type HTH and peptidase S24 domains	Mobilome: prophages, transposons	COG2932	X:[Mobilome: prophages, transposons]	1
-G	Ascorbate-specific PTS system IIC component UlaA	Carbohydrate transport and metabolism	COG3037	G:[Carbohydrate transport and metabolism]	1
-J	23S rRNA A1618 N6-methylase RlmF	Translation, ribosomal structure and biogenesis	COG3129	J:[Translation, ribosomal structure and biogenesis]	1
-S	Uncharacterized membrane protein YcgQ,  UPF0703/DUF1980 family	Function unknown	COG3689	S:[Function unknown]	1
-P	ABC-type enterochelin transport system, permease component	Inorganic ion transport and metabolism	COG4605	P:[Inorganic ion transport and metabolism]	1
-O	Lipase chaperone LimK	Posttranslational modification, protein turnover, chaperones	COG5380	O:[Posttranslational modification, protein turnover, chaperones]	1
-S	Uncharacterized membrane protein YhgE, phage infection protein (PIP) family	Function unknown	COG1511	S:[Function unknown]	1
-K	Transcriptional antiterminator	Transcription	COG3711	K:[Transcription]	1
-E	D-serine dehydratase	Amino acid transport and metabolism	COG3048	E:[Amino acid transport and metabolism]	1
-R	Predicted RNA-binding protein YitL, contains S1 domains, virulence factor B family	General function prediction only	COG2996	R:[General function prediction only]	1
-S	Uncharacterized conserved protein YpuA, DUF1002 family	Function unknown	COG4086	S:[Function unknown]	1
-J	tRNA A22 N1-methylase	Translation, ribosomal structure and biogenesis	COG2384	J:[Translation, ribosomal structure and biogenesis]	1
-C	Succinate/dicarboxylate transporter YjjP, DUF1212 family	Energy production and conversion	COG2966	C:[Energy production and conversion]	1
-R	UTP pyrophosphatase, metal-dependent hydrolase family	General function prediction only	COG1451	R:[General function prediction only]	1
-O	Secreted/periplasmic Zn-dependent peptidases, insulinase-like	Posttranslational modification, protein turnover, chaperones	COG1025	O:[Posttranslational modification, protein turnover, chaperones]	1
-C	Alcohol dehydrogenase YqhD, Fe-dependent ADH family	Energy production and conversion	COG1979	C:[Energy production and conversion]	1
-R	Competence protein CoiA, contains predicted nuclease domain	General function prediction only	COG4469	R:[General function prediction only]	1
-P	ABC-type enterochelin transport system, permease component	Inorganic ion transport and metabolism	COG4606	P:[Inorganic ion transport and metabolism]	1
-X	Regulator of phage lambda lysogenization HflD, binds to CII and stimulates its degradation	Mobilome: prophages, transposons	COG2915	X:[Mobilome: prophages, transposons]	1
-E	ABC-type arginine/histidine transport system, permease component	Amino acid transport and metabolism	COG4160	E:[Amino acid transport and metabolism]	1
-R	Predicted triphosphatase or cyclase YjbK, contains CYTH domain	General function prediction only	COG4116	R:[General function prediction only]	1
-S	Outer membrane protein VirK/YbjX involved in antimicrobial peptide resistance, DUF535 family	Function unknown	COG2990	S:[Function unknown]	1
-R	Penicillin-binding protein-related factor A, putative recombinase	General function prediction only	COG3331	R:[General function prediction only]	1
-K	Negative regulator MecA of genetic competence, sporulation and motility	Transcription	COG4862	K:[Transcription]	1
-D	Spore dipicolinate transporter SpoVV/YjiH/YlbJ, contains nucleoside recognition GATE domain	Cell cycle control, cell division, chromosome partitioning	COG3314	D:[Cell cycle control, cell division, chromosome partitioning]	1
-U	Type III secretion system pilotin YscW/InvH/MxiM, SctG/YbaY family	Intracellular trafficking, secretion, and vesicular transport	COG3126	U:[Intracellular trafficking, secretion, and vesicular transport]	1
-R	Phosphate starvation-inducible membrane PsiE (function unknown)	General function prediction only	COG3223	R:[General function prediction only]	1
-G	Beta- N-acetylglucosaminidase	Carbohydrate transport and metabolism	COG4193	G:[Carbohydrate transport and metabolism]	1
-M	Outer membrane porin OmpC/OmpF/PhoE	Cell wall/membrane/envelope biogenesis	COG3203	M:[Cell wall/membrane/envelope biogenesis]	1
-J	5S rRNA maturation ribonuclease M5, contains TOPRIM domain	Translation, ribosomal structure and biogenesis	COG1658	J:[Translation, ribosomal structure and biogenesis]	1
-G	ABC-type glucose/galactose transport system, permease component	Carbohydrate transport and metabolism	COG4211	G:[Carbohydrate transport and metabolism]	1
-E	Branched-chain amino acid permease	Amino acid transport and metabolism	COG1114	E:[Amino acid transport and metabolism]	1
-S	Uncharacterized conserved protein, contains a von Willebrand factor type A (vWA) domain	Function unknown	COG2425	S:[Function unknown]	1
-K	GTP-sensing pleiotropic transcriptional regulator CodY	Transcription	COG4465	K:[Transcription]	1
-P	ABC-type enterochelin transport system, periplasmic component	Inorganic ion transport and metabolism	COG4607	P:[Inorganic ion transport and metabolism]	1
-H	Riboflavin transporter FmnP/RibU	Coenzyme transport and metabolism	COG3601	H:[Coenzyme transport and metabolism]	1
-A	Regulator of RNase E activity RraB	RNA processing and modification	COG3076	A:[RNA processing and modification]	1
-J	tRNA-Met C34-N4-acetylcytidine synthase TmcAL	Translation, ribosomal structure and biogenesis	COG1323	J:[Translation, ribosomal structure and biogenesis]	1
-T	Cell fate regulator YmcA, YheA/YmcA/DUF963 family (controls sporulation, competence, biofilm development)	Signal transduction mechanisms	COG4550	T:[Signal transduction mechanisms]	1
-T	Adenylate cyclase, class I	Signal transduction mechanisms	COG3072	T:[Signal transduction mechanisms]	1
-E	Na+/serine and Na+/threonine symporter SstT	Amino acid transport and metabolism	COG3633	E:[Amino acid transport and metabolism]	1
-T	YycI protein, regulator of the WalKR two-component signal transduction system	Signal transduction mechanisms	COG4853	T:[Signal transduction mechanisms]	1
-J	tRNA U34 sulfur transfer complex TusBCD TusC component, DsrF family	Translation, ribosomal structure and biogenesis	COG2923	J:[Translation, ribosomal structure and biogenesis]	1
-L	Regulator of replication initiation timing YabA	Replication, recombination and repair	COG4467	L:[Replication, recombination and repair]	1
-U	ESX protein secretion system component YukC	Intracellular trafficking, secretion, and vesicular transport	COG4499	U:[Intracellular trafficking, secretion, and vesicular transport]	1
-S	Dual-topology membrane protein YdgC, GlpM family	Function unknown	COG3136	S:[Function unknown]	1
-N	Pilin (type 1 fimbrial protein)	Cell motility	COG3539	N:[Cell motility]	1
-T	YycH protein, regulator of the WalKR two-component signal transduction system	Signal transduction mechanisms	COG4863	T:[Signal transduction mechanisms]	1
-T	S-ribosylhomocysteine lyase LuxS, autoinducer biosynthesis	Signal transduction mechanisms	COG1854	T:[Signal transduction mechanisms]	1
-J	Elongation factor P hydroxylase EpmC	Translation, ribosomal structure and biogenesis	COG3101	J:[Translation, ribosomal structure and biogenesis]	1
-L	dsDNA-binding nucleoid-associated protein YejK/NdpA	Replication, recombination and repair	COG3081	L:[Replication, recombination and repair]	1
-M	LPS O-antigen chain length determinant protein, WzzB/FepE family	Cell wall/membrane/envelope biogenesis	COG3765	M:[Cell wall/membrane/envelope biogenesis]	1
-D	Septation ring formation regulator EzrA	Cell cycle control, cell division, chromosome partitioning	COG4477	D:[Cell cycle control, cell division, chromosome partitioning]	1
-E	Amino acid permease	Amino acid transport and metabolism	COG0814	E:[Amino acid transport and metabolism]	1
-T	HPt (histidine-containing phosphotransfer) domain	Signal transduction mechanisms	COG2198	T:[Signal transduction mechanisms]	1
-G	Phosphotransferase system cellobiose-specific component IIA	Carbohydrate transport and metabolism	COG1447	G:[Carbohydrate transport and metabolism]	1
-S	Uncharacterized conserved protein Veg, DUF1021 family	Function unknown	COG4466	S:[Function unknown]	1
-G	Phosphotransferase system cellobiose-specific component IIB	Carbohydrate transport and metabolism	COG1440	G:[Carbohydrate transport and metabolism]	1
-M	Nucleoside-specific outer membrane channel protein Tsx	Cell wall/membrane/envelope biogenesis	COG3248	M:[Cell wall/membrane/envelope biogenesis]	1
-S	Uncharacterized membrane protein YhdT	Function unknown	COG3924	S:[Function unknown]	1
-C	Soluble cytochrome b562	Energy production and conversion	COG3783	C:[Energy production and conversion]	1
-R	Predicted periplasmic protein with OB-fold, involved in stress response, YdeI/OmdA family	General function prediction only	COG3111	R:[General function prediction only]	1
-D	Cell division protein FtsN	Cell cycle control, cell division, chromosome partitioning	COG3087	D:[Cell cycle control, cell division, chromosome partitioning]	1
-M	Outer membrane lipoprotein LpoB, binds and activates PBP1b	Cell wall/membrane/envelope biogenesis	COG3417	M:[Cell wall/membrane/envelope biogenesis]	1
-M	Membrane protein TolA involved in colicin uptake	Cell wall/membrane/envelope biogenesis	COG3064	M:[Cell wall/membrane/envelope biogenesis]	1
-C	FoF1-type ATP synthase accessory protein AtpI	Energy production and conversion	COG3312	C:[Energy production and conversion]	1
-W	P pilus assembly protein, chaperone PapD	Extracellular structures	COG3121	W:[Extracellular structures]	1
-E	Lysine export protein LysO/YbjE, DUF340 family	Amino acid transport and metabolism	COG2431	E:[Amino acid transport and metabolism]	1
-T	RseC, positive regulator of sigma E activity	Signal transduction mechanisms	COG3086	T:[Signal transduction mechanisms]	1
-N	Flagellar hook-length control protein FliK	Cell motility	COG3144	N:[Cell motility]	1
-D	Cell division inhibitor SulA, prevents FtsZ ring assembly	Cell cycle control, cell division, chromosome partitioning	COG5404	D:[Cell cycle control, cell division, chromosome partitioning]	1
-K	Regulator of sigma D	Transcription	COG3160	K:[Transcription]	1
-S	Uncharacterized conserved protein YjaG, DUF416 family	Function unknown	COG3068	S:[Function unknown]	1
-S	Uncharacterized membrane protein Smp affecting hemolysin expression	Function unknown	COG3726	S:[Function unknown]	1
-V	Membrane protein AmpE required for beta-lactamase induction	Defense mechanisms	COG3725	V:[Defense mechanisms]	1
 K	DNA-binding transcriptional regulator SgrR of sgrS sRNA, contains a MarR-type HTH domain and a periplasmic-type solute-binding domain	Transcription	COG4533	K:[Transcription]	1
-C	Na+/H+ antiporter NhaB	Energy production and conversion	COG3067	C:[Energy production and conversion]	1
+V	Membrane protein AmpE required for beta-lactamase induction	Defense mechanisms	COG3725	V:[Defense mechanisms]	1
+S	Uncharacterized membrane protein Smp affecting hemolysin expression	Function unknown	COG3726	S:[Function unknown]	1
+S	Uncharacterized conserved protein YjaG, DUF416 family	Function unknown	COG3068	S:[Function unknown]	1
+K	Regulator of sigma D	Transcription	COG3160	K:[Transcription]	1
+D	Cell division inhibitor SulA, prevents FtsZ ring assembly	Cell cycle control, cell division, chromosome partitioning	COG5404	D:[Cell cycle control, cell division, chromosome partitioning]	1
+N	Flagellar hook-length control protein FliK	Cell motility	COG3144	N:[Cell motility]	1
+T	RseC, positive regulator of sigma E activity	Signal transduction mechanisms	COG3086	T:[Signal transduction mechanisms]	1
+E	Lysine export protein LysO/YbjE, DUF340 family	Amino acid transport and metabolism	COG2431	E:[Amino acid transport and metabolism]	1
+W	P pilus assembly protein, chaperone PapD	Extracellular structures	COG3121	W:[Extracellular structures]	1
+C	FoF1-type ATP synthase accessory protein AtpI	Energy production and conversion	COG3312	C:[Energy production and conversion]	1
+M	Membrane protein TolA involved in colicin uptake	Cell wall/membrane/envelope biogenesis	COG3064	M:[Cell wall/membrane/envelope biogenesis]	1
+T	Adenylate cyclase, class I	Signal transduction mechanisms	COG3072	T:[Signal transduction mechanisms]	1
+M	Outer membrane lipoprotein LpoB, binds and activates PBP1b	Cell wall/membrane/envelope biogenesis	COG3417	M:[Cell wall/membrane/envelope biogenesis]	1
+D	Cell division protein FtsN	Cell cycle control, cell division, chromosome partitioning	COG3087	D:[Cell cycle control, cell division, chromosome partitioning]	1
+R	Predicted periplasmic protein with OB-fold, involved in stress response, YdeI/OmdA family	General function prediction only	COG3111	R:[General function prediction only]	1
+C	Soluble cytochrome b562	Energy production and conversion	COG3783	C:[Energy production and conversion]	1
+S	Uncharacterized membrane protein YhdT	Function unknown	COG3924	S:[Function unknown]	1
+M	Nucleoside-specific outer membrane channel protein Tsx	Cell wall/membrane/envelope biogenesis	COG3248	M:[Cell wall/membrane/envelope biogenesis]	1
+G	Phosphotransferase system cellobiose-specific component IIB	Carbohydrate transport and metabolism	COG1440	G:[Carbohydrate transport and metabolism]	1
+S	Uncharacterized membrane protein YhgE, phage infection protein (PIP) family	Function unknown	COG1511	S:[Function unknown]	1
+S	Uncharacterized conserved protein Veg, DUF1021 family	Function unknown	COG4466	S:[Function unknown]	1
+G	Phosphotransferase system cellobiose-specific component IIA	Carbohydrate transport and metabolism	COG1447	G:[Carbohydrate transport and metabolism]	1
+E	Branched-chain amino acid permease	Amino acid transport and metabolism	COG1114	E:[Amino acid transport and metabolism]	1
+T	HPt (histidine-containing phosphotransfer) domain	Signal transduction mechanisms	COG2198	T:[Signal transduction mechanisms]	1
+M	Outer membrane porin OmpC/OmpF/PhoE	Cell wall/membrane/envelope biogenesis	COG3203	M:[Cell wall/membrane/envelope biogenesis]	1
+E	Amino acid permease	Amino acid transport and metabolism	COG0814	E:[Amino acid transport and metabolism]	1
+D	Septation ring formation regulator EzrA	Cell cycle control, cell division, chromosome partitioning	COG4477	D:[Cell cycle control, cell division, chromosome partitioning]	1
+M	LPS O-antigen chain length determinant protein, WzzB/FepE family	Cell wall/membrane/envelope biogenesis	COG3765	M:[Cell wall/membrane/envelope biogenesis]	1
+L	dsDNA-binding nucleoid-associated protein YejK/NdpA	Replication, recombination and repair	COG3081	L:[Replication, recombination and repair]	1
+J	Elongation factor P hydroxylase EpmC	Translation, ribosomal structure and biogenesis	COG3101	J:[Translation, ribosomal structure and biogenesis]	1
+T	S-ribosylhomocysteine lyase LuxS, autoinducer biosynthesis	Signal transduction mechanisms	COG1854	T:[Signal transduction mechanisms]	1
+T	YycH protein, regulator of the WalKR two-component signal transduction system	Signal transduction mechanisms	COG4863	T:[Signal transduction mechanisms]	1
+N	Pilin (type 1 fimbrial protein)	Cell motility	COG3539	N:[Cell motility]	1
+S	Dual-topology membrane protein YdgC, GlpM family	Function unknown	COG3136	S:[Function unknown]	1
+U	ESX protein secretion system component YukC	Intracellular trafficking, secretion, and vesicular transport	COG4499	U:[Intracellular trafficking, secretion, and vesicular transport]	1
+L	Regulator of replication initiation timing YabA	Replication, recombination and repair	COG4467	L:[Replication, recombination and repair]	1
+J	tRNA U34 sulfur transfer complex TusBCD TusC component, DsrF family	Translation, ribosomal structure and biogenesis	COG2923	J:[Translation, ribosomal structure and biogenesis]	1
+T	YycI protein, regulator of the WalKR two-component signal transduction system	Signal transduction mechanisms	COG4853	T:[Signal transduction mechanisms]	1
+E	Na+/serine and Na+/threonine symporter SstT	Amino acid transport and metabolism	COG3633	E:[Amino acid transport and metabolism]	1
+K	Transcriptional antiterminator	Transcription	COG3711	K:[Transcription]	1
+T	Cell fate regulator YmcA, YheA/YmcA/DUF963 family (controls sporulation, competence, biofilm development)	Signal transduction mechanisms	COG4550	T:[Signal transduction mechanisms]	1
+J	tRNA-Met C34-N4-acetylcytidine synthase TmcAL	Translation, ribosomal structure and biogenesis	COG1323	J:[Translation, ribosomal structure and biogenesis]	1
+K	Negative regulator MecA of genetic competence, sporulation and motility	Transcription	COG4862	K:[Transcription]	1
+A	Regulator of RNase E activity RraB	RNA processing and modification	COG3076	A:[RNA processing and modification]	1
+H	Riboflavin transporter FmnP/RibU	Coenzyme transport and metabolism	COG3601	H:[Coenzyme transport and metabolism]	1
+P	ABC-type enterochelin transport system, periplasmic component	Inorganic ion transport and metabolism	COG4607	P:[Inorganic ion transport and metabolism]	1
+K	GTP-sensing pleiotropic transcriptional regulator CodY	Transcription	COG4465	K:[Transcription]	1
+S	Uncharacterized conserved protein, contains a von Willebrand factor type A (vWA) domain	Function unknown	COG2425	S:[Function unknown]	1
+G	ABC-type glucose/galactose transport system, permease component	Carbohydrate transport and metabolism	COG4211	G:[Carbohydrate transport and metabolism]	1
+J	5S rRNA maturation ribonuclease M5, contains TOPRIM domain	Translation, ribosomal structure and biogenesis	COG1658	J:[Translation, ribosomal structure and biogenesis]	1
+E	L-cystine transporter TcyP, sodium:dicarboxylate symporter family	Amino acid transport and metabolism	COG1823	E:[Amino acid transport and metabolism]	1
+S	Uncharacterized conserved protein YpuA, DUF1002 family	Function unknown	COG4086	S:[Function unknown]	1
+G	Beta- N-acetylglucosaminidase	Carbohydrate transport and metabolism	COG4193	G:[Carbohydrate transport and metabolism]	1
+R	Phosphate starvation-inducible membrane PsiE (function unknown)	General function prediction only	COG3223	R:[General function prediction only]	1
+U	Type III secretion system pilotin YscW/InvH/MxiM, SctG/YbaY family	Intracellular trafficking, secretion, and vesicular transport	COG3126	U:[Intracellular trafficking, secretion, and vesicular transport]	1
+D	Spore dipicolinate transporter SpoVV/YjiH/YlbJ, contains nucleoside recognition GATE domain	Cell cycle control, cell division, chromosome partitioning	COG3314	D:[Cell cycle control, cell division, chromosome partitioning]	1
+R	Penicillin-binding protein-related factor A, putative recombinase	General function prediction only	COG3331	R:[General function prediction only]	1
+S	Outer membrane protein VirK/YbjX involved in antimicrobial peptide resistance, DUF535 family	Function unknown	COG2990	S:[Function unknown]	1
+R	Predicted triphosphatase or cyclase YjbK, contains CYTH domain	General function prediction only	COG4116	R:[General function prediction only]	1
+E	ABC-type arginine/histidine transport system, permease component	Amino acid transport and metabolism	COG4160	E:[Amino acid transport and metabolism]	1
+X	Regulator of phage lambda lysogenization HflD, binds to CII and stimulates its degradation	Mobilome: prophages, transposons	COG2915	X:[Mobilome: prophages, transposons]	1
+P	ABC-type enterochelin transport system, permease component	Inorganic ion transport and metabolism	COG4606	P:[Inorganic ion transport and metabolism]	1
+R	Competence protein CoiA, contains predicted nuclease domain	General function prediction only	COG4469	R:[General function prediction only]	1
+C	Alcohol dehydrogenase YqhD, Fe-dependent ADH family	Energy production and conversion	COG1979	C:[Energy production and conversion]	1
+O	Secreted/periplasmic Zn-dependent peptidases, insulinase-like	Posttranslational modification, protein turnover, chaperones	COG1025	O:[Posttranslational modification, protein turnover, chaperones]	1
+R	UTP pyrophosphatase, metal-dependent hydrolase family	General function prediction only	COG1451	R:[General function prediction only]	1
+C	Succinate/dicarboxylate transporter YjjP, DUF1212 family	Energy production and conversion	COG2966	C:[Energy production and conversion]	1
+J	tRNA A22 N1-methylase	Translation, ribosomal structure and biogenesis	COG2384	J:[Translation, ribosomal structure and biogenesis]	1
+R	Predicted RNA-binding protein YitL, contains S1 domains, virulence factor B family	General function prediction only	COG2996	R:[General function prediction only]	1
+E	D-serine dehydratase	Amino acid transport and metabolism	COG3048	E:[Amino acid transport and metabolism]	1
+O	Lipase chaperone LimK	Posttranslational modification, protein turnover, chaperones	COG5380	O:[Posttranslational modification, protein turnover, chaperones]	1
+P	ABC-type enterochelin transport system, permease component	Inorganic ion transport and metabolism	COG4605	P:[Inorganic ion transport and metabolism]	1
+S	Uncharacterized membrane protein YcgQ,  UPF0703/DUF1980 family	Function unknown	COG3689	S:[Function unknown]	1
+J	23S rRNA A1618 N6-methylase RlmF	Translation, ribosomal structure and biogenesis	COG3129	J:[Translation, ribosomal structure and biogenesis]	1
+G	Ascorbate-specific PTS system IIC component UlaA	Carbohydrate transport and metabolism	COG3037	G:[Carbohydrate transport and metabolism]	1
+X	Phage repressor protein C, contains Cro/C1-type HTH and peptidase S24 domains	Mobilome: prophages, transposons	COG2932	X:[Mobilome: prophages, transposons]	1
+L	DNA repair exonuclease SbcCD ATPase subunit	Replication, recombination and repair	COG0419	L:[Replication, recombination and repair]	1
+M	Lipopolysaccharide export system protein LptC	Cell wall/membrane/envelope biogenesis	COG3117	M:[Cell wall/membrane/envelope biogenesis]	1
+L	Predicted ATPase SbcE/YhaN involved in DNA double-strand break repair, contains AAA domain	Replication, recombination and repair	COG4717	L:[Replication, recombination and repair]	1
+E	Alanine-alpha-ketoisovalerate (or valine-pyruvate) aminotransferase	Amino acid transport and metabolism	COG3977	E:[Amino acid transport and metabolism]	1
+E	ABC-type histidine transport system, ATPase component	Amino acid transport and metabolism	COG4598	E:[Amino acid transport and metabolism]	1
+C	Butyrate kinase	Energy production and conversion	COG3426	C:[Energy production and conversion]	1
+R	Predicted carbohydrate-binding protein, contains CBM5 and CBM33 domains	General function prediction only	COG3397	R:[General function prediction only]	1
+C	Inorganic pyrophosphatase/exopolyphosphatase	Energy production and conversion	COG1227	C:[Energy production and conversion]	1
+R	Predicted RNA-binding protein, contains ribosomal protein S1 (RPS1) domain	General function prediction only	COG1098	R:[General function prediction only]	1
+C	Hydroxylamine reductase (hybrid-cluster protein)	Energy production and conversion	COG1151	C:[Energy production and conversion]	1
+T	RseA, negative regulator of sigma E activity	Signal transduction mechanisms	COG3073	T:[Signal transduction mechanisms]	1
+K	Predicted transcriptional regulator YheO, contains PAS and DNA-binding HTH domains	Transcription	COG2964	K:[Transcription]	1
+O	Peptide backbone phosphorylating domain YcaO, involved in protein thioamidation and methylthiolation	Posttranslational modification, protein turnover, chaperones	COG1944	O:[Posttranslational modification, protein turnover, chaperones]	1
+D	Cell division protein ZipA, interacts with FtsZ	Cell cycle control, cell division, chromosome partitioning	COG3115	D:[Cell cycle control, cell division, chromosome partitioning]	1
+R	Putative effector of murein hydrolase LrgA, UPF0299 family	General function prediction only	COG1380	R:[General function prediction only]	1
+K	Transcriptional regulator TyrR of aromatic amino acids metabolism	Transcription	COG3283	K:[Transcription]	1
+I	CDP-diacylglycerol pyrophosphatase	Lipid transport and metabolism	COG2134	I:[Lipid transport and metabolism]	1
+N	Phosphoaspartate phosphatase CheZ, dephosphorylates CheY~P	Cell motility	COG3143	N:[Cell motility]	1
+U	Type Vc autotransporter adhesin, Ata/Hia family	Intracellular trafficking, secretion, and vesicular transport	COG5295	U:[Intracellular trafficking, secretion, and vesicular transport]	1
+P	Putative heme degradation protein	Inorganic ion transport and metabolism	COG3720	P:[Inorganic ion transport and metabolism]	1
+T	sRNA-binding protein ProQ	Signal transduction mechanisms	COG3109	T:[Signal transduction mechanisms]	1
+P	Inorganic triphosphatase YgiF, contains CYTH and CHAD domains	Inorganic ion transport and metabolism	COG3025	P:[Inorganic ion transport and metabolism]	1
+E	ABC-type proline/glycine betaine transport system, periplasmic component	Amino acid transport and metabolism	COG2113	E:[Amino acid transport and metabolism]	1
+E	Succinylglutamate desuccinylase	Amino acid transport and metabolism	COG2988	E:[Amino acid transport and metabolism]	1
+D	Spore germination protein GerM	Cell cycle control, cell division, chromosome partitioning	COG5401	D:[Cell cycle control, cell division, chromosome partitioning]	1
+E	Citrulline hydrolase RocB	Amino acid transport and metabolism	COG4187	E:[Amino acid transport and metabolism]	1
+O	Predicted ATP-dependent protease	Posttranslational modification, protein turnover, chaperones	COG1067	O:[Posttranslational modification, protein turnover, chaperones]	1
+N	Flagellar basal body P-ring formation protein FlgA	Cell motility	COG1261	N:[Cell motility]	1
+P	ABC-type enterobactin transport system, permease component	Inorganic ion transport and metabolism	COG4779	P:[Inorganic ion transport and metabolism]	1
+M	Surface polysaccharide O-acyltransferase WecH	Cell wall/membrane/envelope biogenesis	COG3274	M:[Cell wall/membrane/envelope biogenesis]	1
+F	ppGpp synthetase catalytic domain (RelA/SpoT-type nucleotidyltranferase)	Nucleotide transport and metabolism	COG2357	F:[Nucleotide transport and metabolism]	1
+H	ABC-type cobalamin transport system, permease component BtuC	Coenzyme transport and metabolism	COG4139	H:[Coenzyme transport and metabolism]	1
+M	Outer membrane protein OmpW	Cell wall/membrane/envelope biogenesis	COG3047	M:[Cell wall/membrane/envelope biogenesis]	1
+S	Uncharacterized conserved protein YloU, alkaline shock protein (Asp23) family	Function unknown	COG1302	S:[Function unknown]	1
 R	Uncharacterized Ca-binding beta-propeller protein YjiK	General function prediction only	COG3204	R:[General function prediction only]	1
-C	ATP/ADP translocase	Energy production and conversion	COG3202	C:[Energy production and conversion]	2
-R	Imelysin-like iron-regulated protein IrpA, duplicated M75 peptidase-like domain	General function prediction only	COG3489	R:[General function prediction only]	2
-X	REP element-mobilizing transposase RayT	Mobilome: prophages, transposons	COG1943	X:[Mobilome: prophages, transposons]	2
-L	Thermostable 8-oxoguanine DNA glycosylase	Replication, recombination and repair	COG1059	L:[Replication, recombination and repair]	2
-A	RNA 3'-terminal phosphate cyclase	RNA processing and modification	COG0430	A:[RNA processing and modification]	2
-U	Type III secretion system effector YopM, contains leucine-rich repeats	Intracellular trafficking, secretion, and vesicular transport	COG4886	U:[Intracellular trafficking, secretion, and vesicular transport]	2
-V	Aminoglycoside N3'-acetyltransferase	Defense mechanisms	COG2746	V:[Defense mechanisms]	2
-Q	Carboxysome shell and ethanolamine utilization microcompartment protein CcmK/EutM	Secondary metabolites biosynthesis, transport and catabolism	COG4576	Q:[Secondary metabolites biosynthesis, transport and catabolism]	2
-G	Mannosyl-3-phosphoglycerate phosphatase YedP/MpgP, HAD superfamily	Carbohydrate transport and metabolism	COG3769	G:[Carbohydrate transport and metabolism]	2
-E	5-Methylthioribose/5-deoxyribose kinase, methionine salvage pathway	Amino acid transport and metabolism	COG4857	E:[Amino acid transport and metabolism]	2
-S	Stress response protein YsnF (function unknown)	Function unknown	COG3861	S:[Function unknown]	2
-G	ABC-type polysaccharide transport system, permease component	Carbohydrate transport and metabolism	COG4209	G:[Carbohydrate transport and metabolism]	2
-V	Multidrug transporter EmrE and related cation transporters	Defense mechanisms	COG2076	V:[Defense mechanisms]	2
-K	Transmembrane transcriptional regulator RsiW (anti-sigma-W factor)	Transcription	COG5662	K:[Transcription]	2
-H	Glutaminase/glutamine amidotransferase domain of CobB, CobQ, and lipid II isoglutaminyl synthase	Coenzyme transport and metabolism	COG3442	H:[Coenzyme transport and metabolism]	2
-E	Anaerobic glycerol-3-phosphate dehydrogenase	Amino acid transport and metabolism	COG3075	E:[Amino acid transport and metabolism]	2
-K	DNA-binding transcriptional regulator ModE (molybdenum-dependent)	Transcription	COG2005	K:[Transcription]	2
-R	Putative translation regulator, IMPACT (imprinted ancient) protein family	General function prediction only	COG1739	R:[General function prediction only]	2
-V	Alkyl hydroperoxide reductase subunit AhpF	Defense mechanisms	COG3634	V:[Defense mechanisms]	2
-G	DNA-binding protein, stimulates sugar fermentation	Carbohydrate transport and metabolism	COG1489	G:[Carbohydrate transport and metabolism]	2
-P	Alpha-D-ribose 1-methylphosphonate 5-triphosphate synthase subunit PhnI	Inorganic ion transport and metabolism	COG3626	P:[Inorganic ion transport and metabolism]	2
-J	23S rRNA C2498 (ribose-2'-O)-methylase RlmM	Translation, ribosomal structure and biogenesis	COG2933	J:[Translation, ribosomal structure and biogenesis]	2
-P	Siderophore synthetase component IucA/IucC/SbnC	Inorganic ion transport and metabolism	COG4264	P:[Inorganic ion transport and metabolism]	2
-R	ABC-type uncharacterized transport system, permease component	General function prediction only	COG4137	R:[General function prediction only]	2
-V	Tellurite resistance protein TehA and related permeases	Defense mechanisms	COG1275	V:[Defense mechanisms]	2
-F	Ureidoglycine aminohydrolase	Nucleotide transport and metabolism	COG3257	F:[Nucleotide transport and metabolism]	2
-J	16S rRNA G1207 or 23S rRNA G1835 methylase RsmC/RlmG	Translation, ribosomal structure and biogenesis	COG2813	J:[Translation, ribosomal structure and biogenesis]	2
-T	Stress response protein SCP2	Signal transduction mechanisms	COG2310	T:[Signal transduction mechanisms]	2
-H	Precorrin-6x reductase	Coenzyme transport and metabolism	COG2099	H:[Coenzyme transport and metabolism]	2
-Q	Muconolactone delta-isomerase	Secondary metabolites biosynthesis, transport and catabolism	COG4829	Q:[Secondary metabolites biosynthesis, transport and catabolism]	2
-P	NADPH-dependent ferric siderophore reductase, contains FAD-binding and SIP domains	Inorganic ion transport and metabolism	COG2375	P:[Inorganic ion transport and metabolism]	2
-L	DNA-binding protein YaaA associated with the oxidative stress response	Replication, recombination and repair	COG3022	L:[Replication, recombination and repair]	2
-K	DNA-binding response regulator DpiB of citrate/malate metabolism	Transcription	COG4565	K:[Transcription]	2
-K	RocR-type transcriptional regulator, contains PAS, AAA-type ATPase, and DNA-binding Fis domains	Transcription	COG3829	K:[Transcription]	2
-R	Predicted Na+-dependent transporter YfeH	General function prediction only	COG0385	R:[General function prediction only]	2
-G	Endo-1,4-beta-D-glucanase Y	Carbohydrate transport and metabolism	COG3405	G:[Carbohydrate transport and metabolism]	2
-E	ABC-type proline/glycine betaine transport system, permease component	Amino acid transport and metabolism	COG4176	E:[Amino acid transport and metabolism]	2
+C	Na+/H+ antiporter NhaB	Energy production and conversion	COG3067	C:[Energy production and conversion]	1
+P	ABC-type metal ion transport system, periplasmic component/surface antigen	Inorganic ion transport and metabolism	COG1464	P:[Inorganic ion transport and metabolism]	2
+E	ABC-type methionine transport system, permease component	Amino acid transport and metabolism	COG2011	E:[Amino acid transport and metabolism]	2
+C	Na+/citrate or Na+/malate symporter	Energy production and conversion	COG3493	C:[Energy production and conversion]	2
+G	Phosphotransferase system cellobiose-specific component IIC	Carbohydrate transport and metabolism	COG1455	G:[Carbohydrate transport and metabolism]	2
+E	ABC-type arginine transport system, permease component	Amino acid transport and metabolism	COG4215	E:[Amino acid transport and metabolism]	2
+G	Phosphotransferase system, mannitol-specific IIBC component	Carbohydrate transport and metabolism	COG2213	G:[Carbohydrate transport and metabolism]	2
 L	Exonuclease I (degrades ssDNA)	Replication, recombination and repair	COG2925	L:[Replication, recombination and repair]	2
 J	23S rRNA C2501 and tRNA U34 5'-hydroxylation protein RlhA/YrrN/YrrO, U32 peptidase family	Translation, ribosomal structure and biogenesis	COG0826	J:[Translation, ribosomal structure and biogenesis]	2
-M	Outer membrane lipoprotein SlyB	Cell wall/membrane/envelope biogenesis	COG3133	M:[Cell wall/membrane/envelope biogenesis]	2
-G	Maltoporin (phage lambda and maltose receptor)	Carbohydrate transport and metabolism	COG4580	G:[Carbohydrate transport and metabolism]	2
-G	Phosphotransferase system, mannitol-specific IIBC component	Carbohydrate transport and metabolism	COG2213	G:[Carbohydrate transport and metabolism]	2
-G	Phosphotransferase system IIA component	Carbohydrate transport and metabolism	COG2190	G:[Carbohydrate transport and metabolism]	2
-Q	Lysine/ornithine N-monooxygenase	Secondary metabolites biosynthesis, transport and catabolism	COG3486	Q:[Secondary metabolites biosynthesis, transport and catabolism]	2
+J	16S rRNA G1207 or 23S rRNA G1835 methylase RsmC/RlmG	Translation, ribosomal structure and biogenesis	COG2813	J:[Translation, ribosomal structure and biogenesis]	2
 C	Aconitase B	Energy production and conversion	COG1049	C:[Energy production and conversion]	2
-J	tRNA A37 threonylcarbamoyladenosine dehydratase	Translation, ribosomal structure and biogenesis	COG1179	J:[Translation, ribosomal structure and biogenesis]	2
-N	Cyclic di-GMP-binding flagellar brake protein FlgZ/YcgR, contains PilZNR(YcgR) and PilZ domains	Cell motility	COG5581	N:[Cell motility]	2
-R	Putative NADPH-quinone reductase (modulator of drug activity B)	General function prediction only	COG2249	R:[General function prediction only]	2
-M	Putative effector of murein hydrolase	Cell wall/membrane/envelope biogenesis	COG1346	M:[Cell wall/membrane/envelope biogenesis]	2
-E	Arginine exporter protein ArgO	Amino acid transport and metabolism	COG1279	E:[Amino acid transport and metabolism]	2
-G	Phosphotransferase system cellobiose-specific component IIC	Carbohydrate transport and metabolism	COG1455	G:[Carbohydrate transport and metabolism]	2
-L	DNA recombination-dependent growth factor RdgC	Replication, recombination and repair	COG2974	L:[Replication, recombination and repair]	2
-P	ABC-type metal ion transport system, periplasmic component/surface antigen	Inorganic ion transport and metabolism	COG1464	P:[Inorganic ion transport and metabolism]	2
-K	Sugar diacid utilization regulator CdaR	Transcription	COG3835	K:[Transcription]	2
-H	Triphosphoribosyl-dephospho-CoA synthetase	Coenzyme transport and metabolism	COG1767	H:[Coenzyme transport and metabolism]	2
-J	Ribosome biogenesis GTPase RbgA	Translation, ribosomal structure and biogenesis	COG1161	J:[Translation, ribosomal structure and biogenesis]	2
-M	Outer membrane scaffolding protein for murein synthesis, MipA/OmpV family	Cell wall/membrane/envelope biogenesis	COG3713	M:[Cell wall/membrane/envelope biogenesis]	2
-E	2-oxoadipate dioxygenase/decarboxylase HglS/YdcJ family	Amino acid transport and metabolism	COG5383	E:[Amino acid transport and metabolism]	2
+K	DNA-binding response regulator DpiB of citrate/malate metabolism	Transcription	COG4565	K:[Transcription]	2
 E	Amino acid permease	Amino acid transport and metabolism	COG0833	E:[Amino acid transport and metabolism]	2
-E	ABC-type methionine transport system, permease component	Amino acid transport and metabolism	COG2011	E:[Amino acid transport and metabolism]	2
-E	ABC-type arginine transport system, permease component	Amino acid transport and metabolism	COG4215	E:[Amino acid transport and metabolism]	2
-C	Na+/citrate or Na+/malate symporter	Energy production and conversion	COG3493	C:[Energy production and conversion]	2
-M	Phosphoethanolamine transferase for periplasmic glucans OpgE, AlkP superfamily	Cell wall/membrane/envelope biogenesis	COG2194	M:[Cell wall/membrane/envelope biogenesis]	2
+E	2-oxoadipate dioxygenase/decarboxylase HglS/YdcJ family	Amino acid transport and metabolism	COG5383	E:[Amino acid transport and metabolism]	2
+M	Outer membrane scaffolding protein for murein synthesis, MipA/OmpV family	Cell wall/membrane/envelope biogenesis	COG3713	M:[Cell wall/membrane/envelope biogenesis]	2
+J	Ribosome biogenesis GTPase RbgA	Translation, ribosomal structure and biogenesis	COG1161	J:[Translation, ribosomal structure and biogenesis]	2
+H	Triphosphoribosyl-dephospho-CoA synthetase	Coenzyme transport and metabolism	COG1767	H:[Coenzyme transport and metabolism]	2
+K	Sugar diacid utilization regulator CdaR	Transcription	COG3835	K:[Transcription]	2
+L	DNA recombination-dependent growth factor RdgC	Replication, recombination and repair	COG2974	L:[Replication, recombination and repair]	2
+P	NADPH-dependent ferric siderophore reductase, contains FAD-binding and SIP domains	Inorganic ion transport and metabolism	COG2375	P:[Inorganic ion transport and metabolism]	2
+L	DNA-binding protein YaaA associated with the oxidative stress response	Replication, recombination and repair	COG3022	L:[Replication, recombination and repair]	2
+E	Arginine exporter protein ArgO	Amino acid transport and metabolism	COG1279	E:[Amino acid transport and metabolism]	2
+M	Putative effector of murein hydrolase	Cell wall/membrane/envelope biogenesis	COG1346	M:[Cell wall/membrane/envelope biogenesis]	2
+R	Putative NADPH-quinone reductase (modulator of drug activity B)	General function prediction only	COG2249	R:[General function prediction only]	2
+N	Cyclic di-GMP-binding flagellar brake protein FlgZ/YcgR, contains PilZNR(YcgR) and PilZ domains	Cell motility	COG5581	N:[Cell motility]	2
+J	tRNA A37 threonylcarbamoyladenosine dehydratase	Translation, ribosomal structure and biogenesis	COG1179	J:[Translation, ribosomal structure and biogenesis]	2
+Q	Lysine/ornithine N-monooxygenase	Secondary metabolites biosynthesis, transport and catabolism	COG3486	Q:[Secondary metabolites biosynthesis, transport and catabolism]	2
+G	Phosphotransferase system IIA component	Carbohydrate transport and metabolism	COG2190	G:[Carbohydrate transport and metabolism]	2
+G	Maltoporin (phage lambda and maltose receptor)	Carbohydrate transport and metabolism	COG4580	G:[Carbohydrate transport and metabolism]	2
+M	Outer membrane lipoprotein SlyB	Cell wall/membrane/envelope biogenesis	COG3133	M:[Cell wall/membrane/envelope biogenesis]	2
+E	ABC-type proline/glycine betaine transport system, permease component	Amino acid transport and metabolism	COG4176	E:[Amino acid transport and metabolism]	2
+G	Endo-1,4-beta-D-glucanase Y	Carbohydrate transport and metabolism	COG3405	G:[Carbohydrate transport and metabolism]	2
+R	Predicted Na+-dependent transporter YfeH	General function prediction only	COG0385	R:[General function prediction only]	2
+T	Stress response protein SCP2	Signal transduction mechanisms	COG2310	T:[Signal transduction mechanisms]	2
+R	ABC-type uncharacterized transport system, permease component	General function prediction only	COG4137	R:[General function prediction only]	2
+K	RocR-type transcriptional regulator, contains PAS, AAA-type ATPase, and DNA-binding Fis domains	Transcription	COG3829	K:[Transcription]	2
+Q	Muconolactone delta-isomerase	Secondary metabolites biosynthesis, transport and catabolism	COG4829	Q:[Secondary metabolites biosynthesis, transport and catabolism]	2
+H	Precorrin-6x reductase	Coenzyme transport and metabolism	COG2099	H:[Coenzyme transport and metabolism]	2
+F	Ureidoglycine aminohydrolase	Nucleotide transport and metabolism	COG3257	F:[Nucleotide transport and metabolism]	2
+V	Tellurite resistance protein TehA and related permeases	Defense mechanisms	COG1275	V:[Defense mechanisms]	2
+P	Siderophore synthetase component IucA/IucC/SbnC	Inorganic ion transport and metabolism	COG4264	P:[Inorganic ion transport and metabolism]	2
+J	23S rRNA C2498 (ribose-2'-O)-methylase RlmM	Translation, ribosomal structure and biogenesis	COG2933	J:[Translation, ribosomal structure and biogenesis]	2
+P	Alpha-D-ribose 1-methylphosphonate 5-triphosphate synthase subunit PhnI	Inorganic ion transport and metabolism	COG3626	P:[Inorganic ion transport and metabolism]	2
+G	DNA-binding protein, stimulates sugar fermentation	Carbohydrate transport and metabolism	COG1489	G:[Carbohydrate transport and metabolism]	2
+V	Alkyl hydroperoxide reductase subunit AhpF	Defense mechanisms	COG3634	V:[Defense mechanisms]	2
+S	Stress response protein YsnF (function unknown)	Function unknown	COG3861	S:[Function unknown]	2
+R	Putative translation regulator, IMPACT (imprinted ancient) protein family	General function prediction only	COG1739	R:[General function prediction only]	2
+K	DNA-binding transcriptional regulator ModE (molybdenum-dependent)	Transcription	COG2005	K:[Transcription]	2
+E	Anaerobic glycerol-3-phosphate dehydrogenase	Amino acid transport and metabolism	COG3075	E:[Amino acid transport and metabolism]	2
+H	Glutaminase/glutamine amidotransferase domain of CobB, CobQ, and lipid II isoglutaminyl synthase	Coenzyme transport and metabolism	COG3442	H:[Coenzyme transport and metabolism]	2
+K	Transmembrane transcriptional regulator RsiW (anti-sigma-W factor)	Transcription	COG5662	K:[Transcription]	2
+V	Multidrug transporter EmrE and related cation transporters	Defense mechanisms	COG2076	V:[Defense mechanisms]	2
+G	ABC-type polysaccharide transport system, permease component	Carbohydrate transport and metabolism	COG4209	G:[Carbohydrate transport and metabolism]	2
+E	5-Methylthioribose/5-deoxyribose kinase, methionine salvage pathway	Amino acid transport and metabolism	COG4857	E:[Amino acid transport and metabolism]	2
+G	Mannosyl-3-phosphoglycerate phosphatase YedP/MpgP, HAD superfamily	Carbohydrate transport and metabolism	COG3769	G:[Carbohydrate transport and metabolism]	2
+Q	Carboxysome shell and ethanolamine utilization microcompartment protein CcmK/EutM	Secondary metabolites biosynthesis, transport and catabolism	COG4576	Q:[Secondary metabolites biosynthesis, transport and catabolism]	2
+V	Aminoglycoside N3'-acetyltransferase	Defense mechanisms	COG2746	V:[Defense mechanisms]	2
+U	Type III secretion system effector YopM, contains leucine-rich repeats	Intracellular trafficking, secretion, and vesicular transport	COG4886	U:[Intracellular trafficking, secretion, and vesicular transport]	2
+A	RNA 3'-terminal phosphate cyclase	RNA processing and modification	COG0430	A:[RNA processing and modification]	2
+L	Thermostable 8-oxoguanine DNA glycosylase	Replication, recombination and repair	COG1059	L:[Replication, recombination and repair]	2
+X	REP element-mobilizing transposase RayT	Mobilome: prophages, transposons	COG1943	X:[Mobilome: prophages, transposons]	2
+R	Imelysin-like iron-regulated protein IrpA, duplicated M75 peptidase-like domain	General function prediction only	COG3489	R:[General function prediction only]	2
+C	ATP/ADP translocase	Energy production and conversion	COG3202	C:[Energy production and conversion]	2
 M	Flagellum-specific peptidoglycan hydrolase FlgJ	Cell wall/membrane/envelope biogenesis	COG1705	M:[Cell wall/membrane/envelope biogenesis]	2
-M	Spore coat protein CotH	Cell wall/membrane/envelope biogenesis	COG5337	M:[Cell wall/membrane/envelope biogenesis]	3
-O	Iron-sulfur cluster repair protein YtfE, RIC family, contains ScdAN and hemerythrin domains	Posttranslational modification, protein turnover, chaperones	COG2846	O:[Posttranslational modification, protein turnover, chaperones]	3
-P	Formate-dependent nitrite reductase, periplasmic cytochrome c552 subunit	Inorganic ion transport and metabolism	COG3303	P:[Inorganic ion transport and metabolism]	3
-K	Fic family protein	Transcription	COG3177	K:[Transcription]	3
-P	Thiosulfate dehydrogenase TsdA, contains C-terminal cytochrome c domain	Inorganic ion transport and metabolism	COG3258	P:[Inorganic ion transport and metabolism]	3
-R	Predicted ATPase, AAA+ superfamily	General function prediction only	COG1373	R:[General function prediction only]	3
-E	ABC-type proline/glycine betaine transport system, ATPase component	Amino acid transport and metabolism	COG4175	E:[Amino acid transport and metabolism]	3
-G	2-keto-3-deoxy-galactonokinase	Carbohydrate transport and metabolism	COG3734	G:[Carbohydrate transport and metabolism]	3
-K	DNA-binding transcriptional regulator PaaX (phenylacetic acid degradation)	Transcription	COG3327	K:[Transcription]	3
-L	Replication fork clamp-binding protein CrfC (dynamin-like GTPase family)	Replication, recombination and repair	COG0699	L:[Replication, recombination and repair]	3
-G	Beta-galactosidase GanA	Carbohydrate transport and metabolism	COG1874	G:[Carbohydrate transport and metabolism]	3
-H	Gamma-glutamylcysteine synthetase	Coenzyme transport and metabolism	COG2918	H:[Coenzyme transport and metabolism]	3
-C	FMN-dependent NADH-azoreductase	Energy production and conversion	COG1182	C:[Energy production and conversion]	3
-S	Uncharacterized conserved protein, DUF2248 family	Function unknown	COG4307	S:[Function unknown]	3
-G	L-arabinose isomerase	Carbohydrate transport and metabolism	COG2160	G:[Carbohydrate transport and metabolism]	3
-P	ABC-type iron transport system FetAB, permease component	Inorganic ion transport and metabolism	COG0390	P:[Inorganic ion transport and metabolism]	3
-K	Transcriptional regulator DhaR of acetoin/glycerol metabolism	Transcription	COG3284	K:[Transcription]	3
+M	Phosphoethanolamine transferase for periplasmic glucans OpgE, AlkP superfamily	Cell wall/membrane/envelope biogenesis	COG2194	M:[Cell wall/membrane/envelope biogenesis]	2
 N	Outer membrane usher protein FimD/PapC	Cell motility	COG3188	N:[Cell motility]	3
-L	Membrane protein MutK/YedI, may be involved in DNA repair	Replication, recombination and repair	COG2354	L:[Replication, recombination and repair]	3
-E	Glutathionylspermidine synthase, CHAP domain	Amino acid transport and metabolism	COG0754	E:[Amino acid transport and metabolism]	3
-P	Trk-type K+ transport system, membrane component	Inorganic ion transport and metabolism	COG0168	P:[Inorganic ion transport and metabolism]	3
-C	2-Methylaconitate cis-trans-isomerase PrpF (2-methyl citrate pathway)	Energy production and conversion	COG2828	C:[Energy production and conversion]	3
-E	Aspartyl aminopeptidase	Amino acid transport and metabolism	COG1362	E:[Amino acid transport and metabolism]	3
-A	Oligoribonuclease (3'-5' exoribonuclease)	RNA processing and modification	COG1949	A:[RNA processing and modification]	3
-M	Predicted membrane flippase AglD2/YbhN, UPF0104 family	Cell wall/membrane/envelope biogenesis	COG0392	M:[Cell wall/membrane/envelope biogenesis]	3
-L	Uracil-DNA glycosylase	Replication, recombination and repair	COG0692	L:[Replication, recombination and repair]	3
-C	Mg2+/citrate symporter	Energy production and conversion	COG2851	C:[Energy production and conversion]	3
-S	Uncharacterized conserved protein, related to short-chain dehydrogenases	Function unknown	COG3268	S:[Function unknown]	3
-R	Aromatic carboxylic acid efflux pump AaeB or related transporter, AaeB/MdtO/YccS family	General function prediction only	COG1289	R:[General function prediction only]	3
-G	Mannose or cellobiose epimerase, N-acyl-D-glucosamine 2-epimerase family	Carbohydrate transport and metabolism	COG2942	G:[Carbohydrate transport and metabolism]	3
-H	Pyridoxal/pyridoxine/pyridoxamine kinase	Coenzyme transport and metabolism	COG2240	H:[Coenzyme transport and metabolism]	3
-M	Choline-glycine betaine transporter	Cell wall/membrane/envelope biogenesis	COG1292	M:[Cell wall/membrane/envelope biogenesis]	3
-C	Nitrate reductase assembly protein NarJ, required for insertion of molybdenum cofactor	Energy production and conversion	COG2180	C:[Energy production and conversion]	3
 T	Sensor histidine kinase DipB regulating citrate/malate metabolism	Signal transduction mechanisms	COG3290	T:[Signal transduction mechanisms]	3
-P	High-affinity nickel/cobalt permease	Inorganic ion transport and metabolism	COG3376	P:[Inorganic ion transport and metabolism]	3
-M	UDP-galactopyranose mutase	Cell wall/membrane/envelope biogenesis	COG0562	M:[Cell wall/membrane/envelope biogenesis]	3
 G	Phosphotransferase system IIC components, glucose/maltose/N-acetylglucosamine-specific	Carbohydrate transport and metabolism	COG1263	G:[Carbohydrate transport and metabolism]	3
+M	Choline-glycine betaine transporter	Cell wall/membrane/envelope biogenesis	COG1292	M:[Cell wall/membrane/envelope biogenesis]	3
+R	Aromatic carboxylic acid efflux pump AaeB or related transporter, AaeB/MdtO/YccS family	General function prediction only	COG1289	R:[General function prediction only]	3
+K	Transcriptional regulator DhaR of acetoin/glycerol metabolism	Transcription	COG3284	K:[Transcription]	3
+L	Uracil-DNA glycosylase	Replication, recombination and repair	COG0692	L:[Replication, recombination and repair]	3
+M	UDP-galactopyranose mutase	Cell wall/membrane/envelope biogenesis	COG0562	M:[Cell wall/membrane/envelope biogenesis]	3
+P	High-affinity nickel/cobalt permease	Inorganic ion transport and metabolism	COG3376	P:[Inorganic ion transport and metabolism]	3
+C	Nitrate reductase assembly protein NarJ, required for insertion of molybdenum cofactor	Energy production and conversion	COG2180	C:[Energy production and conversion]	3
+H	Pyridoxal/pyridoxine/pyridoxamine kinase	Coenzyme transport and metabolism	COG2240	H:[Coenzyme transport and metabolism]	3
+G	Mannose or cellobiose epimerase, N-acyl-D-glucosamine 2-epimerase family	Carbohydrate transport and metabolism	COG2942	G:[Carbohydrate transport and metabolism]	3
+C	Mg2+/citrate symporter	Energy production and conversion	COG2851	C:[Energy production and conversion]	3
+L	Membrane protein MutK/YedI, may be involved in DNA repair	Replication, recombination and repair	COG2354	L:[Replication, recombination and repair]	3
+S	Uncharacterized conserved protein, related to short-chain dehydrogenases	Function unknown	COG3268	S:[Function unknown]	3
+M	Predicted membrane flippase AglD2/YbhN, UPF0104 family	Cell wall/membrane/envelope biogenesis	COG0392	M:[Cell wall/membrane/envelope biogenesis]	3
+A	Oligoribonuclease (3'-5' exoribonuclease)	RNA processing and modification	COG1949	A:[RNA processing and modification]	3
+E	Aspartyl aminopeptidase	Amino acid transport and metabolism	COG1362	E:[Amino acid transport and metabolism]	3
+C	2-Methylaconitate cis-trans-isomerase PrpF (2-methyl citrate pathway)	Energy production and conversion	COG2828	C:[Energy production and conversion]	3
+P	Trk-type K+ transport system, membrane component	Inorganic ion transport and metabolism	COG0168	P:[Inorganic ion transport and metabolism]	3
+E	Glutathionylspermidine synthase, CHAP domain	Amino acid transport and metabolism	COG0754	E:[Amino acid transport and metabolism]	3
+P	ABC-type iron transport system FetAB, permease component	Inorganic ion transport and metabolism	COG0390	P:[Inorganic ion transport and metabolism]	3
+C	FMN-dependent NADH-azoreductase	Energy production and conversion	COG1182	C:[Energy production and conversion]	3
+G	L-arabinose isomerase	Carbohydrate transport and metabolism	COG2160	G:[Carbohydrate transport and metabolism]	3
+S	Uncharacterized conserved protein, DUF2248 family	Function unknown	COG4307	S:[Function unknown]	3
+H	Gamma-glutamylcysteine synthetase	Coenzyme transport and metabolism	COG2918	H:[Coenzyme transport and metabolism]	3
+G	Beta-galactosidase GanA	Carbohydrate transport and metabolism	COG1874	G:[Carbohydrate transport and metabolism]	3
+L	Replication fork clamp-binding protein CrfC (dynamin-like GTPase family)	Replication, recombination and repair	COG0699	L:[Replication, recombination and repair]	3
+K	DNA-binding transcriptional regulator PaaX (phenylacetic acid degradation)	Transcription	COG3327	K:[Transcription]	3
+G	2-keto-3-deoxy-galactonokinase	Carbohydrate transport and metabolism	COG3734	G:[Carbohydrate transport and metabolism]	3
+E	ABC-type proline/glycine betaine transport system, ATPase component	Amino acid transport and metabolism	COG4175	E:[Amino acid transport and metabolism]	3
+R	Predicted ATPase, AAA+ superfamily	General function prediction only	COG1373	R:[General function prediction only]	3
+P	Thiosulfate dehydrogenase TsdA, contains C-terminal cytochrome c domain	Inorganic ion transport and metabolism	COG3258	P:[Inorganic ion transport and metabolism]	3
+K	Fic family protein	Transcription	COG3177	K:[Transcription]	3
+P	Formate-dependent nitrite reductase, periplasmic cytochrome c552 subunit	Inorganic ion transport and metabolism	COG3303	P:[Inorganic ion transport and metabolism]	3
+O	Iron-sulfur cluster repair protein YtfE, RIC family, contains ScdAN and hemerythrin domains	Posttranslational modification, protein turnover, chaperones	COG2846	O:[Posttranslational modification, protein turnover, chaperones]	3
+M	Spore coat protein CotH	Cell wall/membrane/envelope biogenesis	COG5337	M:[Cell wall/membrane/envelope biogenesis]	3
 Q	Predicted benzoate:H+ symporter BenE	Secondary metabolites biosynthesis, transport and catabolism	COG3135	Q:[Secondary metabolites biosynthesis, transport and catabolism]	3
-M	Nickel-dependent lactate racemase	Cell wall/membrane/envelope biogenesis	COG3875	M:[Cell wall/membrane/envelope biogenesis]	4
-M	UDP-2,3-diacylglucosamine hydrolase LpxI, combines lipid X-binding and nucleotide phosphodiesterase domains	Cell wall/membrane/envelope biogenesis	COG3494	M:[Cell wall/membrane/envelope biogenesis]	4
-M	Periplasmic protein Wza involved in polysaccharide export, contains SLBB domain of the beta-grasp fold	Cell wall/membrane/envelope biogenesis	COG1596	M:[Cell wall/membrane/envelope biogenesis]	4
-I	Acyl-CoA thioesterase	Lipid transport and metabolism	COG1946	I:[Lipid transport and metabolism]	4
-D	Cell division protein ZapE (Z ring-associated ATPase), AFG1 superfamily	Cell cycle control, cell division, chromosome partitioning	COG1485	D:[Cell cycle control, cell division, chromosome partitioning]	4
-M	Anionic cell wall polymer biosynthesis enzyme TagV/TagU,  LytR-Cps2A-Psr (LCP) family (peptidoglycan teichoic acid transferase)	Cell wall/membrane/envelope biogenesis	COG1316	M:[Cell wall/membrane/envelope biogenesis]	4
-G	Glycerate kinase	Carbohydrate transport and metabolism	COG1929	G:[Carbohydrate transport and metabolism]	4
-T	Two-component sensor histidine kinase, HisKA and HATPase domains	Signal transduction mechanisms	COG3920	T:[Signal transduction mechanisms]	4
 E	L-asparagine transporter or related permease	Amino acid transport and metabolism	COG1113	E:[Amino acid transport and metabolism]	4
-P	Nitrate/nitrite transporter NarK	Inorganic ion transport and metabolism	COG2223	P:[Inorganic ion transport and metabolism]	4
-K	DNA-binding transcriptional regulator, PucR/PutR family	Transcription	COG2508	K:[Transcription]	4
 G	Mannitol-1-phosphate/altronate dehydrogenases	Carbohydrate transport and metabolism	COG0246	G:[Carbohydrate transport and metabolism]	4
-G	Alpha-amylase/alpha-mannosidase, GH57 family	Carbohydrate transport and metabolism	COG1449	G:[Carbohydrate transport and metabolism]	5
-R	GTPase SAR1 family domain	General function prediction only	COG1100	R:[General function prediction only]	5
-J	Bacterial ribosome collision sensor RqcU, MutS2 ATPase family	Translation, ribosomal structure and biogenesis	COG1193	J:[Translation, ribosomal structure and biogenesis]	5
-V	Type I restriction-modification system, DNA methylase subunit	Defense mechanisms	COG0286	V:[Defense mechanisms]	5
-G	Alpha-glucuronidase	Carbohydrate transport and metabolism	COG3661	G:[Carbohydrate transport and metabolism]	5
-G	Endo-1,4-beta-xylanase, GH35 family	Carbohydrate transport and metabolism	COG3693	G:[Carbohydrate transport and metabolism]	5
-F	Deoxyadenosine/deoxycytidine kinase	Nucleotide transport and metabolism	COG1428	F:[Nucleotide transport and metabolism]	5
-U	Type IV secretion system ATPase VirB4	Intracellular trafficking, secretion, and vesicular transport	COG3451	U:[Intracellular trafficking, secretion, and vesicular transport]	5
-T	Predicted secreted protein YlbL, contains PDZ domain	Signal transduction mechanisms	COG3480	T:[Signal transduction mechanisms]	5
-M	Surface protein containing fasciclin (FAS1) repeats	Cell wall/membrane/envelope biogenesis	COG2335	M:[Cell wall/membrane/envelope biogenesis]	5
-R	Membrane protein RarD, contains two EamA domains, drug/metabolite transporter family	General function prediction only	COG2962	R:[General function prediction only]	5
-H	Pantothenate kinase	Coenzyme transport and metabolism	COG1072	H:[Coenzyme transport and metabolism]	5
+K	DNA-binding transcriptional regulator, PucR/PutR family	Transcription	COG2508	K:[Transcription]	4
+P	Nitrate/nitrite transporter NarK	Inorganic ion transport and metabolism	COG2223	P:[Inorganic ion transport and metabolism]	4
+T	Two-component sensor histidine kinase, HisKA and HATPase domains	Signal transduction mechanisms	COG3920	T:[Signal transduction mechanisms]	4
+G	Glycerate kinase	Carbohydrate transport and metabolism	COG1929	G:[Carbohydrate transport and metabolism]	4
+M	Anionic cell wall polymer biosynthesis enzyme TagV/TagU,  LytR-Cps2A-Psr (LCP) family (peptidoglycan teichoic acid transferase)	Cell wall/membrane/envelope biogenesis	COG1316	M:[Cell wall/membrane/envelope biogenesis]	4
+D	Cell division protein ZapE (Z ring-associated ATPase), AFG1 superfamily	Cell cycle control, cell division, chromosome partitioning	COG1485	D:[Cell cycle control, cell division, chromosome partitioning]	4
+I	Acyl-CoA thioesterase	Lipid transport and metabolism	COG1946	I:[Lipid transport and metabolism]	4
+M	Periplasmic protein Wza involved in polysaccharide export, contains SLBB domain of the beta-grasp fold	Cell wall/membrane/envelope biogenesis	COG1596	M:[Cell wall/membrane/envelope biogenesis]	4
+M	UDP-2,3-diacylglucosamine hydrolase LpxI, combines lipid X-binding and nucleotide phosphodiesterase domains	Cell wall/membrane/envelope biogenesis	COG3494	M:[Cell wall/membrane/envelope biogenesis]	4
+M	Nickel-dependent lactate racemase	Cell wall/membrane/envelope biogenesis	COG3875	M:[Cell wall/membrane/envelope biogenesis]	4
 F	Xanthine/uracil permease	Nucleotide transport and metabolism	COG2233	F:[Nucleotide transport and metabolism]	5
-L	Scaffold subunit RecC of the DNA repair enzyme RecBCD (exonuclease V)	Replication, recombination and repair	COG1330	L:[Replication, recombination and repair]	5
-K	DNA-binding transcriptional regulator LsrR, DeoR family	Transcription	COG2390	K:[Transcription]	5
-R	Predicted oxidoreductase	General function prediction only	COG3573	R:[General function prediction only]	5
-R	Predicted glutamine amidotransferase YafJ	General function prediction only	COG0121	R:[General function prediction only]	5
-C	Nitrate reductase beta subunit	Energy production and conversion	COG1140	C:[Energy production and conversion]	5
-P	Periplasmic deferrochelatase/peroxidase EfeB	Inorganic ion transport and metabolism	COG2837	P:[Inorganic ion transport and metabolism]	5
-G	Sucrose-6-phosphate hydrolase SacC, GH32 family	Carbohydrate transport and metabolism	COG1621	G:[Carbohydrate transport and metabolism]	5
-T	Sensor histidine kinase, LytS/YehU family	Signal transduction mechanisms	COG3275	T:[Signal transduction mechanisms]	5
-F	Formyltetrahydrofolate hydrolase	Nucleotide transport and metabolism	COG0788	F:[Nucleotide transport and metabolism]	5
-K	DNA-binding transcriptional regulator, MurR/RpiR family, contains HTH and SIS domains	Transcription	COG1737	K:[Transcription]	5
-G	Na+/melibiose symporter or related transporter	Carbohydrate transport and metabolism	COG2211	G:[Carbohydrate transport and metabolism]	5
-Q	Glyoxylate carboligase	Secondary metabolites biosynthesis, transport and catabolism	COG3960	Q:[Secondary metabolites biosynthesis, transport and catabolism]	5
-G	H+/gluconate symporter GntT or related permease, GntP/DsdX family	Carbohydrate transport and metabolism	COG2610	G:[Carbohydrate transport and metabolism]	5
-G	Phosphotransferase system, fructose-specific IIC component	Carbohydrate transport and metabolism	COG1299	G:[Carbohydrate transport and metabolism]	5
 P	Cyanate permease	Inorganic ion transport and metabolism	COG2807	P:[Inorganic ion transport and metabolism]	5
-E	ABC-type methionine transport system, ATPase component	Amino acid transport and metabolism	COG1135	E:[Amino acid transport and metabolism]	5
-U	Type VI secretion system spike component VgrG, 	Intracellular trafficking, secretion, and vesicular transport	COG3501	U:[Intracellular trafficking, secretion, and vesicular transport]	5
+G	Phosphotransferase system, fructose-specific IIC component	Carbohydrate transport and metabolism	COG1299	G:[Carbohydrate transport and metabolism]	5
+G	H+/gluconate symporter GntT or related permease, GntP/DsdX family	Carbohydrate transport and metabolism	COG2610	G:[Carbohydrate transport and metabolism]	5
+Q	Glyoxylate carboligase	Secondary metabolites biosynthesis, transport and catabolism	COG3960	Q:[Secondary metabolites biosynthesis, transport and catabolism]	5
+G	Na+/melibiose symporter or related transporter	Carbohydrate transport and metabolism	COG2211	G:[Carbohydrate transport and metabolism]	5
+K	DNA-binding transcriptional regulator, MurR/RpiR family, contains HTH and SIS domains	Transcription	COG1737	K:[Transcription]	5
+F	Formyltetrahydrofolate hydrolase	Nucleotide transport and metabolism	COG0788	F:[Nucleotide transport and metabolism]	5
+T	Sensor histidine kinase, LytS/YehU family	Signal transduction mechanisms	COG3275	T:[Signal transduction mechanisms]	5
+G	Sucrose-6-phosphate hydrolase SacC, GH32 family	Carbohydrate transport and metabolism	COG1621	G:[Carbohydrate transport and metabolism]	5
+P	Periplasmic deferrochelatase/peroxidase EfeB	Inorganic ion transport and metabolism	COG2837	P:[Inorganic ion transport and metabolism]	5
+C	Nitrate reductase beta subunit	Energy production and conversion	COG1140	C:[Energy production and conversion]	5
+R	Predicted glutamine amidotransferase YafJ	General function prediction only	COG0121	R:[General function prediction only]	5
+R	Predicted oxidoreductase	General function prediction only	COG3573	R:[General function prediction only]	5
+K	DNA-binding transcriptional regulator LsrR, DeoR family	Transcription	COG2390	K:[Transcription]	5
+L	Scaffold subunit RecC of the DNA repair enzyme RecBCD (exonuclease V)	Replication, recombination and repair	COG1330	L:[Replication, recombination and repair]	5
+H	Pantothenate kinase	Coenzyme transport and metabolism	COG1072	H:[Coenzyme transport and metabolism]	5
+R	Membrane protein RarD, contains two EamA domains, drug/metabolite transporter family	General function prediction only	COG2962	R:[General function prediction only]	5
+M	Surface protein containing fasciclin (FAS1) repeats	Cell wall/membrane/envelope biogenesis	COG2335	M:[Cell wall/membrane/envelope biogenesis]	5
+T	Predicted secreted protein YlbL, contains PDZ domain	Signal transduction mechanisms	COG3480	T:[Signal transduction mechanisms]	5
+U	Type IV secretion system ATPase VirB4	Intracellular trafficking, secretion, and vesicular transport	COG3451	U:[Intracellular trafficking, secretion, and vesicular transport]	5
+F	Deoxyadenosine/deoxycytidine kinase	Nucleotide transport and metabolism	COG1428	F:[Nucleotide transport and metabolism]	5
+G	Endo-1,4-beta-xylanase, GH35 family	Carbohydrate transport and metabolism	COG3693	G:[Carbohydrate transport and metabolism]	5
+G	Alpha-glucuronidase	Carbohydrate transport and metabolism	COG3661	G:[Carbohydrate transport and metabolism]	5
+V	Type I restriction-modification system, DNA methylase subunit	Defense mechanisms	COG0286	V:[Defense mechanisms]	5
+J	Bacterial ribosome collision sensor RqcU, MutS2 ATPase family	Translation, ribosomal structure and biogenesis	COG1193	J:[Translation, ribosomal structure and biogenesis]	5
+R	GTPase SAR1 family domain	General function prediction only	COG1100	R:[General function prediction only]	5
+G	Alpha-amylase/alpha-mannosidase, GH57 family	Carbohydrate transport and metabolism	COG1449	G:[Carbohydrate transport and metabolism]	5
 R	Uncharacterized conserved protein RhsA, contains RHS repeats	General function prediction only	COG3209	R:[General function prediction only]	5
-V	ABC-type antimicrobial peptide transport system, permease component	Defense mechanisms	COG0577	V:[Defense mechanisms]	6
-K	DNA-binding transcriptional regulator, LacI/PurR family	Transcription	COG1609	K:[Transcription]	7
-R	Radical SAM superfamily enzyme YgiQ, UPF0313 family	General function prediction only	COG1032	R:[General function prediction only]	8
-P	Cu/Ag efflux pump CusA	Inorganic ion transport and metabolism	COG3696	P:[Inorganic ion transport and metabolism]	8
-K	FhlA-type transcriptional regulator, contains GAF, AAA-type ATPase, and DNA-binding Fis domains	Transcription	COG3604	K:[Transcription]	8
-K	DNA-binding transcriptional regulator, GntR family	Transcription	COG1802	K:[Transcription]	8
-K	DNA-binding transcriptional regulator, FadR family	Transcription	COG2186	K:[Transcription]	8
-E	NAD-specific glutamate dehydrogenase	Amino acid transport and metabolism	COG2902	E:[Amino acid transport and metabolism]	8
-E	ABC-type amino acid transport/signal transduction system, periplasmic component/domain	Amino acid transport and metabolism	COG0834	E:[Amino acid transport and metabolism]	8
-E	ABC-type amino acid transport system, permease component	Amino acid transport and metabolism	COG0765	E:[Amino acid transport and metabolism]	8
+U	Type VI secretion system spike component VgrG, 	Intracellular trafficking, secretion, and vesicular transport	COG3501	U:[Intracellular trafficking, secretion, and vesicular transport]	5
+E	ABC-type methionine transport system, ATPase component	Amino acid transport and metabolism	COG1135	E:[Amino acid transport and metabolism]	5
+K	DNA-binding transcriptional regulator, LacI/PurR family	Transcription	COG1609	K:[Transcription]	6
+V	ABC-type antimicrobial peptide transport system, permease component	Defense mechanisms	COG0577	V:[Defense mechanisms]	7
 K	DNA-binding transcriptional regulator, IclR family	Transcription	COG1414	K:[Transcription]	8
-P	Catalase	Inorganic ion transport and metabolism	COG0753	P:[Inorganic ion transport and metabolism]	9
-K	Transcriptional regulator GlxA, contains an amidase domain and an AraC-type DNA-binding HTH domain	Transcription	COG4977	K:[Transcription]	9
-E	Glycine cleavage system protein P (pyridoxal-binding), N-terminal domain	Amino acid transport and metabolism	COG0403	E:[Amino acid transport and metabolism]	9
+E	ABC-type amino acid transport system, permease component	Amino acid transport and metabolism	COG0765	E:[Amino acid transport and metabolism]	8
+E	ABC-type amino acid transport/signal transduction system, periplasmic component/domain	Amino acid transport and metabolism	COG0834	E:[Amino acid transport and metabolism]	8
+E	NAD-specific glutamate dehydrogenase	Amino acid transport and metabolism	COG2902	E:[Amino acid transport and metabolism]	8
+K	DNA-binding transcriptional regulator, FadR family	Transcription	COG2186	K:[Transcription]	8
+K	DNA-binding transcriptional regulator, GntR family	Transcription	COG1802	K:[Transcription]	8
+K	FhlA-type transcriptional regulator, contains GAF, AAA-type ATPase, and DNA-binding Fis domains	Transcription	COG3604	K:[Transcription]	8
+P	Cu/Ag efflux pump CusA	Inorganic ion transport and metabolism	COG3696	P:[Inorganic ion transport and metabolism]	8
+R	Radical SAM superfamily enzyme YgiQ, UPF0313 family	General function prediction only	COG1032	R:[General function prediction only]	8
 C	Flavodoxin/ferredoxin--NADP reductase	Energy production and conversion	COG1018	C:[Energy production and conversion]	9
-P	Trk/Ktr K+ transport system regulatory component TrkA/KtrA/KtrC, RCK domain	Inorganic ion transport and metabolism	COG0569	P:[Inorganic ion transport and metabolism]	10
-M	Lipoprotein-anchoring transpeptidase ErfK/SrfK	Cell wall/membrane/envelope biogenesis	COG1376	M:[Cell wall/membrane/envelope biogenesis]	10
-C	NhaP-type Na+/H+ and K+/H+ antiporter with C-terminal TrkAC and CorC domains	Energy production and conversion	COG3263	C:[Energy production and conversion]	10
-G	Beta-glucosidase/6-phospho-beta-glucosidase/beta-galactosidase	Carbohydrate transport and metabolism	COG2723	G:[Carbohydrate transport and metabolism]	10
-E	Threonine/homoserine/homoserine lactone efflux protein	Amino acid transport and metabolism	COG1280	E:[Amino acid transport and metabolism]	10
-G	Dihydroxyacetone kinase	Carbohydrate transport and metabolism	COG2376	G:[Carbohydrate transport and metabolism]	10
-K	DNA-binding transcriptional regulator of sugar metabolism, DeoR/GlpR family	Transcription	COG1349	K:[Transcription]	10
+E	Glycine cleavage system protein P (pyridoxal-binding), N-terminal domain	Amino acid transport and metabolism	COG0403	E:[Amino acid transport and metabolism]	9
+K	Transcriptional regulator GlxA, contains an amidase domain and an AraC-type DNA-binding HTH domain	Transcription	COG4977	K:[Transcription]	9
+P	Catalase	Inorganic ion transport and metabolism	COG0753	P:[Inorganic ion transport and metabolism]	9
 T	Methyl-accepting chemotaxis protein (MCP)	Signal transduction mechanisms	COG0840	T:[Signal transduction mechanisms]	10
-T	Ankyrin repeat	Signal transduction mechanisms	COG0666	T:[Signal transduction mechanisms]	11
-T	c-di-AMP synthetase, contains the diadenylate cyclase (DAC) domain	Signal transduction mechanisms	COG1624	T:[Signal transduction mechanisms]	11
-R	Uncharacterized conserved protein YacL, contains PIN and TRAM domains	General function prediction only	COG4956	R:[General function prediction only]	11
-C	ABC-type Na+ efflux pump, permease component NatB	Energy production and conversion	COG1668	C:[Energy production and conversion]	11
-K	Transcriptional regulator, CopY/TcrY family	Transcription	COG3682	K:[Transcription]	11
-Q	Putative cysteine ligase BshC/YllA (bacillithiol biosynthesis)	Secondary metabolites biosynthesis, transport and catabolism	COG4365	Q:[Secondary metabolites biosynthesis, transport and catabolism]	11
-E	Arginine deiminase	Amino acid transport and metabolism	COG2235	E:[Amino acid transport and metabolism]	11
+K	DNA-binding transcriptional regulator of sugar metabolism, DeoR/GlpR family	Transcription	COG1349	K:[Transcription]	10
+G	Dihydroxyacetone kinase	Carbohydrate transport and metabolism	COG2376	G:[Carbohydrate transport and metabolism]	10
+E	Threonine/homoserine/homoserine lactone efflux protein	Amino acid transport and metabolism	COG1280	E:[Amino acid transport and metabolism]	10
+G	Beta-glucosidase/6-phospho-beta-glucosidase/beta-galactosidase	Carbohydrate transport and metabolism	COG2723	G:[Carbohydrate transport and metabolism]	10
+C	NhaP-type Na+/H+ and K+/H+ antiporter with C-terminal TrkAC and CorC domains	Energy production and conversion	COG3263	C:[Energy production and conversion]	10
+M	Lipoprotein-anchoring transpeptidase ErfK/SrfK	Cell wall/membrane/envelope biogenesis	COG1376	M:[Cell wall/membrane/envelope biogenesis]	10
+P	Trk/Ktr K+ transport system regulatory component TrkA/KtrA/KtrC, RCK domain	Inorganic ion transport and metabolism	COG0569	P:[Inorganic ion transport and metabolism]	10
 C	Nitrate reductase alpha subunit	Energy production and conversion	COG5013	C:[Energy production and conversion]	11
+E	Arginine deiminase	Amino acid transport and metabolism	COG2235	E:[Amino acid transport and metabolism]	11
+Q	Putative cysteine ligase BshC/YllA (bacillithiol biosynthesis)	Secondary metabolites biosynthesis, transport and catabolism	COG4365	Q:[Secondary metabolites biosynthesis, transport and catabolism]	11
+K	Transcriptional regulator, CopY/TcrY family	Transcription	COG3682	K:[Transcription]	11
+C	ABC-type Na+ efflux pump, permease component NatB	Energy production and conversion	COG1668	C:[Energy production and conversion]	11
+R	Uncharacterized conserved protein YacL, contains PIN and TRAM domains	General function prediction only	COG4956	R:[General function prediction only]	11
+T	c-di-AMP synthetase, contains the diadenylate cyclase (DAC) domain	Signal transduction mechanisms	COG1624	T:[Signal transduction mechanisms]	11
+T	Ankyrin repeat	Signal transduction mechanisms	COG0666	T:[Signal transduction mechanisms]	11
