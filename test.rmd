@@ -272,8 +272,8 @@ venn.diagram(
 ```
 ```{r}
 overlapping_COG = intersect(rownames(MGS_COG), rownames(p2_COG))
-count_COG_MGS = MGS_COG[DA_COG_MGS,meta$sample_id]
-count_COG_P2 = p2_COG[DA_COG_P2,meta$sample_id]
+count_COG_MGS = MGS_COG[DA_COG_commun,meta$sample_id]
+count_COG_P2 = p2_COG[DA_COG_commun,meta$sample_id]
 rm(overlapping_COG)
 ```
 Definition des variables
@@ -372,7 +372,8 @@ for (groups in c("crop","grass")) {
       scale_color_manual(values = cog_color) +
       ggtitle(paste("Correlation of Spearman on group", groups, time)) +
       xlab("Spearman correlation") +
-      ylab("COG")
+      ylab("COG")+
+      theme_classic()
   }
 }
 plot_grid_Crop <- ggarrange(plot_cor$crop_0, plot_cor$crop_3, plot_cor$crop_51, plot_cor$crop_125,

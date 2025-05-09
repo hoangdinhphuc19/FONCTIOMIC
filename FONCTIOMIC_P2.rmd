@@ -646,14 +646,22 @@ zscore_COG = t(scale(t(count_COG_P2), center = TRUE, scale = TRUE))
 ```
 ##Distance between the variables (intergroups, Control vs Amended)
 ```{r}
-dist_a_vs_c = vegan::vegdist(t(count_COG_P2), method = "euclidean")
+#dist_a_vs_c = vegan::vegdist(t(count_COG_P2), method = "euclidean")
+dist_a_vs_c = as.dist(1-cor(count_COG_P2,use = "everything", method = "pearson")) #changé de eucleadean
+dist_a_vs_c = as.matrix(dist_a_vs_c)
+dist_a_vs_c = dist_a_vs_c[rowSums(is.na(dist_a_vs_c)) == 0,colSums(is.na(dist_a_vs_c)) == 0,drop = FALSE]
+dist_a_vs_c = as.dist(dist_a_vs_c)
 tree_a_vs_c = hclust(dist_a_vs_c, method = "complete")
 cutree_a_vs_c = cutree(tree_a_vs_c, k = 6 )
 table(cutree_a_vs_c)
 ```
 ##Distance between the observation (COG)
 ```{r}
-dist_cog = vegan::vegdist(count_COG_P2, method = "euclidean")
+#dist_cog = vegan::vegdist(count_COG_P2, method = "euclidean")
+dist_cog = as.dist(1-cor(t(count_COG_P2), use = "everything", method = "pearson")) #changé de eucleadean
+dist_cog = as.matrix(dist_cog)
+dist_cog = dist_cog[rowSums(is.na(dist_cog)) == 0,colSums(is.na(dist_cog)) == 0,drop = FALSE]
+dist_cog = as.dist(dist_cog)
 tree_cog = hclust(dist_cog, method = "complete")
 #cut into arbitrary clusters
 cutree_cog = cutree(tree_cog, k = 11)
@@ -678,8 +686,8 @@ vect_colours = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
                 "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2")
 hb = HeatmapAnnotation(which = "column",
                        Groups = anno_col$Groups,
-                       Time = anno_col$Time,
-                       col = list(Groups = vect_colours, Time = time_colors),
+                       #Time = anno_col$Time,
+                       col = list(Groups = vect_colours), #Time = time_colors),
                        show_legend = TRUE,
                        annotation_name_side = "right",
                        annotation_name_gp = gpar(fontsize = 10, fontface = "bold"),
@@ -712,7 +720,7 @@ p = pheatmap(zscore_COG, name = "Z-score",
               cutree_rows = 11, #18, #6
               cutree_cols = 6,
               top_annotation = hb,
-              right_annotation = ha ,
+              #right_annotation = ha ,
               show_rownames = FALSE)
 pdf("Output/Heatmap_COG_P2.pdf", width = 10, height = 16)
 draw(p,align_heatmap_legend = "heatmap_top",merge_legend = TRUE, heatmap_legend_side = "right", annotation_legend_side = "right")
@@ -978,17 +986,25 @@ zscore_pathways = t(scale(t(count_pathways_P2), center = TRUE, scale = TRUE))
 ```
 ##Distance between the variables (intergroups, Control vs Amended)
 ```{r}
-dist_a_vs_c = vegan::vegdist(t(count_pathways_P2), method = "euclidean")
+#dist_a_vs_c = vegan::vegdist(t(count_pathways_P2), method = "euclidean")
+dist_a_vs_c = as.dist(1-cor(count_pathways_P2,use = "everything", method = "pearson")) #changé de eucleadean
+dist_a_vs_c = as.matrix(dist_a_vs_c)
+dist_a_vs_c = dist_a_vs_c[rowSums(is.na(dist_a_vs_c)) == 0,colSums(is.na(dist_a_vs_c)) == 0,drop = FALSE]
+dist_a_vs_c = as.dist(dist_a_vs_c)
 tree_a_vs_c = hclust(dist_a_vs_c, method = "complete")
 cutree_a_vs_c = cutree(tree_a_vs_c, k = 5 )
 table(cutree_a_vs_c)
 ```
 ##Distance between the observation (pathways)
 ```{r}
-dist_metacyc = vegan::vegdist(count_pathways_P2, method = "euclidean")
+#dist_metacyc = vegan::vegdist(count_pathways_P2, method = "euclidean")
+dist_metacyc = as.dist(1-cor(t(count_pathways_P2), use = "everything", method = "pearson")) #changé de eucleadean
+dist_metacyc = as.matrix(dist_metacyc)
+dist_metacyc = dist_metacyc[rowSums(is.na(dist_metacyc)) == 0,colSums(is.na(dist_metacyc)) == 0,drop = FALSE]
+dist_metacyc = as.dist(dist_metacyc)
 tree_metacyc = hclust(dist_metacyc, method = "complete")
 #cut into arbitrary clusters
-cutree_metacyc = cutree(tree_metacyc, k = 7)
+cutree_metacyc = cutree(tree_metacyc, k = 5)
 table(cutree_metacyc)
 ```
 
@@ -1007,7 +1023,7 @@ vect_colours = c("Amended Cropland"="#fbbb3f", "Control Cropland"="#f2e0bd",
                 "Amended Grassland"="#2abf2a", "Control Grassland"="#b2d9b2")
 hb = HeatmapAnnotation(which = "column",
                        Groups = anno_col$Groups,
-                       Time = anno_col$Time,
+                       #Time = anno_col$Time,
                        col = list(Groups = vect_colours, Time = time_colors),
                        show_legend = TRUE,
                        annotation_name_side = "right",
@@ -1015,7 +1031,7 @@ hb = HeatmapAnnotation(which = "column",
                        annotation_legend_param = list(direction = "vertical", title_gp = gpar(fontsize = 10, fontface = "bold")))
 pheatmap(zscore_pathways, name = "Z-score",
             cluster_rows = tree_metacyc, cluster_cols = tree_a_vs_c,
-              cutree_rows = 7, #18, #6
+              cutree_rows = 5, #18, #6
               cutree_cols = 5,
               top_annotation = hb,
               show_rownames = TRUE)
@@ -1062,5 +1078,41 @@ for ( time in c(0, 3, 51, 125)){
 ```
 
 ```{r}
-
+bar_plot_cog_i = list()
+count_COG_P2_i = count_COG_P2[c("COG0814","COG2431","COG1114","COG4533","COG3160","COG3711","COG1440","COG1447","COG4211"),]
+for ( time in c(0, 3, 51, 125)){
+  df_count = count_COG_P2_i[,c(get(paste0("P2_crop_", time)), get(paste0("P2_grass_", time)))]
+  df_dif <- data.frame(
+      dif_C_1 = df_count[, 4] - df_count[, 1],
+      dif_C_2 = df_count[, 5] - df_count[, 2],
+      dif_C_3 = df_count[, 6] - df_count[, 3],
+      dif_G_1 = df_count[, 10] - df_count[, 7],
+      dif_G_2 = df_count[, 11] - df_count[, 8],
+      dif_G_3 = df_count[, 12] - df_count[, 9]
+    )
+  names(df_dif) = c("dif_C_1", "dif_C_2","dif_C_3","dif_G_1","dif_G_2","dif_G_3")
+  rownames(df_dif) = rownames(df_count)
+  df_dif$mean_C = rowMeans(df_dif[,1:3])
+  df_dif$mean_G = rowMeans(df_dif[,4:6])
+  df_dif$sd_C = apply(df_dif[,1:3], 1, sd)
+  df_dif$sd_G = apply(df_dif[,4:6], 1, sd)
+  df_dif$COG_number = factor(rownames(df_dif),levels = c("COG0814","COG2431","COG1114","COG4533","COG3160","COG3711","COG1440","COG1447","COG4211"))
+  df_plot = df_dif[,7:11]
+  df_plot = df_plot %>% pivot_longer(cols = 1:4,names_to = c(".value", "type"),names_sep = "_")
+  df_plot$type = factor(df_plot$type, levels = c("G","C"))
+  bar_plot_cog_i[[paste0("T",time)]] = ggplot(df_plot, aes(x = mean, y = COG_number, fill = type)) +
+    geom_bar(position = "dodge", stat = "identity") +
+    geom_errorbar(aes(y = COG_number, xmin = mean - sd, xmax = mean + sd), width = 0.2, position = position_dodge(0.9)) +
+    xlab(NULL) +
+    ylab(NULL) +
+    ggtitle(paste0("Difference between Amended and Control at "," (T",time,") P2's outcome")) +
+    scale_fill_manual(values = c("C" = "#fbbb3f", "G" = "#2abf2a"), labels = c("C" = "Cropland","G" = "Grassland")) +
+    geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
+    theme_bw() +
+    theme(plot.title = element_text(size = 8, hjust =0.5, face = "bold"),
+          axis.text.y = element_text(size = 8, face = "bold"),
+          legend.title=element_blank(),
+          legend.key.size = unit(1, 'cm'),
+          legend.text = element_text(size=8))
+}
 ```

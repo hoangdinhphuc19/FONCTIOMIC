@@ -294,7 +294,8 @@ for (groups in c("crop","grass")) {
         legend.text = element_text(size = 14)) +
       ggtitle(paste("Correlation of Spearman on group", groups, time)) +
       xlab("Spearman correlation") +
-      ylab("EC class")
+      ylab("EC class")+
+      theme_classic()
   }
 }
 d_cor_crop_3 = as.data.frame(d_cor_crop_0)
