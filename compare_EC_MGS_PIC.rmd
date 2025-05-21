@@ -49,11 +49,28 @@ ggplot(diag_cor.1, aes(x = Spearman_correlation, y = EC_class,group = EC_class))
 Venn Diagramm for EC detected between PICRUSt2 and MGS
 ```{r}
 venn.diagram(
-        x = list(rownames(tb_ec_cleaned), rownames(p2_EC)),
+        x = list(rownames(MGS_EC), rownames(p2_EC)),
         category.names = c("MGS" , "PICRUSt2"),
-        filename = '#14_venn_diagramm.png',
+        filename = 'EC_venn_diagramm.png',
         output=TRUE,
         imagetype="png" ,
+        print.mode = "percent",
+        lwd = 2,
+        lty = 'blank',
+        fill = c("cornflowerblue", "pink"),
+        cat.fontface = "bold",
+        cat.default.pos = "outer",
+        cat.fontfamily = "sans",
+)
+```
+```{r}
+venn.diagram(
+        x = list(rownames(MGS_COG), rownames(p2_COG)),
+        category.names = c("MGS" , "PICRUSt2"),
+        filename = 'COG_venn_diagramm.png',
+        output=TRUE,
+        imagetype="png" ,
+        print.mode = "percent",
         lwd = 2,
         lty = 'blank',
         fill = c("cornflowerblue", "pink"),
