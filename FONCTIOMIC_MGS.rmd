@@ -37,6 +37,9 @@ tb_cog = read_tsv("Data FONCTIOMIC/counts_by_COG.raw.tsv")
 COG_anno = read_rds("description_mapfiles/COG_anno.rds")
 COG_anno$COG_number = rownames(COG_anno)
 tb_pathways = read_delim("Data FONCTIOMIC/pathways_mgs.tabular", delim = "\t")
+taxon = read.delim("Data FONCTIOMIC/Taxo/fonctiomic_otu_table_MGS.tsv", header = TRUE, row.names = 1)
+colnames(taxon) = rownames(meta)
+rownames(taxon) = paste0("OTU_", rownames(taxon))
 ```
 ##Define of variables for subset matrix
 ```{r}
@@ -1133,9 +1136,21 @@ for ( time in c(0, 3, 51, 125)){
 ```
 
 ```{r}
+dds_MGS = DESeqDataSetFromMatrix(countData = taxon,
+                                  colData = meta,
+                                  design = ~ Category + time, tidy = FALSE)
+vst_taxon = vst(dds_MGS,blind = FALSE) # variance stabilizing transformation
+```
+
+```{r}
+set.seed(38)
+c = dudi.pca(t(assay(vst_taxon)), scannf = FALSE, nf = 2)
 b = dudi.pca(t(assay(vst_COG_MGS)), scannf = FALSE, nf = 2)
 a = dudi.pca(t(assay(vst_MGS)), scannf = FALSE, nf = 2)
-coi = coinertia(b, a, scannf = FALSE, nf = 2)
-randtest(coi, fixed=1)
+ktab_mgs = ktab.list.dudi(list(c, b, a), 
+                 tabnames = c("Taxon", "COG", "MGS"))
+coi1 = coinertia(c,b,scannf = FALSE, nf = 2)
+coi2 = coinertia(c,a,scannf = FALSE, nf = 2)
+coi3 = coinertia(b,a,scannf = FALSE, nf = 2)
 ```
 
